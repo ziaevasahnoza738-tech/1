@@ -1,0 +1,22 @@
+@import './style.scss';
+nav{
+    @include bi(space-between,center);
+    .nav{
+        border: 2px solid rgb(180, 215, 252);
+        border-radius: 20px;
+    }
+    padding: 20px,20px;
+    .link{
+        color: aliceblue;
+        
+       
+
+    }
+    
+    
+    
+
+    
+
+    
+}
