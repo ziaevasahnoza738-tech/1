@@ -1,119 +1,87 @@
+import React, { useState } from 'react';
+import Section1 from './1bolm';
+  import Section2 from './2bolm';
+       import Section3 from './3bolm';
+    import Section4 from './4bolm';
+    // import Section5 from './5bolm';
+    // import foto from './nnp.jpg'
 
+export default function App() {
+  const [active, setActive] = useState('1bolm');
 
-import { useEffect, useState } from "react";
-import axios from 'axios'
-import logo from '././scss/logo.png'
-import qqq from "./scss/qqq.avif"
-
-function APP() {
-
-
-  const [showBox, setShowBox] = useState(false);
-  const [search, setSearch] = useState("");
-
-
-
-  const [users, setUsears] = useState([]);
-
-  useEffect(() => {
-    axios.get("https://6a0ad25221e445625696a932.mockapi.io/app/1x/sssssss")
-      .then((res) => { setUsears(res.data); })
-      .catch((error) => { console.log(error); });
-
-  }, []);
-
-  const filteredUsers = users.filter(
-    (user) =>
-      user.ism && user.ism.toLowerCase().includes(search.toLowerCase())
-  );
+  const navItems = [
+      { id: '1bolm', label: 'Asosiy  ' },
+       { id: '2bolm', label: 'Men haqimda' },
+              { id: '3bolm', label: 'Loyihalar' },
+      { id: '4bolm', label: 'Aloqa' },
+      // { id: '5bolm', label: 'Men', }
+  ];
 
   return (
+
     <>
-      <div>
-        {showBox && (
-          <div className='boxs'>
-            <h3>rtgaergretmaertq</h3>
-          </div>
-        )}
+    
 
-      </div>
+      
+  
 
-      <div className="uuu">
-        <nav className="qqq">
-          <img className="eee" src={logo} alt="" />
-          <button onClick={() => setShowBox(!showBox)} className="ffff">
-            <i class="fa-brands fa-codepen"></i>Bosing
+   
+<body className='nmt'>
+  
 
+
+     <div style={{ fontFamily: 'sans-serif' }}>
+  <nav style={{ display: 'flex', gap: 16, padding: '20px 40px', background: '#1e1e2e', position: 'sticky' }}>
+      {navItems.map(item => (
+          <button
+       key={item.id}     
+       onClick={() => setActive(item.id)}
+            style={{
+         background:  '#7c3aed',
+              color: '#fff',
+            padding: '12px 25px',
+           borderRadius: 8,           cursor: 'pointer',
+        
+            }}
+          >
+
+         {item.label}
           </button>
 
-          <input
-            className="inp"
-            type="text"
-            placeholder="Nima qidiryabsiz"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
 
-          />
 
-          <div className="mmm" id="root">
 
-            <button className="ssssss"><i class="fa-solid fa-user"></i><h1>Siz</h1></button>
-            <button><i class="fa-solid fa-heart"></i><h1>Istaklar</h1></button>
-            <button><i class="fa-solid fa-cart-shopping"></i><h1>Karzinka</h1></button>
-          </div>
 
-        </nav>
+      
+        ))}
+      </nav>
+      
 
-        <div>
-          <img className="ddddddd" src={qqq} alt="" height="20%" />
 
-        </div>
-
-        <div className="APP">
-          {filteredUsers.map((user) => (
-            <>
-              <div className="sss" key={user.id}>
-                < img src={user.img} />
-
-                <h1 className="narx">{user.narx}so'm</h1>
-
-                <h1 className="old">       {user.old}so'm</h1>
-
-                <h1 > {user.ism}</h1>
-
-                {/* <h1>⭐{user.bal}</h1> */}
-                <button className="fff">Sotib olish</button>
-              </div>
-
-            </>
-
-          ))
-          }
-        </div>
+      
+    
+  
+      <div style={{ padding: 60 }}>
+        {active === '1bolm' && <Section1 />}
+        {active === '2bolm' && <Section2 />}
+        {active === '3bolm' && <Section3 />}
+        {active === '4bolm' && <Section4 />}
+        {/* {active === '5bolm' && <Section5 />} */}
       </div>
+    </div>
+    
+    </body>
 
-      <footer>
-        <div>
-          <h1 >Manzl:toshkent</h1>
-          <h1>Tel:77 777 77 77</h1>
-          <h1>Insta:_kadirov_u_</h1>
-        </div>
-        <div>
-          <h1>Ism:Ulug'bek</h1>
-          <h1>Fam:Kadirov</h1>
-          <h1>uy manzl:Andjon Qo'rg'ontepa</h1>
-        </div>
-        <div>
-          <h1>Telegram:@ukadirov571 </h1>
-          <h1>Yutub:@_kadirov_u_</h1>
-          <h1>Ishlab chiqarsh:Uzum market</h1>
-        </div>
 
-      </footer>
 
+
+
+
+
+      
+  
     </>
 
-  )
-
-}
-export default APP;
+  
+  );
+};
