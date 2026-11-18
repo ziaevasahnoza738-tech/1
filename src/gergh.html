@@ -1,0 +1,700 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Toshkent — Qishloqdan Zamonaviy Megapolisgacha</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Manrope:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root { --gold:#f3c653; --cream:#f9f5e8; --night:#050811; }
+* { box-sizing:border-box; margin:0; padding:0; }
+html, body { height:3500vh; background:var(--night); color:var(--cream); font-family:'Manrope',sans-serif; overflow-x:hidden; }
+#canvas-container { position:fixed; inset:0; z-index:1; }
+canvas { display:block; width:100vw; height:100vh; }
+.ui-layer { position:fixed; inset:0; z-index:2; pointer-events:none; display:flex; flex-direction:column; justify-content:space-between; padding:40px 60px; }
+header { display:flex; justify-content:space-between; align-items:center; pointer-events:auto; }
+.logo { font-family:'Cinzel',serif; font-size:26px; font-weight:800; color:var(--gold); letter-spacing:.15em; text-transform:uppercase; }
+nav { display:flex; gap:40px; font-size:13px; font-weight:500; letter-spacing:.2em; text-transform:uppercase; }
+nav a { color:var(--cream); text-decoration:none; transition:color .3s; }
+nav a:hover { color:var(--gold); }
+.hero { position:absolute; top:48%; left:50%; transform:translate(-50%,-50%); text-align:center; pointer-events:auto; transition:opacity .6s ease; width:90%; }
+.hero h1 { font-family:'Cinzel',serif; font-size:clamp(38px,6vw,80px); font-weight:800; line-height:1.1; letter-spacing:-.02em; margin-bottom:20px; text-shadow:0 10px 40px rgba(0,0,0,.9); }
+.hero p { font-size:17px; color:#d1c8b0; max-width:600px; margin:0 auto; line-height:1.6; }
+.end { position:absolute; bottom:14%; left:50%; transform:translateX(-50%); width:90%; text-align:center; font-family:'Cinzel',serif; font-size:clamp(24px,4vw,52px); font-weight:800; color:var(--gold); text-shadow:0 6px 30px rgba(0,0,0,.9); opacity:0; }
+.season { position:absolute; left:60px; bottom:40px; font-family:'Cinzel',serif; font-size:22px; letter-spacing:.3em; text-transform:uppercase; color:var(--gold); text-shadow:0 4px 18px rgba(0,0,0,.8); }
+.pop { animation:pop 1.2s ease; }
+@keyframes pop { from{opacity:0; transform:translateY(10px)} to{opacity:1; transform:none} }
+@media (max-width:768px){ .season{left:20px} }
+.scroll-indicator { position:absolute; bottom:40px; left:50%; transform:translateX(-50%); display:flex; flex-direction:column; align-items:center; gap:12px; font-size:11px; letter-spacing:.25em; text-transform:uppercase; color:var(--gold); }
+.scroll-bar { width:1px; height:50px; background:linear-gradient(to bottom,var(--gold),transparent); animation:scrollAnim 2s infinite; }
+@keyframes scrollAnim { 0%{transform:scaleY(0);transform-origin:top} 50%{transform:scaleY(1);transform-origin:top} 50.1%{transform:scaleY(1);transform-origin:bottom} 100%{transform:scaleY(0);transform-origin:bottom} }
+@media (max-width:768px){ .ui-layer{padding:20px} nav{display:none} }
+</style>
+<base target="_blank">
+</head>
+<body>
+<div id="canvas-container"></div>
+<div class="ui-layer">
+  <header>
+    <div class="logo">Toshkent Sayohati</div>
+    <nav><a href="#">Bahor</a><a href="#">Yoz</a><a href="#">Kuz</a><a href="#">Qish</a></nav>
+  </header>
+  <div class="hero" id="hero">
+    <h1>Qishloqdan Zamonaviy Poytaxtgacha</h1>
+    <p>Bahor gullaridan qishki salyutgacha: to’rt fasl va qishloqdan zamonaviy poytaxtgacha sekin sayohat.</p>
+  </div>
+  <div class="season" id="season">Bahor</div>
+  <div class="end" id="end">Yangi yil bilan, Toshkent!</div>
+  <div class="scroll-indicator"><span>Sayohat uchun pastga suring</span><div class="scroll-bar"></div></div>
+</div>
+ 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+const container = document.getElementById('canvas-container');
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(65, innerWidth/innerHeight, 0.5, 4000);
+const renderer = new THREE.WebGLRenderer({ antialias:true });
+renderer.setSize(innerWidth, innerHeight);
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+container.appendChild(renderer.domElement);
+ 
+const clamp = (v,a=0,b=1) => Math.min(b, Math.max(a, v));
+const EYE = 3; // kamera balandligi (yer sathidan)
+ 
+// ---------- Yorug'lik ----------
+const ambient = new THREE.AmbientLight(0x2a3550, 1.0); scene.add(ambient);
+const dirLight = new THREE.DirectionalLight(0xffeedd, 0.4); dirLight.position.set(40,80,30); scene.add(dirLight);
+const camLight = new THREE.PointLight(0xffc477, 1.5, 45); scene.add(camLight);
+const ambNight = new THREE.Color(0x2a3550), ambDay = new THREE.Color(0xffffff);
+const sunNight = new THREE.Color(0x8899cc), sunDay = new THREE.Color(0xfff2dd);
+ 
+// ---------- Osmon: oy, quyosh, shafaq, yulduzlar (hammasi uzoqda, binolar ortida) ----------
+function glowTexture(draw) {
+  const c = document.createElement('canvas'); c.width = c.height = 256;
+  draw(c.getContext('2d')); return new THREE.CanvasTexture(c);
+}
+const moonTex = glowTexture(g => {
+  let r = g.createRadialGradient(128,128,40,128,128,128);
+  r.addColorStop(0,'rgba(200,220,255,.55)'); r.addColorStop(1,'rgba(200,220,255,0)');
+  g.fillStyle = r; g.fillRect(0,0,256,256);
+  g.beginPath(); g.arc(128,128,62,0,7); g.fillStyle = '#eef2f8'; g.fill();
+  g.fillStyle = 'rgba(150,160,180,.35)';
+  [[108,108,12],[148,122,9],[120,152,14],[150,92,6]].forEach(([x,y,r]) => { g.beginPath(); g.arc(x,y,r,0,7); g.fill(); });
+});
+const sunTex = glowTexture(g => {
+  let r = g.createRadialGradient(128,128,0,128,128,128);
+  r.addColorStop(0,'rgba(255,255,235,1)'); r.addColorStop(.28,'rgba(255,236,150,1)');
+  r.addColorStop(.34,'rgba(255,200,90,.55)'); r.addColorStop(1,'rgba(255,150,40,0)');
+  g.fillStyle = r; g.fillRect(0,0,256,256);
+});
+const shafaqTex = glowTexture(g => {
+  let r = g.createLinearGradient(0,0,0,256);
+  r.addColorStop(0,'rgba(255,90,30,0)'); r.addColorStop(.6,'rgba(255,120,40,.8)'); r.addColorStop(1,'rgba(255,200,100,1)');
+  g.fillStyle = r; g.fillRect(0,0,256,256);
+});
+const skyMat = t => new THREE.SpriteMaterial({ map:t, transparent:true, fog:false, depthWrite:false });
+const moon = new THREE.Sprite(skyMat(moonTex)); moon.scale.set(220,220,1); scene.add(moon);
+const sun  = new THREE.Sprite(skyMat(sunTex));  sun.scale.set(420,420,1);  scene.add(sun);
+const shafaq = new THREE.Mesh(new THREE.PlaneGeometry(3600,700),
+  new THREE.MeshBasicMaterial({ map:shafaqTex, transparent:true, opacity:0, fog:false, depthWrite:false, blending:THREE.AdditiveBlending }));
+scene.add(shafaq);
+ 
+const starPos = new Float32Array(1200*3);
+for (let i=0;i<1200;i++){
+  const a = Math.random()*Math.PI*2, e = Math.random()*1.25 + 0.05, R = 1800;
+  starPos[i*3]   = Math.cos(a)*Math.cos(e)*R;
+  starPos[i*3+1] = Math.sin(e)*R*0.7;
+  starPos[i*3+2] = Math.sin(a)*Math.cos(e)*R;
+}
+const starGeo = new THREE.BufferGeometry();
+starGeo.setAttribute('position', new THREE.BufferAttribute(starPos,3));
+const stars = new THREE.Points(starGeo, new THREE.PointsMaterial({ color:0xffffff, size:2, sizeAttenuation:false, transparent:true, fog:false }));
+scene.add(stars);
+ 
+// Bulutlar
+const cloudGroup = new THREE.Group(); scene.add(cloudGroup);
+const cloudMat = new THREE.MeshLambertMaterial({ color:0xffeedd, transparent:true, opacity:0 });
+for (let i=0;i<25;i++){
+  const c = new THREE.Mesh(new THREE.BoxGeometry(44,7,18), cloudMat);
+  cloudGroup.add(c);
+}
+ 
+// ---------- Yo'l yo'nalishi (yer sathida, tekis) ----------
+const curve = new THREE.CatmullRomCurve3([
+  new THREE.Vector3(0,EYE,0), new THREE.Vector3(0,EYE,-120), new THREE.Vector3(25,EYE,-300),
+  new THREE.Vector3(-25,EYE,-500), new THREE.Vector3(0,EYE,-750), new THREE.Vector3(0,EYE,-1000),
+  new THREE.Vector3(0,EYE,-1250), new THREE.Vector3(0,EYE,-1400)
+]);
+curve.arcLengthDivisions = 1000;
+const UP = new THREE.Vector3(0,1,0);
+function flatTangent(u){ const t = curve.getTangentAt(u); t.y = 0; return t.normalize(); }
+ 
+// ---------- Materiallar ----------
+function wallTexture(){
+  const c = document.createElement('canvas'); c.width = c.height = 256;
+  const g = c.getContext('2d'); g.fillStyle = '#8c6239'; g.fillRect(0,0,256,256);
+  g.strokeStyle = '#5a3d22'; g.lineWidth = 3;
+  for (let i=0;i<=256;i+=32){ g.beginPath(); g.moveTo(0,i); g.lineTo(256,i); g.stroke(); g.beginPath(); g.moveTo(i,0); g.lineTo(i,256); g.stroke(); }
+  return new THREE.CanvasTexture(c);
+}
+const M = (o) => new THREE.MeshStandardMaterial(o);
+const villageMat = M({ map:wallTexture(), roughness:.9 }), shopMat = M({ color:0xc27803, roughness:.5 });
+const tentMat = M({ color:0xd90429, roughness:.4 }), roofMat = M({ color:0x4a3525, roughness:.8 });
+const leafMat = M({ color:0x2d6a4f, roughness:.7 }), trunkMat = M({ color:0x5c4033, roughness:.9 });
+const concreteMat = M({ color:0xe0e0e0, roughness:.4 }), glassMat = M({ color:0x1d3557, roughness:.1, metalness:.9 });
+const marketMat = M({ color:0x457b9d, roughness:.3 }), poleMat = M({ color:0x333333 });
+const bulbMat = new THREE.MeshBasicMaterial({ color:0xffcc77 });
+ 
+// ---------- Yo'l, trotuar, yer (yo'l egri chiziqqa ergashadi) ----------
+function ribbon(a, b, y, mat, dash){
+  const N = 600, pos = [], idx = [];
+  for (let i=0;i<=N;i++){
+    const u = i/N, p = curve.getPointAt(u), t = flatTangent(u), rx = -t.z, rz = t.x;
+    pos.push(p.x+rx*a, y, p.z+rz*a,  p.x+rx*b, y, p.z+rz*b);
+    if (i<N && !(dash && Math.floor(i/dash)%2)) { const k=i*2; idx.push(k,k+1,k+3, k,k+3,k+2); }
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(pos,3)); g.setIndex(idx); g.computeVertexNormals();
+  const m = new THREE.Mesh(g, mat); scene.add(m); return m;
+}
+const po = { side:THREE.DoubleSide, polygonOffset:true, polygonOffsetFactor:-2, polygonOffsetUnits:-2 };
+ribbon(-7, 7, 0.05, M({ color:0x2a2c33, roughness:.9, ...po }));                 // asfalt
+ribbon(-.15, .15, 0.1, new THREE.MeshBasicMaterial({ color:0xffffff, ...po }), 12); // o'rta chiziq
+ribbon(-9.8, -7, 0.18, M({ color:0x8a8578, roughness:.9, ...po }));              // trotuar chap
+ribbon(7, 9.8, 0.18, M({ color:0x8a8578, roughness:.9, ...po }));                // trotuar o'ng
+const SEAS = [0x6fbf5a,0x3f8a3a,0xa3823a,0xf2f6fa].map(c => new THREE.Color(c));   // bahor, yoz, kuz, qish
+const seasonBlend = (arr,u,out) => { const s = clamp(u)*4, k = Math.min(3,Math.floor(s)); return out.copy(arr[k]).lerp(arr[Math.min(3,k+1)], clamp((s-k-.7)/.3)); };
+const tmpC = new THREE.Color();
+const gGeo = new THREE.PlaneGeometry(3000,4200,12,140), gCol = new Float32Array(gGeo.attributes.position.count*3);
+for (let k=0;k<gGeo.attributes.position.count;k++){ const c = seasonBlend(SEAS, (gGeo.attributes.position.getY(k)+1200)/1400, tmpC); gCol[k*3] = c.r; gCol[k*3+1] = c.g; gCol[k*3+2] = c.b; }
+gGeo.setAttribute('color', new THREE.BufferAttribute(gCol,3));
+const ground = new THREE.Mesh(gGeo, M({ vertexColors:true, roughness:.95 }));
+ground.rotation.x = -Math.PI/2; ground.position.set(0,-0.1,-1200); scene.add(ground);
+ 
+// ---------- Fasllar: bahor -> yoz -> kuz -> qish; uylar qishloqdan shaharga ----------
+const rnd = (i,k) => { const x = Math.sin(i*127.1 + k*311.7)*43758.5453; return x - Math.floor(x); };
+const SKY_N = new THREE.Color(.02,.03,.07);
+const SKYS = [0xa8dcff,0x62b6ff,0xf2b684,0x93a6c8].map(c => new THREE.Color(c));
+const WIN_D = new THREE.Color(0x3a5a7a), WIN_N = new THREE.Color(0xffc870);
+const BM = c => new THREE.MeshBasicMaterial({ color:c });
+const winLit = BM(0x3a5a7a), signMat = BM(0xffb347);
+const lampTex = glowTexture(g => { const r = g.createRadialGradient(128,128,0,128,128,128);
+  r.addColorStop(0,'rgba(255,190,100,.9)'); r.addColorStop(1,'rgba(255,190,100,0)'); g.fillStyle = r; g.fillRect(0,0,256,256); });
+const dotTex = glowTexture(g => { const r = g.createRadialGradient(128,128,0,128,128,128);
+  r.addColorStop(0,'rgba(255,255,255,1)'); r.addColorStop(.45,'rgba(255,255,255,.85)'); r.addColorStop(1,'rgba(255,255,255,0)'); g.fillStyle = r; g.fillRect(0,0,256,256); });
+const lampSpr = new THREE.SpriteMaterial({ map:lampTex, transparent:true, opacity:0, depthWrite:false, blending:THREE.AdditiveBlending });
+const poolMat = new THREE.MeshBasicMaterial({ map:lampTex, transparent:true, opacity:0, depthWrite:false, blending:THREE.AdditiveBlending, polygonOffset:true, polygonOffsetFactor:-4, polygonOffsetUnits:-4 });
+const winMat = (() => {                                  // deraza naqshi, tunda yonadi
+  const cc = document.createElement('canvas'), ce = document.createElement('canvas');
+  cc.width = cc.height = ce.width = ce.height = 64;
+  const g1 = cc.getContext('2d'), g2 = ce.getContext('2d');
+  g1.fillStyle = '#223a5e'; g1.fillRect(0,0,64,64); g2.fillStyle = '#000'; g2.fillRect(0,0,64,64);
+  for (let x=0;x<2;x++) for (let y=0;y<2;y++){ const lit = Math.random()>.4;
+    g1.fillStyle = lit ? '#ffd98a' : '#3d5a80'; g1.fillRect(x*32+6,y*32+6,20,20);
+    if (lit){ g2.fillStyle = '#ffcf70'; g2.fillRect(x*32+6,y*32+6,20,20); } }
+  const t1 = new THREE.CanvasTexture(cc), t2 = new THREE.CanvasTexture(ce);
+  t1.wrapS = t1.wrapT = t2.wrapS = t2.wrapT = THREE.RepeatWrapping;
+  return new THREE.MeshStandardMaterial({ map:t1, emissive:0xffffff, emissiveMap:t2, emissiveIntensity:0, roughness:.25, metalness:.4 });
+})();
+const doorMat = M({ color:0x5a3220 }), potMat = M({ color:0x8a4b2a }), tableMat = M({ color:0x6b4423 });
+const FLS = [[0xff8fb0,0xffe066,0xffffff],[0xe63946,0xffd166,0xc77dff],[0xe8832a,0xe9b93a,0xb5451b]].map(a => a.map(c => M({ color:c, roughness:.6 })));
+const awn = [tentMat, M({ color:0x2a9d8f, roughness:.5 }), M({ color:0xe9c46a, roughness:.5 })];
+const umb = [M({ color:0xd62828 }), M({ color:0x2a9d8f }), M({ color:0xf4a261 })];
+const snowMat = M({ color:0xffffff, roughness:.9 });
+const LM = { pk1:0xffb3c7, pk2:0xff8fb0, lg:0x86d46f, g1:0x2d6a4f, g2:0x3a8a4a, or:0xe8832a, rd:0xc23b22, yl:0xe9b93a };
+for (const k in LM) LM[k] = M({ color:LM[k], roughness:.8 });
+const gm = c => M({ color:c, roughness:1, polygonOffset:true, polygonOffsetFactor:-6, polygonOffsetUnits:-6 });
+const petalG = gm(0xffc4d4), leafG = [gm(0xd9822b), gm(0xb5451b), gm(0xe3b23c)];
+const xl = [0xff3b3b,0xffd24a,0x4aa8ff,0x5cff8a].map(c => ({ c, m:BM(c) }));   // yangi yil chiroqlari
+ 
+// bir xil narsalar (deraza, eshik, chiroq...) InstancedMesh bilan tez chiziladi
+const pools = new Map(), mtx = new THREE.Matrix4(), qq = new THREE.Quaternion(), ee = new THREE.Euler(), v1 = new THREE.Vector3(), v2 = new THREE.Vector3();
+const GEO = {
+  box:() => new THREE.BoxGeometry(1,1,1), cyl:() => new THREE.CylinderGeometry(1,1,1,10),
+  cone:() => { const g = new THREE.ConeGeometry(1,1,4); g.rotateY(Math.PI/4); return g; },
+  sph:() => new THREE.SphereGeometry(1,8,8), pln:() => { const g = new THREE.PlaneGeometry(1,1); g.rotateX(-Math.PI/2); return g; }
+};
+function put(kind, mat, grp, x,y,z, sx,sy,sz, rz=0, ry=0){
+  const k = kind + mat.uuid; let P = pools.get(k); if (!P){ P = { kind, mat, m:[] }; pools.set(k,P); }
+  qq.setFromEuler(ee.set(0,ry,rz,'YXZ')); mtx.compose(v1.set(x,y,z), qq, v2.set(sx,sy,sz)).premultiply(grp.matrixWorld); P.m.push(mtx.clone());
+}
+function flush(){
+  pools.forEach(P => { const im = new THREE.InstancedMesh(GEO[P.kind](), P.mat, P.m.length);
+    P.m.forEach((m,j) => im.setMatrixAt(j,m)); im.frustumCulled = false; scene.add(im); });
+  pools.clear();
+}
+function tallBox(grp,w,h,d,mat,x,y,z){
+  const geo = new THREE.BoxGeometry(w,h,d), uv = geo.attributes.uv;
+  for (let k=0;k<uv.count;k++) uv.setXY(k, uv.getX(k)*w/6, uv.getY(k)*h/6);
+  const m = new THREE.Mesh(geo, mat); m.position.set(x,y,z); grp.add(m);
+}
+let CU = 0;                                              // hozirgi segmentning yo'l bo'ylab o'rni (0..1)
+ 
+// daraxt: bahorda gullaydi, yozda yam-yashil, kuzda barglari sarg'ayib to'kiladi, qishda yalang va qor bilan
+// daraxt: tabiiy ko'rinish — mayda gumbazcha soxta-tasodifiy joylashgan, yalang shoxli qishki holat
+const TREE_GREENS = [M({ color:0x2f5d3a, roughness:.85 }), M({ color:0x3c6b42, roughness:.85 }), M({ color:0x517a3f, roughness:.85 })];
+function tree(grp,x,z,u,k){
+  const s = u*4, r = rnd(k,17), pinkP = s<.5 ? .7 : .7*clamp(1-(s-.5)/.5);
+  const bare = s>=3, lean = (rnd(k,23)-.5)*.14;
+  put('cyl',trunkMat,grp,x,bare?2.1:1.6,z,.26,bare?4.2:3.2,.26,lean,0);
+  if (bare){                                               // qish: yalang shoxlar + qor
+    for (let b=0;b<6;b++){ const a=b*Math.PI/3 + r*6.28, ca=Math.cos(a), sa=Math.sin(a), ln=1.6+rnd(k,b)*1.4;
+      put('cyl',trunkMat,grp,x+ca*ln*.5,4.4+ln*.35,z+sa*ln*.5,.06,ln*1.6,.06,.75,a);
+      put('sph',snowMat,grp,x+ca*ln,5.1+ln*.6,z+sa*ln,.26,.18,.26); }
+    put('sph',snowMat,grp,x,4.3,z,.42,.26,.42);
+    return;
+  }
+  let mats;
+  if (s<1) mats = r<pinkP ? [(k%2?LM.pk1:LM.pk2),(k%2?LM.pk2:LM.pk1)] : [TREE_GREENS[0],TREE_GREENS[1]];
+  else if (s<2.3) mats = [TREE_GREENS[k%3],TREE_GREENS[(k+1)%3]];
+  else mats = [[LM.or,LM.rd],[LM.rd,LM.yl],[LM.or,LM.yl]][k%3];
+  const n = Math.max(3, Math.round(12 - (s>2 ? (s-2)*5 : 0)));  // kuzda barglar so'naydi
+  for (let j=0;j<n;j++){                                   // mayda gumbazchalar — gulbargga o'xshamaydigan tabiiy tojn
+    const a = rnd(k,j*3)*6.283, rad = .5 + rnd(k,j*3+1)*1.6;
+    const px = x + Math.cos(a)*rad*.95, pz = z + Math.sin(a)*rad*.95;
+    const py = 3.2 + rnd(k,j*3+2)*1.8 - rad*.3;
+    const sc = .5 + rnd(k,j+40)*.7;
+    put('sph', mats[j%2], grp, px,py,pz, sc, sc*.82, sc);
+  }
+  if (s<1 && r<pinkP) put('pln',petalG,grp,x,.05,z,3.4,1,3.4);
+  if (s>=2 && s<3.1){ const w = 2.4 + (1-n/12)*2.4; put('pln',leafG[k%3],grp,x,.05,z,w,1,w); }
+}
+const flowers = (grp,s,fx,z,k) => {
+  const q = Math.floor(CU*4); if (q>=3) return;           // qishda gul yo'q
+  put('cyl',potMat,grp,fx-s*.7,.3,z,.3,.6,.3); put('sph',FLS[q][k%3],grp,fx-s*.7,.75,z,.4,.4,.4);
+};
+// do'kon vitrinasi: ichida gullar ko'rinadigan yorug' oyna
+const shopWinTex = (() => {
+  const c = document.createElement('canvas'); c.width = 128; c.height = 96; const g = c.getContext('2d');
+  g.fillStyle = '#241609'; g.fillRect(0,0,128,96);
+  const grd = g.createLinearGradient(0,0,0,96); grd.addColorStop(0,'rgba(255,222,150,.95)'); grd.addColorStop(1,'rgba(255,170,80,.3)');
+  g.fillStyle = grd; g.fillRect(0,0,128,96);
+  const fl = ['#ff6b9d','#ffd166','#ff8c42','#e63946','#c77dff','#ffffff'];
+  for (let i=0;i<26;i++){ const x = 8+Math.random()*112, y = 32+Math.random()*56, rr = 2.5+Math.random()*3.5, col = fl[i%6];
+    g.fillStyle = '#3f7d3a'; g.fillRect(x-1,y,2,96-y);
+    g.fillStyle = col; for (let p=0;p<5;p++){ const a = p/5*6.283; g.beginPath(); g.arc(x+Math.cos(a)*rr,y+Math.sin(a)*rr,rr*.8,0,7); g.fill(); }
+    g.fillStyle = '#ffe066'; g.beginPath(); g.arc(x,y,rr*.55,0,7); g.fill(); }
+  const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; return t;
+})();
+const shopWinMat = new THREE.MeshStandardMaterial({ map:shopWinTex, emissive:0xffffff, emissiveMap:shopWinTex, emissiveIntensity:.4, roughness:.3 });
+function shopFront(grp,s,fx,k,wide){
+  put('box',shopWinMat,grp,fx-s*.08,1.75,0,.12,2.4,wide);          // katta vitrina — ichidagi gullar ko'rinadi
+  put('box',poleMat,grp,fx-s*.12,1.75,0,.14,2.5,.18);            // vertikal ramka
+  put('box',poleMat,grp,fx-s*.1,.6,0,.16,.12,wide);              // vitrina tagi
+  put('box',awn[k%3],grp,fx-s*.95,3.25,0,1.9,.15,wide+1);        // kundalik tom
+  if (CU>.74) put('box',snowMat,grp,fx-s*.95,3.4,0,1.9,.1,wide+1);
+  put('box',signMat,grp,fx-s*.3,4,0,.15,.7,wide*.7);
+  flowers(grp,s,fx,-wide/2-.2,k); flowers(grp,s,fx,wide/2+.2,k+1);
+}
+function doorWin(grp,s,fx,h,k,openWin){
+  put('box',doorMat,grp,fx-s*.05,1.1,-1.3,.12,2.2,1.1);
+  const wy = Math.min(h*.55,3);
+  put('box',winLit,grp,fx-s*.06,wy,1.5,.1,1.1,1.1);
+  if (openWin){                                                  // mahalla uy-do'koni: derazalar ochiq
+    put('box',winLit,grp,fx-s*.55,wy,.7,.08,1.05,1, 0, s*1.05);
+    put('box',winLit,grp,fx-s*.55,wy,2.3,.08,1.05,1, 0, -s*1.05);
+  }
+  if (CU>.74){ put('sph',LM.g1,grp,fx-s*.14,1.9,-1.3,.14,.5,.5); put('sph',LM.rd,grp,fx-s*.2,1.5,-1.3,.12,.15,.15); }
+  flowers(grp,s,fx,-2.4,k); flowers(grp,s,fx,-.2,k+1);
+}
+function floors(grp,s,fx,h,d){
+  for (let y=4.8;y<h-1;y+=3.2){ put('box',winLit,grp,fx-s*.06,y,-d*.22,.1,1.3,1.2); put('box',winLit,grp,fx-s*.06,y,d*.22,.1,1.3,1.2); }
+}
+function eaves(grp,s,fx,h,d,k){                            // qishda tom ostida rangli chiroqlar
+  if (CU<=.74) return;
+  for (let z=-d/2+.5, j=0; z<=d/2-.4; z+=1.1, j++) put('sph',xl[(j+k)%4].m,grp,fx-s*.12,h-.2,z,.17,.17,.17);
+}
+function cafe(grp,s,k){
+  if (CU>.74) return;
+  const x = s*8.7;
+  for (const z of [-2.2,2.2]){
+    put('cyl',tableMat,grp,x,.8,z,.5,.08,.5); put('cyl',poleMat,grp,x,.4,z,.08,.8,.08);
+    put('box',tableMat,grp,x,.45,z-.85,.45,.1,.45); put('box',tableMat,grp,x,.45,z+.85,.45,.1,.45);
+    put('cyl',poleMat,grp,x,1.4,z,.05,2.2,.05); put('cone',umb[k%3],grp,x,2.65,z,1.4,.6,1.4);
+    put('sph',bulbMat,grp,x,2.35,z,.14,.14,.14);
+  }
+}
+ 
+// yoz: o'ng tomonda cho'milish hovuzi (4-5 ta uy o'rnida)
+const rippleTex = (() => {
+  const c = document.createElement('canvas'); c.width = c.height = 128; const g = c.getContext('2d');
+  g.fillStyle = '#5fc7ff'; g.fillRect(0,0,128,128); g.strokeStyle = 'rgba(255,255,255,.55)'; g.lineWidth = 2;
+  for (let i=0;i<8;i++){ g.beginPath(); const y = i*16+6; g.moveTo(0,y); for (let x=0;x<=128;x+=8) g.lineTo(x, y + Math.sin(x*Math.PI*2/64 + i)*3); g.stroke(); }
+  const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(3,5); return t;
+})();
+const poolWaterMat = new THREE.MeshStandardMaterial({ map:rippleTex, color:0x9fe0ff, roughness:.1, metalness:.3, emissive:0x0a4a7a, emissiveIntensity:.35 });
+const swimmers = [];
+const skin = [0xf1c27d,0xe0ac69,0x8d5524,0xc68642].map(c => M({ color:c }));
+const ringC = [0xff5d73,0xffd166,0x4cc9f0,0x80ed99].map(c => M({ color:c, roughness:.5 }));
+const whiteM = M({ color:0xf5f5f5, roughness:.7 }), slideM = M({ color:0x2a9d8f, roughness:.4 });
+function poolArea(grp){
+  const mesh = (geo,mat,x,y,z) => { const m = new THREE.Mesh(geo,mat); m.position.set(x,y,z); grp.add(m); return m; };
+  mesh(new THREE.BoxGeometry(22,.3,34), M({ color:0xe6d9bd, roughness:.9 }), -22,.1,0);
+  mesh(new THREE.BoxGeometry(14,.2,24), poolWaterMat, -23,.3,0);
+  [[14.8,25*0+.5,-23,-12.15],[14.8,.5,-23,12.15]].forEach(([w,d,x,z]) => mesh(new THREE.BoxGeometry(w,.35,d), whiteM, x,.42,z));
+  [-30.15,-15.85].forEach(x => mesh(new THREE.BoxGeometry(.5,.35,25), whiteM, x,.42,0));
+  [-12,-7,-2,3,8].forEach((z,j) => { put('box',whiteM,grp,-13.2,.55,z,1,.25,2.4); put('box',ringC[j%4],grp,-13.2,.72,z,.9,.08,2.2); put('box',whiteM,grp,-13.2,.85,z-1.1,1,.7,.2); });
+  [-9.5,.5,5.5].forEach((z,j) => { put('cyl',poleMat,grp,-13.2,1.5,z+2.2,.06,3,.06); put('cone',umb[j%3],grp,-13.2,3.3,z+2.2,2.3,.9,2.3); });
+  put('box',whiteM,grp,-10.9,.6,0,.12,.8,34);
+  mesh(new THREE.BoxGeometry(1.6,4.8,1.6), whiteM, -23,2.7,-14.6);                     // slayd
+  mesh(new THREE.BoxGeometry(1.2,.15,9.6), slideM, -23,2.75,-10.2).rotation.x = .45;
+  mesh(new THREE.BoxGeometry(1.2,1.2,1.2), whiteM, -23,.85,14.6);                       // sakrash taxtasi
+  mesh(new THREE.BoxGeometry(1.2,.15,4.8), slideM, -23,1.5,12.2);
+  for (let j=0;j<9;j++){                                                                // suzayotganlar va to'p
+    const g = new THREE.Group();
+    if (j<8){ const ring = new THREE.Mesh(new THREE.TorusGeometry(.55,.18,8,14), ringC[j%4]); ring.rotation.x = Math.PI/2; g.add(ring);
+      const body = new THREE.Mesh(new THREE.SphereGeometry(.4,8,8), ringC[(j+2)%4]); body.position.y = .15; body.scale.y = .7; g.add(body);
+      const head = new THREE.Mesh(new THREE.SphereGeometry(.3,8,8), skin[j%4]); head.position.y = .65; g.add(head); }
+    else { const b = new THREE.Mesh(new THREE.SphereGeometry(.7,10,10), M({ color:0xff6b6b })); b.position.y = .5; g.add(b); }
+    const bx = -29 + rnd(j,9)*12, bz = -9 + rnd(j,8)*18; g.position.set(bx,.42,bz); grp.add(g);
+    swimmers.push({ g, bx, bz, ph:j*1.3, rad:.8 + rnd(j,6)*2.2 });
+  }
+  tree(grp,-31.5,-14,.3,5); tree(grp,-31.5,14,.3,6); tree(grp,-18,15.5,.3,7); tree(grp,-31.5,0,.3,8);
+}
+ 
+const NS = 200;
+const HOUSE_WALLS = [0xc9b18c,0xb98d5f,0xd8c9a8,0xa9846a,0xc7a97e,0x9fb5a0].map(c => M({ color:c, roughness:.85 }));
+function villageHouse(grp,s,u,i,shop,k){                       // qishloq: har xil dizayn, 2 xil tom, balkon
+  const r = rnd(i,s*3), wall = HOUSE_WALLS[Math.floor(r*HOUSE_WALLS.length)];
+  const two = rnd(i,s*5) > .6;
+  const h = two ? 7.5 + rnd(i,s+7)*1.5 : 4.6 + rnd(i,s+7)*1.8;
+  const w = 4.5 + rnd(i,s+8)*2.5, d = 5.5 + rnd(i,s+9)*2;
+  const cx = s*(12.5 + rnd(i,s+10)*3), fx = cx - s*w/2;
+  const snowy = u>.72 && rnd(i,s+13) < clamp((u-.72)/.08), rm = snowy ? snowMat : roofMat;
+  put('box', wall, grp, cx,h/2,0, w,h,d);
+  if (rnd(i,s+14) > .45) put('cone', rm, grp, cx,h+1,0, (w+.7)/1.414, 2, (d+.7)/1.414);
+  else { put('box', rm, grp, cx,h+.15,0, w+.5,.3,d+.5); put('box', wall, grp, cx,h+.55,0, w+.5,.5,.25); }
+  if (two){
+    put('box', concreteMat, grp, fx - s*.7, h*.52, d*.15, 1.4,.15,2.6);
+    put('box', poleMat, grp, fx - s*1.35, h*.52+.55, d*.15, .07,1.1,2.6);
+    put('box', winLit, grp, fx - s*.06, h*.52+1.7, d*.15, .1,1.4,1.5);
+  }
+  if (shop) shopFront(grp,s,fx,k,Math.min(d-1,4.5)); else doorWin(grp,s,fx,h,k);
+  eaves(grp,s,fx,h,d,k);
+}
+function cityBlock(grp,s,u,i,b,k,taper){                       // shahar: 3 xil arxitektura + pastda do'kon/kafe
+  const r = rnd(i,s*3+1), arch = Math.floor(r*3);
+  const h = (16 + 22*b + rnd(i,s+5)*10)*taper, cx = s*18, fx = cx - s*5;
+  if (arch===0){                                               // shisha minorasi, ustki bosqich
+    tallBox(grp,10,h,8,winMat,cx,h/2,0);
+    if (h>26) tallBox(grp,7,h*.35,6,winMat,cx,h+h*.17,0);
+  } else if (arch===1){                                        // beton, gorizontal deraza lentalari
+    tallBox(grp,11,h,9,concreteMat,cx,h/2,0);
+    for (let y=4;y<h-2;y+=5.5) put('box',winLit,grp,cx,y,0,11.3,.9,9.3);
+    put('box',glassMat,grp,cx,h+.6,0,6,1.2,4);
+  } else {                                                     // bosqichli bino
+    tallBox(grp,12,h*.55,10,concreteMat,cx,h*.275,0);
+    tallBox(grp,9,h*.5,8,winMat,cx,h*.55+h*.25,0);
+    tallBox(grp,6,h*.3,6,glassMat,cx,h*.8+h*.15,0);
+  }
+  if (u>.74) put('box',snowMat,grp,cx,h+.15,0,10.2,.3,8.2);
+  shopFront(grp,s,fx,k,6.5);
+  if (u<.95 && i%2===0) tallBox(grp,12,h+12,12,winMat,s*35,(h+12)/2,-12);
+  if (rnd(i,s+11) > .75) cafe(grp,s,k);
+}
+for (let i=0;i<NS;i++){
+  const u = i/NS, pos = curve.getPointAt(u), tan = flatTangent(u); CU = u;
+  const grp = new THREE.Group(); grp.position.set(pos.x,0,pos.z); grp.lookAt(grp.position.clone().add(tan)); grp.updateMatrixWorld(true);
+  const a = clamp((u-.12)/.38), b = clamp((u-.5)/.4);
+  const taper = 1 - .55*clamp((u-.86)/.14);
+  for (const s of [-1,1]){
+    if (s<0 && i>=58 && i<=62){ if (i===60) poolArea(grp); continue; }
+    const r = rnd(i,s), L = a + b + (r-.5)*.8, k = Math.floor(r*30);
+    if (L < .5){                                               // qishloq uyi — har xil dizayn
+      if (rnd(i,s+3) > .78){ tree(grp,s*13,0,u,i*2+(s>0?1:0)); continue; }
+      villageHouse(grp,s,u,i,(s>0 && r>.4) || r>.85,k);
+    } else if (L < 1.5){                                       // mahalla — uy-do'kon, derazasi ochiq
+      const h = 8 + a*2 + rnd(i,s+9)*7, w = 7, d = 8, cx = s*14, fx = cx - s*w/2;
+      const snowy = u>.72 && rnd(i,s+13) < clamp((u-.72)/.08), rm = snowy ? snowMat : roofMat;
+      const mw = [concreteMat, villageMat, HOUSE_WALLS[i%6]][Math.floor(rnd(i,s+15)*3)];
+      put('box', mw, grp, cx,h/2,0, w,h,d);
+      put('box', rm, grp, cx,h+.2,0, w+.6,.4,d+.6);
+      if (r>.55) shopFront(grp,s,fx,k,4.6); else doorWin(grp,s,fx,h,k,true);
+      floors(grp,s,fx,h,d); eaves(grp,s,fx,h,d,k);
+      if (a>.5) put('box',concreteMat,grp,s*24,(h+3)/2,-10,8,h+3,10);
+      if (rnd(i,s+11) > .8) cafe(grp,s,k);
+    } else {                                                   // zamonaviy shahar
+      cityBlock(grp,s,u,i,b,k,taper);
+    }
+  }
+  // orqa qatorlar — 3-4 qator uy va bino ko'rinsin
+  for (let row=1; row<=3; row++){
+    for (const s of [-1,1]){
+      if (s<0 && i>=52 && i<=68) continue;
+      const rr = rnd(i*7+row, s*11+row);
+      if (rr > .8) continue;
+      const off = s*(27 + row*16 + rr*8), oz = (rr-.5)*12;
+      const bh = (7 + a*4 + b*24 + rr*13 + row*2.5)*taper;
+      const bw = 8 + rr*7, bd = 8 + rnd(i,row*3+s)*6;
+      const wall = (a+b>1.2) ? (rr>.5 ? concreteMat : glassMat) : HOUSE_WALLS[Math.floor(rr*6)];
+      put('box', wall, grp, off, bh/2, oz, bw,bh,bd);
+      put('box', roofMat, grp, off, bh+.2, oz, bw+.5,.4,bd+.5);
+      if (u>.74 && rr<.5) put('box', snowMat, grp, off, bh+.45, oz, bw+.5,.15,bd+.5);
+      if (bh > 14) for (let y=4;y<bh-2;y+=4.5) put('box',winLit,grp,off - s*(bw/2+.05),y,oz,.1,1.4,bd*.6);
+    }
+  }
+  if (i%3===1) tree(grp,(Math.floor(i/3)%2 ? -1 : 1)*10.3,2,u,i);  // yo'l bo'ylab fasl daraxtlari
+  if (i%2===0){                                                // ko'cha chirog'i + yorug' dog'i yo'lda
+    const sd = (i%4===0) ? -8.8 : 8.8, sg = Math.sign(sd), hx = sd - sg*1.6;
+    put('cyl',poleMat,grp,sd,3,0,.13,6,.13); put('box',poleMat,grp,sd-sg*.8,6.05,0,1.6,.12,.12);
+    put('box',poleMat,grp,hx,6,0,.9,.18,.45); put('sph',bulbMat,grp,hx,5.8,0,.2,.2,.2);
+    put('pln',poolMat,grp,hx,.26,0,11,1,11);
+    const spr = new THREE.Sprite(lampSpr); spr.position.set(hx,5.8,0).applyMatrix4(grp.matrixWorld); spr.scale.set(4.5,4.5,1); scene.add(spr);
+  }
+  scene.add(grp);
+}
+flush();
+ 
+// ---------- Final: qishki maydon, katta archa, salyut, samolyotlar; fasl zarralari ----------
+const clock = new THREE.Clock(); let T = 0;
+const prom = new THREE.Mesh(new THREE.PlaneGeometry(110,120), M({ color:0xf2f6fa, roughness:.9, ...po }));
+prom.rotation.x = -Math.PI/2; prom.position.set(0,.2,-1460); scene.add(prom);
+ 
+// uzoqdagi tog'lar (Chimyon)
+const mtMat = new THREE.MeshBasicMaterial({ color:0x1b2745, fog:false }), capMat = new THREE.MeshBasicMaterial({ color:0xe8eef8, fog:false });
+const MT_N = new THREE.Color(0x1b2745), MT_D = new THREE.Color(0x7d93bd);
+for (let j=0;j<11;j++){
+  const h = 260 + rnd(j,1)*220, r = 300 + rnd(j,2)*220, x = -1500 + j*300 + (rnd(j,3)-.5)*120, z = -2700 - rnd(j,4)*500;
+  const m = new THREE.Mesh(new THREE.ConeGeometry(r,h,6), mtMat); m.position.set(x,h/2-5,z); scene.add(m);
+  const c = new THREE.Mesh(new THREE.ConeGeometry(r*.3,h*.3,6), capMat); c.position.set(x,h*.85-5,z); scene.add(c);
+}
+ 
+// katta yangi yil archasi: egilgan shoxlar, qor, chiroqlar, sharlar, gul-garland, tagida sovg'alar
+const tree3 = new THREE.Group(); tree3.position.set(0,0,-1480); scene.add(tree3);
+const needleA = M({ color:0x14502b, roughness:.9 }), needleB = M({ color:0x1f6b3a, roughness:.9 });
+const goldM = new THREE.MeshStandardMaterial({ color:0xf2c14e, metalness:.9, roughness:.25, emissive:0x553300, emissiveIntensity:.4 });
+const balls = [0xd62828,0xf2c14e,0x3a86ff].map(c => M({ color:c, metalness:.8, roughness:.2 }));
+const gifts = [0xd62828,0x2a9d8f,0x3a86ff,0x8338ec,0xfb8500].map(c => M({ color:c, roughness:.5 }));
+const pod = new THREE.Mesh(new THREE.CylinderGeometry(13,13,.5,32), snowMat); pod.position.y = .45; tree3.add(pod);
+const trunk3 = new THREE.Mesh(new THREE.CylinderGeometry(1.6,1.9,8,12), trunkMat); trunk3.position.y = 4; tree3.add(trunk3);
+const core = new THREE.Mesh(new THREE.ConeGeometry(8.5,44,18), needleA); core.position.y = 27; tree3.add(core);
+const star3 = new THREE.Mesh((() => { const sh = new THREE.Shape();
+  for (let j=0;j<10;j++){ const a = j*Math.PI/5 + Math.PI/2, rr = j%2 ? 1.1 : 2.6; const px = Math.cos(a)*rr, py = Math.sin(a)*rr; j ? sh.lineTo(px,py) : sh.moveTo(px,py); }
+  const g = new THREE.ExtrudeGeometry(sh,{ depth:.8, bevelEnabled:false }); g.translate(0,0,-.4); return g; })(), BM(0xffe27a));
+star3.position.y = 50.5; tree3.add(star3);
+const starSpr = new THREE.Sprite(new THREE.SpriteMaterial({ map:lampTex, transparent:true, depthWrite:false, blending:THREE.AdditiveBlending, fog:false }));
+starSpr.scale.set(26,26,1); starSpr.position.y = 50.5; tree3.add(starSpr);
+const treeGlow = new THREE.Sprite(new THREE.SpriteMaterial({ map:lampTex, transparent:true, opacity:0, depthWrite:false, blending:THREE.AdditiveBlending, fog:false }));
+treeGlow.scale.set(70,70,1); treeGlow.position.y = 25; tree3.add(treeGlow);
+const treeLight = new THREE.PointLight(0xffd9a0, 0, 140); treeLight.position.set(0,22,-1462); scene.add(treeLight);
+tree3.updateMatrixWorld(true);
+const DR = .38, TIERS = 16;
+for (let k=0;k<TIERS;k++){
+  const yk = 6 + k*2.7, R = 15*Math.pow(1-k/TIERS,.9) + 1.2, nb = Math.round(24*(1-k/TIERS)) + 8;
+  for (let b=0;b<nb;b++){
+    const psi = b/nb*Math.PI*2 + k*.5, cx = Math.cos(psi)*(R/2)*Math.cos(DR), cz = -Math.sin(psi)*(R/2)*Math.cos(DR), cy = yk - (R/2)*Math.sin(DR);
+    const tx = Math.cos(psi)*R*Math.cos(DR), tz = -Math.sin(psi)*R*Math.cos(DR), ty = yk - R*Math.sin(DR);
+    put('cone', k%2 ? needleA : needleB, tree3, cx,cy,cz, .55,R,1.9, -(Math.PI/2+DR), psi);
+    put('cone', snowMat, tree3, cx,cy+.2,cz, .3,R*.75,1.1, -(Math.PI/2+DR), psi);
+    if (b%2===0) put('sph', xl[(b+k)%4].m, tree3, tx*.92,ty-.1,tz*.92, .28,.28,.28);
+    if (b%6===3 && k>1) put('sph', balls[(b+k)%3], tree3, tx*.8,ty-.5,tz*.8, .75,.75,.75);
+  }
+}
+for (let j=0;j<300;j++){ const t = j/300, y = 7 + t*41, rad = (15*(1-(y-6)/46) + .8)*.78, ang = t*Math.PI*2*11;   // oltin garland
+  put('sph', goldM, tree3, Math.cos(ang)*rad, y, Math.sin(ang)*rad, .2,.2,.2); }
+for (let j=0;j<14;j++){                                                                                        // sovg'alar
+  const ang = j/14*Math.PI*2 + rnd(j,3), rr = 6.5 + rnd(j,4)*5.5, w = 1.6 + rnd(j,5)*2.2, hh = 1.2 + rnd(j,6)*1.8, dd = 1.6 + rnd(j,7)*2;
+  const x = Math.cos(ang)*rr, z = Math.sin(ang)*rr, y = .7 + hh/2;
+  put('box', gifts[j%5], tree3, x,y,z, w,hh,dd); put('box', goldM, tree3, x,y,z, w+.06,hh+.06,.3);
+  put('box', goldM, tree3, x,y,z, .3,hh+.06,dd+.06); put('sph', goldM, tree3, x,.7+hh+.2,z, .5,.3,.5);
+}
+flush();
+ 
+// samolyotlar
+const planes = [];
+function makePlane(y, z, sp, dir, sc){
+  const g = new THREE.Group(), m = M({ color:0xf2f2f2, metalness:.3, roughness:.4 });
+  const part = (geo,x,y2,z2) => { const o = new THREE.Mesh(geo,m); o.position.set(x,y2,z2); g.add(o); return o; };
+  part(new THREE.CylinderGeometry(.7,1.1,16,10),0,0,0).rotation.z = Math.PI/2;
+  part(new THREE.BoxGeometry(4,.3,24),-.5,0,0); part(new THREE.BoxGeometry(2.2,3,.3),-7,1.6,0); part(new THREE.BoxGeometry(2,.2,7),-7,.6,0);
+  const L = (c,x,y2,z2) => { const s = new THREE.Mesh(new THREE.SphereGeometry(.6,6,6), new THREE.MeshBasicMaterial({ color:c, fog:false })); s.position.set(x,y2,z2); g.add(s); return s; };
+  L(0xff2222,-.5,0,-12); L(0x22ff66,-.5,0,12); const strobe = L(0xffffff,-7,3.2,0);
+  g.scale.setScalar(sc); g.position.set((Math.random()-.5)*1200,y,z); g.rotation.y = dir>0 ? 0 : Math.PI;
+  scene.add(g); planes.push({ g, sp, dir, strobe });
+}
+makePlane(120,-1750,45,1,2.2); makePlane(160,-2000,38,-1,2.6); makePlane(95,-1650,55,1,2);
+// Santa: tog'lar ustidan tez uchib o'tadi — qo'shimcha bezaksiz, chanochada xira chiroqlar
+const santa = new THREE.Group(); santa.visible = false; scene.add(santa);
+const santaLightMeshes = [];
+{
+  const red = M({ color:0x7d1a1a, roughness:.7 });
+  const sl = new THREE.Group(); santa.add(sl);
+  const body = new THREE.Mesh(new THREE.CylinderGeometry(1.1,1.6,10,8), red); body.rotation.z = Math.PI/2; sl.add(body);
+  const nose = new THREE.Mesh(new THREE.ConeGeometry(1.1,3,8), red); nose.rotation.z = -Math.PI/2; nose.position.set(6.2,0,0); sl.add(nose);
+  const sBody = new THREE.Mesh(new THREE.CylinderGeometry(.85,1.25,3.6,8), red); sBody.position.set(-3.4,2.1,0); sl.add(sBody);
+  const head = new THREE.Mesh(new THREE.SphereGeometry(.65,8,8), M({ color:0xd9a878, roughness:.8 })); head.position.set(-3.4,4.3,0); sl.add(head);
+  const hat = new THREE.Mesh(new THREE.ConeGeometry(.65,1.5,8), red); hat.position.set(-3.4,5.2,0); sl.add(hat);
+  for (let j=0;j<7;j++){ const b = new THREE.Mesh(new THREE.SphereGeometry(.26,6,6), new THREE.MeshBasicMaterial({ color:0xffcf8a, fog:false }));
+    b.position.set(-4.6 + j*1.6, -1 + Math.sin(j*1.3)*.25, 0); sl.add(b); santaLightMeshes.push(b); }
+  santa.scale.setScalar(3.2);
+}
+
+ 
+// cheksiz salyut: ko'tarilish -> portlash (shar, halqa, tilla "tol")
+const FP = 200, fws = [];
+for (let b=0;b<12;b++){
+  const geo = new THREE.BufferGeometry(), pos = new Float32Array(FP*3), col = new Float32Array(FP*3);
+  geo.setAttribute('position', new THREE.BufferAttribute(pos,3)); geo.setAttribute('color', new THREE.BufferAttribute(col,3));
+  const mat = new THREE.PointsMaterial({ size:4.5, map:dotTex, vertexColors:true, transparent:true, opacity:0, depthWrite:false, blending:THREE.AdditiveBlending, fog:false });
+  const pts = new THREE.Points(geo, mat); pts.frustumCulled = false; scene.add(pts);
+  fws.push({ pts, pos, col, vel:new Float32Array(FP*3), t:-Math.random()*4, ph:0, life:2.5, g:15, drag:.35, cx:0, cy:0, cz:0, rise:1 });
+}
+function fwLaunch(f){
+  f.cx = (Math.random()-.5)*520; f.cy = 90 + Math.random()*130; f.cz = -1620 - Math.random()*380; f.ph = 1; f.t = 0; f.rise = .8 + Math.random()*.35;
+  f.pts.geometry.setDrawRange(0,1); f.col[0] = 1; f.col[1] = .9; f.col[2] = .6; f.pos[0] = f.cx; f.pos[1] = 20; f.pos[2] = f.cz;
+  f.pts.geometry.attributes.color.needsUpdate = true;
+}
+function fwBurst(f){
+  const type = Math.random(), hues = [0,.02,.09,.11,.13,.55,.33], hue = hues[Math.floor(Math.random()*hues.length)], c1 = new THREE.Color().setHSL(hue,.95,.52), c2 = new THREE.Color().setHSL(hue,.6,.85), gold = new THREE.Color().setHSL(.11,.95,.58);
+  f.g = 18; f.drag = .5; f.life = 2.6 + Math.random()*.9;
+  const e1 = new THREE.Vector3(Math.random()-.5,Math.random()-.5,Math.random()-.5).normalize(), e2 = new THREE.Vector3(Math.random()-.5,Math.random()-.5,Math.random()-.5).cross(e1).normalize();
+  if (type >= .8){ f.g = 26; f.drag = .8; f.life = 4.4; }
+  for (let j=0;j<FP;j++){
+    let vx, vy, vz, c = c1;
+    if (type < .55){ const th = Math.random()*Math.PI*2, ph = Math.acos(2*Math.random()-1), s = 19 + Math.random()*17;
+      vx = Math.sin(ph)*Math.cos(th)*s; vy = Math.cos(ph)*s; vz = Math.sin(ph)*Math.sin(th)*s; if (j%3===0) c = c2; }
+    else if (type < .8){ const a = j/FP*Math.PI*2; vx = (e1.x*Math.cos(a)+e2.x*Math.sin(a))*28; vy = (e1.y*Math.cos(a)+e2.y*Math.sin(a))*28; vz = (e1.z*Math.cos(a)+e2.z*Math.sin(a))*28; }
+    else { const th = Math.random()*Math.PI*2, ph = Math.acos(2*Math.random()-1), s = 12 + Math.random()*11;
+      vx = Math.sin(ph)*Math.cos(th)*s; vy = Math.cos(ph)*s - 7; vz = Math.sin(ph)*Math.sin(th)*s; c = gold; }
+    f.vel[j*3] = vx; f.vel[j*3+1] = vy; f.vel[j*3+2] = vz;
+    f.pos[j*3] = f.cx; f.pos[j*3+1] = f.cy; f.pos[j*3+2] = f.cz; f.col[j*3] = c.r; f.col[j*3+1] = c.g; f.col[j*3+2] = c.b;
+  }
+  f.pts.geometry.attributes.color.needsUpdate = true; f.pts.geometry.setDrawRange(0,FP); f.ph = 2; f.t = 0;
+}
+ 
+// fasl zarralari: bahorda gul bargi, kuzda to'kilayotgan barglar (asta-sekin kamayadi), qishda qor (asta-sekin ko'payadi)
+function makeFall(N, size, cols, spMin, spMax){
+  const pos = new Float32Array(N*3), col = new Float32Array(N*3), sp = new Float32Array(N), cc = cols.map(c => new THREE.Color(c));
+  for (let i=0;i<N;i++){ pos[i*3] = (Math.random()-.5)*140; pos[i*3+1] = Math.random()*45-3; pos[i*3+2] = (Math.random()-.5)*140;
+    sp[i] = spMin + Math.random()*(spMax-spMin); const c = cc[i%cc.length]; col[i*3] = c.r; col[i*3+1] = c.g; col[i*3+2] = c.b; }
+  const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.BufferAttribute(pos,3)); geo.setAttribute('color', new THREE.BufferAttribute(col,3));
+  const pts = new THREE.Points(geo, new THREE.PointsMaterial({ size, map:dotTex, vertexColors:true, transparent:true, opacity:0, depthWrite:false }));
+  pts.frustumCulled = false; scene.add(pts); return { pts, pos, sp, N };
+}
+function stepFall(F, dt, w, sway){
+  const cnt = Math.floor(F.N*w); F.pts.geometry.setDrawRange(0,cnt); F.pts.material.opacity = cnt>0 ? .95 : 0; F.pts.position.copy(camera.position);
+  for (let i=0;i<cnt;i++){
+    const o = i*3; F.pos[o+1] -= F.sp[i]*dt; F.pos[o] += (Math.sin(T*1.2+i)*sway + .6)*dt; F.pos[o+2] += Math.cos(T*.9+i*.7)*sway*.6*dt;
+    if (F.pos[o+1] < -3) F.pos[o+1] = 42; if (F.pos[o] > 70) F.pos[o] = -70;
+  }
+  F.pts.geometry.attributes.position.needsUpdate = true;
+}
+const petals = makeFall(700,.55,[0xffb3c7,0xffd6e0,0xffffff],1,2.2);
+const leaves = makeFall(600,.85,[0xe8832a,0xc23b22,0xe9b93a],1.5,3);
+const snowF  = makeFall(2400,.5,[0xffffff],2.5,5);
+ 
+function world(dt, p, n){
+  T += dt; const cu = currentT, d = 1 - n;
+  mtMat.color.copy(MT_N).lerp(MT_D, d);
+  rippleTex.offset.set(T*.02, T*.035);
+  swimmers.forEach(s => { const a = T*.35 + s.ph; s.g.position.set(s.bx + Math.cos(a)*s.rad, .42 + Math.sin(T*1.6+s.ph)*.06, s.bz + Math.sin(a)*s.rad*.8); s.g.rotation.y = -a; });
+  xl.forEach((o,k) => o.m.color.setHex(o.c).multiplyScalar((.4 + .6*(.5+.5*Math.sin(T*3 + k*1.6)))*(.6 + .4*n)));
+  treeLight.intensity = 2.5*n; treeGlow.material.opacity = .3*n; star3.rotation.y = T; starSpr.material.opacity = .5 + .5*n;
+  stepFall(petals, dt, clamp((.27-cu)/.1), 1.6);
+  stepFall(leaves, dt, clamp((cu-.47)/.06)*clamp((.78-cu)/.2), 2.6);
+  stepFall(snowF,  dt, clamp((cu-.72)/.1), .9);
+  const fa = p > .5 ? clamp(n*1.8) : 0;
+  fws.forEach(f => {
+    f.t += dt;
+    if (f.ph === 0){ f.pts.material.opacity = 0; if (f.t >= 0 && fa > 0) fwLaunch(f); return; }
+    if (f.ph === 1){ const k = clamp(f.t/f.rise); f.pos[1] = 20 + (f.cy-20)*(1-(1-k)*(1-k)); f.pts.geometry.attributes.position.needsUpdate = true;
+      f.pts.material.opacity = fa; if (k >= 1) fwBurst(f); return; }
+    const drag = Math.pow(f.drag, dt);
+    for (let j=0;j<FP;j++){
+      f.vel[j*3] *= drag; f.vel[j*3+1] = f.vel[j*3+1]*drag - f.g*dt; f.vel[j*3+2] *= drag;
+      f.pos[j*3] += f.vel[j*3]*dt; f.pos[j*3+1] += f.vel[j*3+1]*dt; f.pos[j*3+2] += f.vel[j*3+2]*dt;
+    }
+    f.pts.geometry.attributes.position.needsUpdate = true;
+    f.pts.material.opacity = fa * clamp(1 - f.t/f.life) * (.8 + .2*Math.random());
+    if (f.t > f.life){ f.ph = 0; f.t = -Math.random()*1.2; }
+  });
+  planes.forEach(o => { o.g.position.x += o.dir*o.sp*dt; if (Math.abs(o.g.position.x) > 800) o.g.position.x = -Math.sign(o.g.position.x)*800; o.strobe.visible = Math.sin(T*6) > .7; });
+  santa.visible = p > .86;
+  if (santa.visible){ const sx = ((T*260) % 2600) - 1300;
+    santa.position.set(sx, 330 + Math.sin(T*.8)*8, -2350); santa.rotation.z = Math.sin(T*.8)*.04;
+    santaLightMeshes.forEach((b,j) => b.material.color.setHex(0xffcf8a).multiplyScalar(.28 + .28*(.5+.5*Math.sin(T*5+j*1.7)))); }
+}
+ 
+// ---------- Skroll va animatsiya ----------
+let scrollProgress = 0;
+function onScroll(){
+  const max = document.documentElement.scrollHeight - innerHeight;
+  scrollProgress = max > 0 ? scrollY/max : 0;
+  document.getElementById('hero').style.opacity = scrollProgress > .04 ? Math.max(0, 1-(scrollProgress-.04)*20) : 1;
+  document.getElementById('end').style.opacity = clamp((scrollProgress-.96)*25);
+  const sn = ['Bahor','Yoz','Kuz','Qish'][Math.min(3,Math.floor(scrollProgress*4))], el = document.getElementById('season');
+  if (el.textContent !== sn){ el.textContent = sn; el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop'); }
+}
+addEventListener('scroll', onScroll); onScroll();
+ 
+let mouseX = 0, mouseY = 0;
+addEventListener('mousemove', e => { mouseX = (e.clientX/innerWidth-.5)*.15; mouseY = (e.clientY/innerHeight-.5)*.1; });
+ 
+let currentT = 0;
+const tmp = new THREE.Vector3();
+function skyPlace(obj, fwd, right, dist, side, y){
+  obj.position.copy(camera.position).addScaledVector(fwd, dist).addScaledVector(right, side);
+  obj.position.y = y;
+}
+function animate(){
+  requestAnimationFrame(animate);
+  const p = scrollProgress;
+  currentT += (Math.min(.999, p) - currentT) * .03;
+ 
+  camera.position.copy(curve.getPointAt(currentT));
+  const tg = camera.position.clone().addScaledVector(flatTangent(currentT), 50); tg.y += 14*clamp((currentT-.86)/.14); camera.lookAt(tg);
+  camera.rotation.y += mouseX*.05; camera.rotation.x += mouseY*.05;
+ 
+  const fwd = flatTangent(currentT), right = new THREE.Vector3(-fwd.z, 0, fwd.x);
+ 
+  const d = clamp(p/.14)*clamp((.93-p)/.18), n = 1 - d;   // d: kunduz (bahor tongidan kuzgacha), n: tun (boshi va qish oxiri)
+ 
+  // Oy (tunda ko'rinadi)
+  moon.visible = n > .05; moon.material.opacity = clamp(n*1.6);
+  skyPlace(moon, fwd, right, 1900, p<.5 ? -400 : 400, 150 + 450*n);
+ 
+  // Quyosh (kun o'rtasida)
+  sun.visible = d > .04; sun.material.opacity = clamp(d*4);
+  skyPlace(sun, fwd, right, 1900, 500 - 1000*p, 20 + 760*d);
+ 
+  // Shafaq (tong va kech)
+  const sp = Math.sin(clamp(d)*Math.PI);
+  shafaq.material.opacity = sp*.6;
+  skyPlace(shafaq, fwd, right, 1950, 0, 230);
+  shafaq.lookAt(camera.position.x, 230, camera.position.z);
+ 
+  // Osmon rangi, tuman, yulduzlar
+  const sky = SKY_N.clone().lerp(seasonBlend(SKYS, currentT, tmpC), d); sky.r += sp*.3; sky.g += sp*.1;
+  scene.background = sky; scene.fog = new THREE.FogExp2(sky, .0025);
+  stars.position.copy(camera.position); stars.material.opacity = clamp(n*1.3);
+ 
+  // Yorug'lik: boshi va oxiri qorong'i, o'rtasi yorug'
+  dirLight.intensity = .2 + 1.4*d; dirLight.color.copy(sunNight).lerp(sunDay, d);
+  ambient.intensity = .8 + 1.1*d; ambient.color.copy(ambNight).lerp(ambDay, d);
+  camLight.position.copy(camera.position); camLight.intensity = 1.8*n;
+  world(Math.min(.05, clock.getDelta()), p, n);
+  winLit.color.copy(WIN_D).lerp(WIN_N, n);
+  signMat.color.setHex(0xffb347).multiplyScalar(.45 + .55*n);
+  bulbMat.color.setRGB(1,.8,.47).multiplyScalar(.2 + .8*n);
+  lampSpr.opacity = .7*n; poolMat.opacity = .5*n;
+  winMat.emissiveIntensity = n*1.1;
+ 
+  // Bulutlar (faqat kunduz)
+  cloudMat.opacity = d*.85;
+  cloudGroup.children.forEach((c,idx) => {
+    const sd = idx%2===0 ? 1 : -1;
+    c.position.set(camera.position.x + sd*(70+(idx%3)*30), 100 + (idx%4)*8, camera.position.z - idx*45);
+  });
+ 
+  renderer.render(scene, camera);
+}
+animate();
+ 
+addEventListener('resize', () => {
+  camera.aspect = innerWidth/innerHeight; camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+});
+</script>
+</body>
+</html>
+ 

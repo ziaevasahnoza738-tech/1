@@ -1,0 +1,347 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Buxoroi Sharif — Naqshin Ko'chalar Sayohati</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Manrope:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --gold: #f3c653;
+  --cream: #f9f5e8;
+  --night: #03050a;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  height: 1200vh; /* Sayohat chuqurligi uchun uzun scroll */
+  background: var(--night);
+  color: var(--cream);
+  font-family: 'Manrope', sans-serif;
+  overflow-x: hidden;
+}
+#canvas-container {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+}
+canvas { display: block; width: 100vw; height: 100vh; }
+.ui-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 40px 60px;
+}
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  pointer-events: auto;
+}
+.logo {
+  font-family: 'Cinzel', serif;
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--gold);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+nav {
+  display: flex;
+  gap: 40px;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+nav a {
+  color: var(--cream);
+  text-decoration: none;
+  transition: color 0.3s;
+}
+nav a:hover { color: var(--gold); }
+.hero {
+  position: absolute;
+  top: 48%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  pointer-events: auto;
+  transition: opacity 0.6s ease;
+}
+.hero h1 {
+  font-family: 'Cinzel', serif;
+  font-size: clamp(42px, 7vw, 88px);
+  font-weight: 800;
+  color: var(--cream);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  margin-bottom: 20px;
+  text-shadow: 0 10px 40px rgba(0,0,0,0.9);
+}
+.hero p {
+  font-size: 17px;
+  color: #d1c8b0;
+  max-width: 550px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+.scroll-indicator {
+  position: absolute;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  font-size: 11px;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+.scroll-bar {
+  width: 1px;
+  height: 50px;
+  background: linear-gradient(to bottom, var(--gold), transparent);
+  animation: scrollAnim 2s infinite;
+}
+@keyframes scrollAnim {
+  0% { transform: scaleY(0); transform-origin: top; }
+  50% { transform: scaleY(1); transform-origin: top; }
+  50.1% { transform: scaleY(1); transform-origin: bottom; }
+  100% { transform: scaleY(0); transform-origin: bottom; }
+}
+@media (max-width: 768px) {
+  .ui-layer { padding: 20px; }
+  nav { display: none; }
+}
+</style>
+</head>
+<body>
+
+<div id="canvas-container"></div>
+
+<div class="ui-layer">
+  <header>
+    <div class="logo">Buxoroi Sharif</div>
+    <nav>
+      <a href="#">Arxitektura</a>
+      <a href="#">Naqshlar</a>
+      <a href="#">Mahallalar</a>
+      <a href="#">Tarix</a>
+    </nav>
+  </header>
+
+  <div class="hero" id="hero">
+    <h1>Sehrli Ko'chalar</h1>
+    <p>Ajdodlar nafasi, moviy gumbazlar va qadimiy naqshin devorlar orasiga sho'ng'ing.</p>
+  </div>
+
+  <div class="scroll-indicator">
+    <span>Mahallaga kirish uchun pastga suring</span>
+    <div class="scroll-bar"></div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+const container = document.getElementById('canvas-container');
+const scene = new THREE.Scene();
+scene.fog = new THREE.FogExp2(0x03050a, 0.03);
+
+const camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 1000);
+camera.position.set(0, 2.2, 0);
+
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+container.appendChild(renderer.domElement);
+
+// Lighting
+const ambientLight = new THREE.AmbientLight(0x151c2c, 2);
+scene.add(ambientLight);
+
+// --- PROCEDURAL ORIENTAL PATTERN TEXTURE GENERATOR ---
+function createPatternTexture() {
+  const canvas = document.createElement('canvas');
+  canvas.width = 512;
+  canvas.height = 512;
+  const ctx = canvas.getContext('2d');
+
+  // Brick background
+  ctx.fillStyle = '#6b301c';
+  ctx.fillRect(0, 0, 512, 512);
+
+  // Brick lines
+  ctx.strokeStyle = '#3a160b';
+  ctx.lineWidth = 6;
+  for (let i = 0; i <= 512; i += 64) {
+    ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(512, i); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, 512); ctx.stroke();
+  }
+
+  // Turquoise Tile Ornament (Girih style overlay)
+  ctx.fillStyle = '#0f5257';
+  ctx.strokeStyle = '#f3c653';
+  ctx.lineWidth = 4;
+  ctx.beginPath();
+  ctx.arc(256, 256, 120, 0, Math.PI * 2);
+  ctx.fill(); ctx.stroke();
+
+  ctx.beginPath();
+  ctx.moveTo(256, 100); ctx.lineTo(412, 256); ctx.lineTo(256, 412); ctx.lineTo(100, 256); ctx.closePath();
+  ctx.stroke();
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.RepeatWrapping;
+  texture.repeat.set(1, 4);
+  return texture;
+}
+
+const wallTexture = createPatternTexture();
+const wallMaterial = new THREE.MeshStandardMaterial({
+  map: wallTexture,
+  roughness: 0.8,
+  metalness: 0.2
+});
+
+const woodMaterial = new THREE.MeshStandardMaterial({
+  color: 0x2b150c,
+  roughness: 0.9
+});
+
+const tileAccentMat = new THREE.MeshStandardMaterial({
+  color: 0x0b4f6c,
+  roughness: 0.3,
+  metalness: 0.4
+});
+
+// Build Detailed Alleyway
+const alleyGroup = new THREE.Group();
+scene.add(alleyGroup);
+
+const segmentLength = 12;
+const totalSegments = 70;
+
+for (let i = 0; i < totalSegments; i++) {
+  const zPos = -i * segmentLength;
+
+  // Walls with height and thickness
+  const wallGeo = new THREE.BoxGeometry(2, 9, segmentLength);
+  
+  const leftWall = new THREE.Mesh(wallGeo, wallMaterial);
+  leftWall.position.set(-6.5, 4.5, zPos);
+  alleyGroup.add(leftWall);
+
+  const rightWall = new THREE.Mesh(wallGeo, wallMaterial);
+  rightWall.position.set(6.5, 4.5, zPos);
+  alleyGroup.add(rightWall);
+
+  // Traditional Arched Niches & Doors every segment
+  const doorGeo = new THREE.BoxGeometry(2.8, 5.5, 0.6);
+  const leftDoor = new THREE.Mesh(doorGeo, woodMaterial);
+  leftDoor.position.set(-5.5, 2.75, zPos);
+  alleyGroup.add(leftDoor);
+
+  const rightDoor = new THREE.Mesh(doorGeo, woodMaterial);
+  rightDoor.position.set(5.5, 2.75, zPos);
+  alleyGroup.add(rightDoor);
+
+  // Turquoise tiled arches above doors
+  const archGeo = new THREE.BoxGeometry(3.2, 0.8, 0.8);
+  const leftArch = new THREE.Mesh(archGeo, tileAccentMat);
+  leftArch.position.set(-5.5, 5.8, zPos);
+  alleyGroup.add(leftArch);
+
+  const rightArch = new THREE.Mesh(archGeo, tileAccentMat);
+  rightArch.position.set(5.5, 5.8, zPos);
+  alleyGroup.add(rightArch);
+
+  // Warm glowing lanterns hanging from walls
+  if (i % 2 === 0) {
+    const lampLight = new THREE.PointLight(0xffaa33, 2.5, 14);
+    lampLight.position.set(-4.5, 5, zPos);
+    scene.add(lampLight);
+
+    const rLampLight = new THREE.PointLight(0xffaa33, 2.5, 14);
+    rLampLight.position.set(4.5, 5, zPos);
+    scene.add(rLampLight);
+  }
+}
+
+// Street ground (Cobblestone look)
+const groundGeo = new THREE.PlaneGeometry(15, totalSegments * segmentLength);
+const groundMat = new THREE.MeshStandardMaterial({ color: 0x0c0f16, roughness: 0.9 });
+const ground = new THREE.Mesh(groundGeo, groundMat);
+ground.rotation.x = -Math.PI / 2;
+ground.position.set(0, 0, - (totalSegments * segmentLength) / 2 + 6);
+scene.add(ground);
+
+// Floating Desert Dust / Night particles
+const particleCount = 700;
+const particleGeo = new THREE.BufferGeometry();
+const particlePos = new Float32Array(particleCount * 3);
+
+for (let i = 0; i < particleCount * 3; i += 3) {
+  particlePos[i] = (Math.random() - 0.5) * 18;
+  particlePos[i+1] = Math.random() * 9;
+  particlePos[i+2] = -Math.random() * (totalSegments * segmentLength);
+}
+particleGeo.setAttribute('position', new THREE.BufferAttribute(particlePos, 3));
+const particleMat = new THREE.PointsMaterial({
+  color: 0xf3c653,
+  size: 0.15,
+  transparent: true,
+  opacity: 0.7
+});
+scene.add(new THREE.Points(particleGeo, particleMat));
+
+// Scroll & Mouse mechanics
+let scrollProgress = 0;
+window.addEventListener('scroll', () => {
+  const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+  scrollProgress = window.scrollY / maxScroll;
+  
+  const hero = document.getElementById('hero');
+  if (scrollProgress > 0.04) {
+    hero.style.opacity = Math.max(0, 1 - (scrollProgress - 0.04) * 20);
+  } else {
+    hero.style.opacity = 1;
+  }
+});
+
+let mouseX = 0, mouseY = 0;
+window.addEventListener('mousemove', (e) => {
+  mouseX = (e.clientX / window.innerWidth - 0.5) * 0.4;
+  mouseY = (e.clientY / window.innerHeight - 0.5) * 0.25;
+});
+
+// Render loop
+function animate() {
+  requestAnimationFrame(animate);
+
+  const maxZ = -(totalSegments * segmentLength) + 30;
+  let targetZ = -scrollProgress * Math.abs(maxZ);
+  
+  camera.position.z += (targetZ - camera.position.z) * 0.06;
+  camera.rotation.y += (mouseX - camera.rotation.y) * 0.06;
+  camera.rotation.x += (-mouseY - camera.rotation.x) * 0.06;
+
+  renderer.render(scene, camera);
+}
+animate();
+
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+</script>
+
+</body>
+</html>

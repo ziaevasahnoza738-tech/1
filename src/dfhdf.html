@@ -1,0 +1,382 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Toshkent — Qishloqdan Zamonaviy Megapolisgacha</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Manrope:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root { --gold:#f3c653; --cream:#f9f5e8; --night:#050811; }
+* { box-sizing:border-box; margin:0; padding:0; }
+html, body { height:3500vh; background:var(--night); color:var(--cream); font-family:'Manrope',sans-serif; overflow-x:hidden; }
+#canvas-container { position:fixed; inset:0; z-index:1; }
+canvas { display:block; width:100vw; height:100vh; }
+.ui-layer { position:fixed; inset:0; z-index:2; pointer-events:none; display:flex; flex-direction:column; justify-content:space-between; padding:40px 60px; }
+header { display:flex; justify-content:space-between; align-items:center; pointer-events:auto; }
+.logo { font-family:'Cinzel',serif; font-size:26px; font-weight:800; color:var(--gold); letter-spacing:.15em; text-transform:uppercase; }
+nav { display:flex; gap:40px; font-size:13px; font-weight:500; letter-spacing:.2em; text-transform:uppercase; }
+nav a { color:var(--cream); text-decoration:none; transition:color .3s; }
+nav a:hover { color:var(--gold); }
+.hero { position:absolute; top:48%; left:50%; transform:translate(-50%,-50%); text-align:center; pointer-events:auto; transition:opacity .6s ease; width:90%; }
+.hero h1 { font-family:'Cinzel',serif; font-size:clamp(38px,6vw,80px); font-weight:800; line-height:1.1; letter-spacing:-.02em; margin-bottom:20px; text-shadow:0 10px 40px rgba(0,0,0,.9); }
+.hero p { font-size:17px; color:#d1c8b0; max-width:600px; margin:0 auto; line-height:1.6; }
+.scroll-indicator { position:absolute; bottom:40px; left:50%; transform:translateX(-50%); display:flex; flex-direction:column; align-items:center; gap:12px; font-size:11px; letter-spacing:.25em; text-transform:uppercase; color:var(--gold); }
+.scroll-bar { width:1px; height:50px; background:linear-gradient(to bottom,var(--gold),transparent); animation:scrollAnim 2s infinite; }
+@keyframes scrollAnim { 0%{transform:scaleY(0);transform-origin:top} 50%{transform:scaleY(1);transform-origin:top} 50.1%{transform:scaleY(1);transform-origin:bottom} 100%{transform:scaleY(0);transform-origin:bottom} }
+@media (max-width:768px){ .ui-layer{padding:20px} nav{display:none} }
+</style>
+</head>
+<body>
+<div id="canvas-container"></div>
+<div class="ui-layer">
+  <header>
+    <div class="logo">Toshkent Sayohati</div>
+    <nav><a href="#">Mahalla</a><a href="#">Bozorlar</a><a href="#">Markaz</a><a href="#">Teleminora</a></nav>
+  </header>
+  <div class="hero" id="hero">
+    <h1>Qishloqdan Zamonaviy Poytaxtgacha</h1>
+    <p>Qadimiy loy uylar, do’konlar, chodirli bozor rastalari va ulkan zamonaviy megapolis bo’ylab sekin sayohat.</p>
+  </div>
+  <div class="scroll-indicator"><span>Sayohat uchun pastga suring</span><div class="scroll-bar"></div></div>
+</div>
+ 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+const container = document.getElementById('canvas-container');
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(65, innerWidth/innerHeight, 0.5, 4000);
+const renderer = new THREE.WebGLRenderer({ antialias:true });
+renderer.setSize(innerWidth, innerHeight);
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+container.appendChild(renderer.domElement);
+ 
+const clamp = (v,a=0,b=1) => Math.min(b, Math.max(a, v));
+const EYE = 3; // kamera balandligi (yer sathidan)
+ 
+// ---------- Yorug'lik ----------
+const ambient = new THREE.AmbientLight(0x2a3550, 1.0); scene.add(ambient);
+const dirLight = new THREE.DirectionalLight(0xffeedd, 0.4); dirLight.position.set(40,80,30); scene.add(dirLight);
+const camLight = new THREE.PointLight(0xffc477, 1.5, 45); scene.add(camLight);
+const ambNight = new THREE.Color(0x2a3550), ambDay = new THREE.Color(0xffffff);
+const sunNight = new THREE.Color(0x8899cc), sunDay = new THREE.Color(0xfff2dd);
+ 
+// ---------- Osmon: oy, quyosh, shafaq, yulduzlar (hammasi uzoqda, binolar ortida) ----------
+function glowTexture(draw) {
+  const c = document.createElement('canvas'); c.width = c.height = 256;
+  draw(c.getContext('2d')); return new THREE.CanvasTexture(c);
+}
+const moonTex = glowTexture(g => {
+  let r = g.createRadialGradient(128,128,40,128,128,128);
+  r.addColorStop(0,'rgba(200,220,255,.55)'); r.addColorStop(1,'rgba(200,220,255,0)');
+  g.fillStyle = r; g.fillRect(0,0,256,256);
+  g.beginPath(); g.arc(128,128,62,0,7); g.fillStyle = '#eef2f8'; g.fill();
+  g.fillStyle = 'rgba(150,160,180,.35)';
+  [[108,108,12],[148,122,9],[120,152,14],[150,92,6]].forEach(([x,y,r]) => { g.beginPath(); g.arc(x,y,r,0,7); g.fill(); });
+});
+const sunTex = glowTexture(g => {
+  let r = g.createRadialGradient(128,128,0,128,128,128);
+  r.addColorStop(0,'rgba(255,255,235,1)'); r.addColorStop(.28,'rgba(255,236,150,1)');
+  r.addColorStop(.34,'rgba(255,200,90,.55)'); r.addColorStop(1,'rgba(255,150,40,0)');
+  g.fillStyle = r; g.fillRect(0,0,256,256);
+});
+const shafaqTex = glowTexture(g => {
+  let r = g.createLinearGradient(0,0,0,256);
+  r.addColorStop(0,'rgba(255,90,30,0)'); r.addColorStop(.6,'rgba(255,120,40,.8)'); r.addColorStop(1,'rgba(255,200,100,1)');
+  g.fillStyle = r; g.fillRect(0,0,256,256);
+});
+const skyMat = t => new THREE.SpriteMaterial({ map:t, transparent:true, fog:false, depthWrite:false });
+const moon = new THREE.Sprite(skyMat(moonTex)); moon.scale.set(220,220,1); scene.add(moon);
+const sun  = new THREE.Sprite(skyMat(sunTex));  sun.scale.set(420,420,1);  scene.add(sun);
+const shafaq = new THREE.Mesh(new THREE.PlaneGeometry(3600,700),
+  new THREE.MeshBasicMaterial({ map:shafaqTex, transparent:true, opacity:0, fog:false, depthWrite:false, blending:THREE.AdditiveBlending }));
+scene.add(shafaq);
+ 
+const starPos = new Float32Array(1200*3);
+for (let i=0;i<1200;i++){
+  const a = Math.random()*Math.PI*2, e = Math.random()*1.25 + 0.05, R = 1800;
+  starPos[i*3]   = Math.cos(a)*Math.cos(e)*R;
+  starPos[i*3+1] = Math.sin(e)*R*0.7;
+  starPos[i*3+2] = Math.sin(a)*Math.cos(e)*R;
+}
+const starGeo = new THREE.BufferGeometry();
+starGeo.setAttribute('position', new THREE.BufferAttribute(starPos,3));
+const stars = new THREE.Points(starGeo, new THREE.PointsMaterial({ color:0xffffff, size:2, sizeAttenuation:false, transparent:true, fog:false }));
+scene.add(stars);
+ 
+// Bulutlar
+const cloudGroup = new THREE.Group(); scene.add(cloudGroup);
+const cloudMat = new THREE.MeshLambertMaterial({ color:0xffeedd, transparent:true, opacity:0 });
+for (let i=0;i<25;i++){
+  const c = new THREE.Mesh(new THREE.BoxGeometry(44,7,18), cloudMat);
+  cloudGroup.add(c);
+}
+ 
+// ---------- Yo'l yo'nalishi (yer sathida, tekis) ----------
+const curve = new THREE.CatmullRomCurve3([
+  new THREE.Vector3(0,EYE,0), new THREE.Vector3(0,EYE,-120), new THREE.Vector3(25,EYE,-300),
+  new THREE.Vector3(-25,EYE,-500), new THREE.Vector3(0,EYE,-750), new THREE.Vector3(0,EYE,-1000),
+  new THREE.Vector3(0,EYE,-1250), new THREE.Vector3(0,EYE,-1330)
+]);
+curve.arcLengthDivisions = 1000;
+const UP = new THREE.Vector3(0,1,0);
+function flatTangent(u){ const t = curve.getTangentAt(u); t.y = 0; return t.normalize(); }
+ 
+// ---------- Materiallar ----------
+function wallTexture(){
+  const c = document.createElement('canvas'); c.width = c.height = 256;
+  const g = c.getContext('2d'); g.fillStyle = '#8c6239'; g.fillRect(0,0,256,256);
+  g.strokeStyle = '#5a3d22'; g.lineWidth = 3;
+  for (let i=0;i<=256;i+=32){ g.beginPath(); g.moveTo(0,i); g.lineTo(256,i); g.stroke(); g.beginPath(); g.moveTo(i,0); g.lineTo(i,256); g.stroke(); }
+  return new THREE.CanvasTexture(c);
+}
+const M = (o) => new THREE.MeshStandardMaterial(o);
+const villageMat = M({ map:wallTexture(), roughness:.9 }), shopMat = M({ color:0xc27803, roughness:.5 });
+const tentMat = M({ color:0xd90429, roughness:.4 }), roofMat = M({ color:0x4a3525, roughness:.8 });
+const leafMat = M({ color:0x2d6a4f, roughness:.7 }), trunkMat = M({ color:0x5c4033, roughness:.9 });
+const concreteMat = M({ color:0xe0e0e0, roughness:.4 }), glassMat = M({ color:0x1d3557, roughness:.1, metalness:.9 });
+const marketMat = M({ color:0x457b9d, roughness:.3 }), poleMat = M({ color:0x333333 });
+const bulbMat = new THREE.MeshBasicMaterial({ color:0xffcc77 });
+ 
+// ---------- Yo'l, trotuar, yer (yo'l egri chiziqqa ergashadi) ----------
+function ribbon(a, b, y, mat, dash){
+  const N = 600, pos = [], idx = [];
+  for (let i=0;i<=N;i++){
+    const u = i/N, p = curve.getPointAt(u), t = flatTangent(u), rx = -t.z, rz = t.x;
+    pos.push(p.x+rx*a, y, p.z+rz*a,  p.x+rx*b, y, p.z+rz*b);
+    if (i<N && !(dash && Math.floor(i/dash)%2)) { const k=i*2; idx.push(k,k+1,k+3, k,k+3,k+2); }
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(pos,3)); g.setIndex(idx); g.computeVertexNormals();
+  const m = new THREE.Mesh(g, mat); scene.add(m); return m;
+}
+const po = { side:THREE.DoubleSide, polygonOffset:true, polygonOffsetFactor:-2, polygonOffsetUnits:-2 };
+ribbon(-7, 7, 0.05, M({ color:0x2a2c33, roughness:.9, ...po }));                 // asfalt
+ribbon(-.15, .15, 0.1, new THREE.MeshBasicMaterial({ color:0xffffff, ...po }), 12); // o'rta chiziq
+ribbon(-9.8, -7, 0.18, M({ color:0x8a8578, roughness:.9, ...po }));              // trotuar chap
+ribbon(7, 9.8, 0.18, M({ color:0x8a8578, roughness:.9, ...po }));                // trotuar o'ng
+const ground = new THREE.Mesh(new THREE.PlaneGeometry(3000,4200), M({ color:0x5b5646, roughness:.95 }));
+ground.rotation.x = -Math.PI/2; ground.position.set(0,-0.1,-1200); scene.add(ground);
+const plaza = new THREE.Mesh(new THREE.CircleGeometry(12,40), M({ color:0x8a8578, roughness:.8, ...po }));
+plaza.rotation.x = -Math.PI/2; plaza.position.set(0,0.18,-1350); scene.add(plaza);
+ 
+// ---------- Bosqichma-bosqich o'zgaradigan shahar (uylar, do'konlar, kafelar, chiroqlar) ----------
+const rnd = (i,k) => { const x = Math.sin(i*127.1 + k*311.7)*43758.5453; return x - Math.floor(x); };
+const SKY_N = new THREE.Color(.02,.03,.07), SKY_D = new THREE.Color(.55,.75,1);
+const WIN_D = new THREE.Color(0x3a5a7a), WIN_N = new THREE.Color(0xffc870);
+const BM = c => new THREE.MeshBasicMaterial({ color:c });
+const winLit = BM(0x3a5a7a), signMat = BM(0xffb347);
+const lampTex = glowTexture(g => { const r = g.createRadialGradient(128,128,0,128,128,128);
+  r.addColorStop(0,'rgba(255,190,100,.9)'); r.addColorStop(1,'rgba(255,190,100,0)'); g.fillStyle = r; g.fillRect(0,0,256,256); });
+const addMat = o => new THREE.MeshBasicMaterial({ transparent:true, opacity:0, depthWrite:false, blending:THREE.AdditiveBlending, ...o });
+const haloMat = addMat({ color:0xffaa44 });
+const poolMat = addMat({ map:lampTex, polygonOffset:true, polygonOffsetFactor:-4, polygonOffsetUnits:-4 });
+// kunduz/tun: derazalar tunda yonadi (emissive xarita)
+const winMat = (() => {
+  const cc = document.createElement('canvas'), ce = document.createElement('canvas');
+  cc.width = cc.height = ce.width = ce.height = 64;
+  const g1 = cc.getContext('2d'), g2 = ce.getContext('2d');
+  g1.fillStyle = '#223a5e'; g1.fillRect(0,0,64,64); g2.fillStyle = '#000'; g2.fillRect(0,0,64,64);
+  for (let x=0;x<2;x++) for (let y=0;y<2;y++){ const lit = Math.random()>.4;
+    g1.fillStyle = lit ? '#ffd98a' : '#3d5a80'; g1.fillRect(x*32+6,y*32+6,20,20);
+    if (lit){ g2.fillStyle = '#ffcf70'; g2.fillRect(x*32+6,y*32+6,20,20); } }
+  const t1 = new THREE.CanvasTexture(cc), t2 = new THREE.CanvasTexture(ce);
+  t1.wrapS = t1.wrapT = t2.wrapS = t2.wrapT = THREE.RepeatWrapping;
+  return new THREE.MeshStandardMaterial({ map:t1, emissive:0xffffff, emissiveMap:t2, emissiveIntensity:0, roughness:.25, metalness:.4 });
+})();
+const doorMat = M({ color:0x5a3220 }), potMat = M({ color:0x8a4b2a }), tableMat = M({ color:0x6b4423 });
+const fl = [0xff4d6d,0xffd166,0xc77dff].map(c => M({ color:c, roughness:.6 }));
+const awn = [tentMat, M({ color:0x2a9d8f, roughness:.5 }), M({ color:0xe9c46a, roughness:.5 })];
+const umb = [M({ color:0xd62828 }), M({ color:0x2a9d8f }), M({ color:0xf4a261 })];
+ 
+// bir xil narsalar (deraza, eshik, chiroq...) InstancedMesh bilan tez chiziladi
+const pools = new Map(), mtx = new THREE.Matrix4(), qq = new THREE.Quaternion(), ee = new THREE.Euler(), v1 = new THREE.Vector3(), v2 = new THREE.Vector3();
+const GEO = {
+  box:() => new THREE.BoxGeometry(1,1,1), cyl:() => new THREE.CylinderGeometry(1,1,1,10),
+  cone:() => { const g = new THREE.ConeGeometry(1,1,4); g.rotateY(Math.PI/4); return g; },
+  sph:() => new THREE.SphereGeometry(1,8,8), pln:() => { const g = new THREE.PlaneGeometry(1,1); g.rotateX(-Math.PI/2); return g; }
+};
+function put(kind, mat, grp, x,y,z, sx,sy,sz){
+  const k = kind + mat.uuid; let P = pools.get(k); if (!P){ P = { kind, mat, m:[] }; pools.set(k,P); }
+  qq.setFromEuler(ee.set(0,0,0)); mtx.compose(v1.set(x,y,z), qq, v2.set(sx,sy,sz)).premultiply(grp.matrixWorld); P.m.push(mtx.clone());
+}
+function tallBox(grp,w,h,d,mat,x,y,z){
+  const geo = new THREE.BoxGeometry(w,h,d), uv = geo.attributes.uv;
+  for (let k=0;k<uv.count;k++) uv.setXY(k, uv.getX(k)*w/6, uv.getY(k)*h/6);
+  const m = new THREE.Mesh(geo, mat); m.position.set(x,y,z); grp.add(m);
+}
+const tree = (grp,x,z) => { put('cyl',trunkMat,grp,x,1.5,z,.35,3,.35); put('sph',leafMat,grp,x,4,z,1.8,1.8,1.8); };
+const flowers = (grp,s,fx,z,k) => { put('cyl',potMat,grp,fx-s*.7,.3,z,.3,.6,.3); put('sph',fl[k%3],grp,fx-s*.7,.75,z,.4,.4,.4); };
+function shopFront(grp,s,fx,k,wide){                    // vitrina, soyabon (tent), yonuvchi viveska, gullar
+  put('box',winLit,grp,fx-s*.06,1.7,0,.1,1.8,wide);
+  put('box',awn[k%3],grp,fx-s*.9,3.15,0,1.8,.15,wide+1);
+  put('box',signMat,grp,fx-s*.3,3.8,0,.15,.7,wide*.7);
+  flowers(grp,s,fx,-wide/2-.2,k); flowers(grp,s,fx,wide/2+.2,k+1);
+}
+function doorWin(grp,s,fx,h,k){                         // eshik, deraza, eshik oldida gul
+  put('box',doorMat,grp,fx-s*.05,1.1,-1.3,.12,2.2,1.1);
+  put('box',winLit,grp,fx-s*.06,Math.min(h*.55,3),1.5,.1,1.1,1.1);
+  flowers(grp,s,fx,-2.4,k); flowers(grp,s,fx,-.2,k+1);
+}
+function floors(grp,s,fx,h,d){
+  for (let y=4.8;y<h-1;y+=3.2){ put('box',winLit,grp,fx-s*.06,y,-d*.22,.1,1.3,1.2); put('box',winLit,grp,fx-s*.06,y,d*.22,.1,1.3,1.2); }
+}
+function cafe(grp,s,k){                                  // trotuarda kafe: stol, stul, soyabon, chiroq
+  const x = s*8.7;
+  for (const z of [-2.2,2.2]){
+    put('cyl',tableMat,grp,x,.8,z,.5,.08,.5); put('cyl',poleMat,grp,x,.4,z,.08,.8,.08);
+    put('box',tableMat,grp,x,.45,z-.85,.45,.1,.45); put('box',tableMat,grp,x,.45,z+.85,.45,.1,.45);
+    put('cyl',poleMat,grp,x,1.4,z,.05,2.2,.05); put('cone',umb[k%3],grp,x,2.65,z,1.4,.6,1.4);
+    put('sph',bulbMat,grp,x,2.35,z,.14,.14,.14); put('sph',haloMat,grp,x,2.35,z,.9,.9,.9);
+  }
+}
+ 
+const NS = 200;
+for (let i=0;i<NS;i++){
+  const u = i/NS, pos = curve.getPointAt(u), tan = flatTangent(u);
+  const grp = new THREE.Group(); grp.position.set(pos.x,0,pos.z); grp.lookAt(grp.position.clone().add(tan)); grp.updateMatrixWorld(true);
+  const a = clamp((u-.12)/.38), b = clamp((u-.5)/.4);          // qishloq->mahalla, mahalla->shahar
+  const taper = 1 - .55*clamp((u-.86)/.14);                    // oxirida binolar pasayadi, minora ochiladi
+  for (const s of [-1,1]){
+    const r = rnd(i,s), L = a + b + (r-.5)*.8, k = Math.floor(r*30);
+    if (L < .5){                                               // qishloq uyi
+      if (rnd(i,s+3) > .78){ tree(grp,s*13,0); continue; }
+      const h = 5 + rnd(i,s+7)*2.5, w = 5, d = 6, cx = s*13, fx = cx - s*w/2, shop = (s>0 && r>.4) || r>.85;
+      put('box', shop ? shopMat : villageMat, grp, cx,h/2,0, w,h,d);
+      put('cone', roofMat, grp, cx,h+.9,0, (w+.8)/1.414,1.8,(d+.8)/1.414);
+      if (shop) shopFront(grp,s,fx,k,3.6); else doorWin(grp,s,fx,h,k);
+    } else if (L < 1.5){                                       // mahalla
+      const h = 8 + a*2 + rnd(i,s+9)*7, w = 7, d = 8, cx = s*14, fx = cx - s*w/2;
+      put('box', r>.5 ? concreteMat : villageMat, grp, cx,h/2,0, w,h,d);
+      put('box', roofMat, grp, cx,h+.2,0, w+.6,.4,d+.6);
+      if (r>.55) shopFront(grp,s,fx,k,4.6); else doorWin(grp,s,fx,h,k);
+      floors(grp,s,fx,h,d);
+      if (a>.5) put('box',concreteMat,grp,s*24,(h+3)/2,-10,8,h+3,10);
+      if (rnd(i,s+11) > .8) cafe(grp,s,k);
+    } else {                                                   // zamonaviy shahar
+      const h = (16 + 22*b + rnd(i,s+5)*10)*taper, cx = s*18, fx = cx - s*5;
+      tallBox(grp,10,h,8,winMat,cx,h/2,0);
+      shopFront(grp,s,fx,k,6.5);
+      if (u<.95 && i%2===0) tallBox(grp,12,h+12,12,winMat,s*35,(h+12)/2,-12);
+      if (rnd(i,s+11) > .75) cafe(grp,s,k);
+    }
+  }
+  if (u<.45 && i%5===0) tree(grp,(i%10===0?-1:1)*10.3,2);      // trotuar chetida daraxt
+  if (i%2===0){                                                // ko'cha chirog'i + yorug' dog'i yo'lda
+    const sd = (i%4===0) ? -8.8 : 8.8;
+    put('cyl',poleMat,grp,sd,3,0,.13,6,.13); put('sph',bulbMat,grp,sd,6.2,0,.45,.45,.45);
+    put('sph',haloMat,grp,sd,6.2,0,2.4,2.4,2.4); put('pln',poolMat,grp,sd*.5,.26,0,16,1,16);
+  }
+  scene.add(grp);
+}
+pools.forEach(P => {
+  const im = new THREE.InstancedMesh(GEO[P.kind](), P.mat, P.m.length);
+  P.m.forEach((m,j) => im.setMatrixAt(j,m)); im.frustumCulled = false; scene.add(im);
+});
+// yo'l oxiridan minora maydonchasigacha
+const link = new THREE.Mesh(new THREE.PlaneGeometry(14,22), M({ color:0x2a2c33, roughness:.9, ...po }));
+link.rotation.x = -Math.PI/2; link.position.set(0,.06,-1341); scene.add(link);
+ 
+// ---------- Toshkent teleminorasi (yangi) ----------
+const tw = new THREE.Group(); tw.position.set(0,0,-1352); scene.add(tw);
+const tM = c => new THREE.MeshStandardMaterial({ color:c, roughness:.6, fog:false });
+const tConcrete = tM(0xcfccc2), tRed = tM(0xd62828), tWhite = tM(0xf2f2f2);
+const tGlass = new THREE.MeshStandardMaterial({ color:0x2a4a6e, metalness:.8, roughness:.15, fog:false });
+const add = (geo,mat,y) => { const m = new THREE.Mesh(geo,mat); m.position.y = y; tw.add(m); return m; };
+add(new THREE.CylinderGeometry(1.8,3.4,54,20), tConcrete, 27);                 // asosiy tana
+for (let k=0;k<3;k++){                                                          // 3 ta qiya oyoq
+  const ang = k*Math.PI*2/3, A = new THREE.Vector3(Math.cos(ang)*9,0,Math.sin(ang)*9), B = new THREE.Vector3(0,26,0);
+  const dir = B.clone().sub(A), len = dir.length();
+  const leg = new THREE.Mesh(new THREE.CylinderGeometry(.7,1.1,len,8), tConcrete);
+  leg.position.copy(A.clone().add(B).multiplyScalar(.5)); leg.quaternion.setFromUnitVectors(UP, dir.normalize()); tw.add(leg);
+}
+add(new THREE.CylinderGeometry(7,2,4,24), tConcrete, 56);                      // pastki konus
+add(new THREE.CylinderGeometry(7,7,5,24), tGlass, 60.5);                       // restoran kabinasi
+add(new THREE.CylinderGeometry(5.5,7,1.2,24), tConcrete, 63.7);                // tomi
+add(new THREE.CylinderGeometry(1.4,2,14,16), tConcrete, 71.3);                 // yuqori tana
+for (let k=0;k<6;k++) add(new THREE.CylinderGeometry(1-k*.13,1.1-k*.13,7,10), k%2 ? tWhite : tRed, 81.8 + k*7); // antenna
+add(new THREE.SphereGeometry(.8,12,12), new THREE.MeshBasicMaterial({ color:0xff2222, fog:false }), 121);
+const tLight = new THREE.PointLight(0xff3333, 2, 70); tLight.position.y = 121; tw.add(tLight);
+const towerFlood = new THREE.PointLight(0xffd9a0, 0, 90); towerFlood.position.set(0,12,6); tw.add(towerFlood);
+ 
+// ---------- Skroll va animatsiya ----------
+let scrollProgress = 0;
+function onScroll(){
+  const max = document.documentElement.scrollHeight - innerHeight;
+  scrollProgress = max > 0 ? scrollY/max : 0;
+  document.getElementById('hero').style.opacity = scrollProgress > .04 ? Math.max(0, 1-(scrollProgress-.04)*20) : 1;
+}
+addEventListener('scroll', onScroll); onScroll();
+ 
+let mouseX = 0, mouseY = 0;
+addEventListener('mousemove', e => { mouseX = (e.clientX/innerWidth-.5)*.15; mouseY = (e.clientY/innerHeight-.5)*.1; });
+ 
+let currentT = 0;
+const tmp = new THREE.Vector3();
+function skyPlace(obj, fwd, right, dist, side, y){
+  obj.position.copy(camera.position).addScaledVector(fwd, dist).addScaledVector(right, side);
+  obj.position.y = y;
+}
+function animate(){
+  requestAnimationFrame(animate);
+  const p = scrollProgress;
+  currentT += (Math.min(.999, p) - currentT) * .03;
+ 
+  camera.position.copy(curve.getPointAt(currentT));
+  camera.lookAt(curve.getPointAt(Math.min(.999, currentT + .012)));
+  camera.rotation.y += mouseX*.05; camera.rotation.x += mouseY*.05;
+ 
+  const fwd = flatTangent(currentT), right = new THREE.Vector3(-fwd.z, 0, fwd.x);
+ 
+  const d = clamp(Math.sin(p*Math.PI)*1.35), n = 1 - d;   // d: kunduz (o'rtada), n: tun (boshi va oxiri)
+ 
+  // Oy (tunda ko'rinadi)
+  moon.visible = n > .05; moon.material.opacity = clamp(n*1.6);
+  skyPlace(moon, fwd, right, 1900, p<.5 ? -400 : 400, 150 + 450*n);
+ 
+  // Quyosh (kun o'rtasida)
+  sun.visible = d > .04; sun.material.opacity = clamp(d*4);
+  skyPlace(sun, fwd, right, 1900, 500 - 1000*p, 20 + 760*d);
+ 
+  // Shafaq (tong va kech)
+  const sp = Math.sin(clamp(d)*Math.PI);
+  shafaq.material.opacity = sp*.6;
+  skyPlace(shafaq, fwd, right, 1950, 0, 230);
+  shafaq.lookAt(camera.position.x, 230, camera.position.z);
+ 
+  // Osmon rangi, tuman, yulduzlar
+  const sky = SKY_N.clone().lerp(SKY_D, d); sky.r += sp*.3; sky.g += sp*.1;
+  scene.background = sky; scene.fog = new THREE.FogExp2(sky, .0025);
+  stars.position.copy(camera.position); stars.material.opacity = clamp(n*1.3);
+ 
+  // Yorug'lik: boshi va oxiri qorong'i, o'rtasi yorug'
+  dirLight.intensity = .2 + 1.4*d; dirLight.color.copy(sunNight).lerp(sunDay, d);
+  ambient.intensity = .8 + 1.1*d; ambient.color.copy(ambNight).lerp(ambDay, d);
+  camLight.position.copy(camera.position); camLight.intensity = 1.8*n;
+  towerFlood.intensity = 2.2*n;
+  winLit.color.copy(WIN_D).lerp(WIN_N, n);
+  signMat.color.setHex(0xffb347).multiplyScalar(.45 + .55*n);
+  bulbMat.color.setRGB(1,.8,.47).multiplyScalar(.2 + .8*n);
+  haloMat.opacity = .45*n; poolMat.opacity = .85*n;
+  winMat.emissiveIntensity = n*1.1;
+  tGlass.emissive.setHex(0xffcc66); tGlass.emissiveIntensity = n*.9;
+  tConcrete.emissive.setHex(0xffd9a0); tConcrete.emissiveIntensity = n*.4;
+ 
+  // Bulutlar (faqat kunduz)
+  cloudMat.opacity = d*.85;
+  cloudGroup.children.forEach((c,idx) => {
+    const sd = idx%2===0 ? 1 : -1;
+    c.position.set(camera.position.x + sd*(70+(idx%3)*30), 100 + (idx%4)*8, camera.position.z - idx*45);
+  });
+ 
+  renderer.render(scene, camera);
+}
+animate();
+ 
+addEventListener('resize', () => {
+  camera.aspect = innerWidth/innerHeight; camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+});
+</script>
+</body>
+</html>
+ 

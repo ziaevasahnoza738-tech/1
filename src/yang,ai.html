@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#05070c" />
+  <title>SELENE — Watch the Earth rise</title>
+  <meta name="description" content="SELENE is a concept for lunar expeditions: six to twenty-eight days, one view nobody forgets — the Earth rising over the Moon." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Michroma&family=Manrope:wght@300..700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            void: '#05070c',
+            'void-2': '#0b0f18',
+            regolith: '#c9ccd3',
+            dust: '#8b909b',
+            earth: '#6fb6ff',
+            sunlit: '#f2e6c9',
+          },
+          fontFamily: {
+            display: ['Michroma', 'Eurostile', 'Arial Black', 'sans-serif'],
+            sans: ['Manrope', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif'],
+            mono: ['IBM Plex Mono', 'ui-monospace', 'Menlo', 'monospace'],
+          },
+          fontSize: {
+            hero: ['clamp(2.25rem, 8.6vw, 9rem)', { lineHeight: '1', letterSpacing: '0.24em' }],
+            display: ['clamp(1.75rem, 4vw, 3.75rem)', { lineHeight: '1.08', letterSpacing: '0.02em' }],
+            body: ['clamp(0.9375rem, 1.05vw, 1.0625rem)', { lineHeight: '1.65', letterSpacing: '-0.005em' }],
+            label: ['0.6875rem', { lineHeight: '1.3', letterSpacing: '0.16em' }],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    html { background: #05070c; }
+    body {
+      margin: 0;
+      background: #05070c;
+      color: #c9ccd3;
+      font-family: Manrope, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: clip;
+    }
+    ::selection { background: #6fb6ff; color: #05070c; }
+    :focus-visible { outline: 1.5px solid #6fb6ff; outline-offset: 3px; border-radius: 4px; }
+    .h-screen-s { height: 100svh; }
+    .brackets {
+      background:
+        linear-gradient(currentColor, currentColor) top left / 14px 1px,
+        linear-gradient(currentColor, currentColor) top left / 1px 14px,
+        linear-gradient(currentColor, currentColor) top right / 14px 1px,
+        linear-gradient(currentColor, currentColor) top right / 1px 14px,
+        linear-gradient(currentColor, currentColor) bottom left / 14px 1px,
+        linear-gradient(currentColor, currentColor) bottom left / 1px 14px,
+        linear-gradient(currentColor, currentColor) bottom right / 14px 1px,
+        linear-gradient(currentColor, currentColor) bottom right / 1px 14px;
+      background-repeat: no-repeat;
+    }
+    [data-reveal] {
+      opacity: 0;
+      transform: translate3d(0, 24px, 0);
+      transition: opacity 1s cubic-bezier(0.2, 0.7, 0.1, 1), transform 1s cubic-bezier(0.2, 0.7, 0.1, 1);
+    }
+    [data-reveal].is-in { opacity: 1; transform: none; }
+    @media (prefers-reduced-motion: reduce) {
+      [data-reveal] { transform: none; }
+    }
+    @keyframes leg-in {
+      from { opacity: 0; transform: translate3d(0, 12px, 0); }
+    }
+    .animate-leg-in { animation: leg-in 0.6s cubic-bezier(0.2, 0.7, 0.1, 1); }
+    .layer-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 58% 50%; }
+    @media (min-width: 768px) { .layer-img { object-position: center; } }
+  </style>
+</head>
+<body class="bg-void text-regolith">
+
+  <!-- HEADER -->
+  <header class="fixed inset-x-0 top-0 z-50 text-white">
+    <div class="flex items-center justify-between px-4 pt-4 sm:px-6 sm:pt-5 md:px-[3vw]">
+      <a href="#top" class="flex items-center gap-2.5" aria-label="Selene — back to top" data-nav>
+        <svg viewBox="0 0 24 24" aria-hidden="true" class="size-5"><path d="M15.5 3.2A9 9 0 1 0 20.8 16 7.2 7.2 0 0 1 15.5 3.2Z" fill="currentColor"/></svg>
+        <span class="font-display text-[0.9375rem] tracking-[0.36em]">SELENE</span>
+      </a>
+      <nav aria-label="Primary" class="hidden items-center gap-8 md:flex">
+        <a href="#log" class="font-mono text-label text-white/75 uppercase transition-colors hover:text-white" data-nav>Log</a>
+        <a href="#trajectory" class="font-mono text-label text-white/75 uppercase transition-colors hover:text-white" data-nav>Trajectory</a>
+        <a href="#missions" class="font-mono text-label text-white/75 uppercase transition-colors hover:text-white" data-nav>Missions</a>
+        <a href="#reserve" class="font-mono text-label text-white/75 uppercase transition-colors hover:text-white" data-nav>Reserve</a>
+        <a href="#reserve" class="rounded-[4px] bg-white px-4 py-2.5 font-mono text-label text-void uppercase transition-colors hover:bg-earth" data-nav>Reserve a seat</a>
+      </nav>
+      <button type="button" id="menu-btn" aria-expanded="false" aria-controls="menu" class="font-mono text-label uppercase md:hidden">Menu</button>
+    </div>
+    <div id="menu" class="fixed inset-0 -z-10 flex flex-col justify-center gap-6 bg-void/95 px-6 backdrop-blur-xl transition-opacity md:hidden pointer-events-none opacity-0">
+      <a href="#log" class="flex items-baseline gap-4 font-display text-[1.75rem] tracking-[0.14em] uppercase" data-nav data-close><span class="font-mono text-label text-earth">01</span>Log</a>
+      <a href="#trajectory" class="flex items-baseline gap-4 font-display text-[1.75rem] tracking-[0.14em] uppercase" data-nav data-close><span class="font-mono text-label text-earth">02</span>Trajectory</a>
+      <a href="#missions" class="flex items-baseline gap-4 font-display text-[1.75rem] tracking-[0.14em] uppercase" data-nav data-close><span class="font-mono text-label text-earth">03</span>Missions</a>
+      <a href="#reserve" class="flex items-baseline gap-4 font-display text-[1.75rem] tracking-[0.14em] uppercase" data-nav data-close><span class="font-mono text-label text-earth">04</span>Reserve</a>
+    </div>
+  </header>
+
+  <main>
+    <!-- EARTHRISE -->
+    <section id="top" aria-label="Earthrise" class="relative" style="height:440svh">
+      <div class="sticky top-0 h-screen-s overflow-hidden bg-void">
+        <div class="absolute inset-0 will-change-transform" data-layer="sky">
+          <picture>
+            <source media="(max-width:767px)" srcset="public/layers/m/sky.webp" />
+            <img src="public/layers/d/sky.webp" alt="" aria-hidden="true" class="layer-img" decoding="async" fetchpriority="high" />
+          </picture>
+        </div>
+        <div class="absolute inset-0 will-change-transform" data-layer="earth">
+          <picture>
+            <source media="(max-width:767px)" srcset="public/layers/m/earth.webp" />
+            <img src="public/layers/d/earth.webp" alt="" aria-hidden="true" class="layer-img" decoding="async" />
+          </picture>
+        </div>
+        <div class="absolute inset-0 will-change-transform" data-layer="moonscape">
+          <picture>
+            <source media="(max-width:767px)" srcset="public/layers/m/moonscape.webp" />
+            <img src="public/layers/d/moonscape.webp" alt="" aria-hidden="true" class="layer-img" decoding="async" />
+          </picture>
+        </div>
+
+        <div id="title" class="pointer-events-none absolute inset-x-0 top-[26%] text-center md:top-[30%]" style="opacity:0">
+          <h1 class="font-display text-hero text-white" style="text-shadow:0 4px 40px rgb(0 0 0 / 0.5); margin-right:-0.24em">EARTHRISE</h1>
+          <p class="mt-4 font-mono text-label text-regolith/80 uppercase">A concept for lunar expeditions</p>
+        </div>
+
+        <div class="absolute inset-0 will-change-transform" data-layer="frame">
+          <picture>
+            <source media="(max-width:767px)" srcset="public/layers/m/frame.webp" />
+            <img src="public/layers/d/frame.webp" alt="" aria-hidden="true" class="layer-img" decoding="async" />
+          </picture>
+        </div>
+        <div class="absolute inset-0 will-change-transform" data-layer="astronaut">
+          <picture>
+            <source media="(max-width:767px)" srcset="public/layers/m/astronaut.webp" />
+            <img src="public/layers/d/astronaut.webp" alt="" aria-hidden="true" class="layer-img" decoding="async" />
+          </picture>
+        </div>
+        <div class="absolute inset-0 will-change-transform" data-layer="ground">
+          <picture>
+            <source media="(max-width:767px)" srcset="public/layers/m/ground.webp" />
+            <img src="public/layers/d/ground.webp" alt="" aria-hidden="true" class="layer-img" decoding="async" />
+          </picture>
+          <div class="absolute inset-x-0 top-full h-[110vh] bg-void"></div>
+        </div>
+
+        <div id="veil" aria-hidden="true" class="pointer-events-none absolute inset-0" style="background:radial-gradient(60% 50% at 30% 40%, rgba(170,184,210,0.55), transparent 70%), radial-gradient(50% 60% at 75% 60%, rgba(120,140,180,0.5), transparent 70%), radial-gradient(80% 80% at 50% 50%, rgba(20,26,40,0.85), rgba(5,7,12,0.95))">
+          <div class="absolute inset-x-0 top-1/2 -translate-y-1/2 text-center">
+            <p class="font-mono text-label text-regolith/80 uppercase">A concept for lunar expeditions</p>
+            <p class="mt-3 font-display text-[0.8125rem] tracking-[0.5em] text-white/90 uppercase" style="margin-right:-0.5em">Scroll to clear the dust</p>
+            <span aria-hidden="true" class="mt-6 inline-block animate-bounce text-regolith/70">↓</span>
+          </div>
+        </div>
+        <canvas id="dust" aria-hidden="true" class="pointer-events-none absolute inset-0 size-full"></canvas>
+
+        <div id="hud" aria-hidden="true" class="pointer-events-none absolute inset-4 font-mono text-[0.625rem] tracking-[0.14em] text-regolith/75 uppercase sm:inset-6 md:text-label" style="opacity:0">
+          <div class="brackets absolute inset-0 text-regolith/40"></div>
+          <div class="absolute top-16 left-3 space-y-1 md:top-20 md:left-4">
+            <p id="clock">T+ 00:00:00</p>
+            <p class="text-regolith/50">Mission clock</p>
+          </div>
+          <div class="absolute top-16 right-3 space-y-1 text-right md:top-20 md:right-4">
+            <p>Earth elev <span id="elev" class="text-earth">0.0°</span></p>
+            <p class="text-regolith/50">Above horizon</p>
+          </div>
+          <div class="absolute bottom-3 left-3 md:bottom-4 md:left-4">Mare Tranquillitatis · 0.67°N 23.47°E</div>
+          <div class="absolute right-3 bottom-3 flex items-center gap-2 md:right-4 md:bottom-4">Scroll <span class="inline-block animate-bounce">↓</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MISSION LOG -->
+    <section id="log" aria-labelledby="log-title" class="relative bg-void" style="height:340svh">
+      <div class="sticky top-0 flex h-screen-s flex-col justify-center overflow-hidden pt-16 md:flex-row md:items-center md:pt-0">
+        <div class="relative z-10 shrink-0 px-4 sm:px-6 md:w-[32vw] md:pl-[6vw] md:pr-10">
+          <p class="font-mono text-label text-earth uppercase">Mission log</p>
+          <h2 id="log-title" class="mt-4 font-display text-display text-white">The first holiday that leaves the planet.</h2>
+          <p class="mt-5 max-w-[26rem] text-body text-regolith/70 max-md:hidden">Four days out, a week on the surface, and one view nobody has ever forgotten. This is the trip, frame by frame.</p>
+          <div class="mt-8 flex items-center gap-4 font-mono text-label text-regolith/60 uppercase max-md:hidden" aria-hidden="true">
+            <span><span id="log-count" class="text-white">01</span> / 04</span>
+            <span class="relative h-px w-32 bg-white/15">
+              <span id="log-bar" class="absolute inset-0 origin-left bg-earth" style="transform:scaleX(0)"></span>
+            </span>
+          </div>
+        </div>
+        <ol id="log-track" class="mt-8 flex gap-5 pl-4 will-change-transform sm:pl-6 md:mt-0 md:gap-7 md:pl-0">
+          <li class="w-[70vw] shrink-0 origin-bottom sm:w-[44vw] md:w-[clamp(16rem,24vw,23rem)]" data-card>
+            <figure>
+              <div class="relative aspect-[3/4] overflow-hidden rounded-[6px] bg-void-2">
+                <img src="public/media/cards/m1-launch.webp" alt="Launch" width="840" height="1120" loading="lazy" class="size-full object-cover will-change-transform" data-img />
+                <span class="absolute top-3 left-3 rounded-[3px] bg-void/70 px-2 py-1 font-mono text-[0.625rem] tracking-[0.14em] text-white uppercase backdrop-blur">T−0</span>
+              </div>
+              <figcaption class="mt-4 flex gap-4">
+                <span class="font-mono text-label text-earth">01</span>
+                <span>
+                  <span class="block font-display text-[0.9375rem] tracking-[0.08em] text-white uppercase">Launch</span>
+                  <span class="mt-1.5 block text-[0.875rem] leading-relaxed text-regolith/65">Nine minutes of thunder, then silence and the curve of the Earth.</span>
+                </span>
+              </figcaption>
+            </figure>
+          </li>
+          <li class="w-[70vw] shrink-0 origin-bottom sm:w-[44vw] md:w-[clamp(16rem,24vw,23rem)]" data-card>
+            <figure>
+              <div class="relative aspect-[3/4] overflow-hidden rounded-[6px] bg-void-2">
+                <img src="public/media/cards/m2-orbit.webp" alt="Lunar orbit" width="840" height="1120" loading="lazy" class="size-full object-cover will-change-transform" data-img />
+                <span class="absolute top-3 left-3 rounded-[3px] bg-void/70 px-2 py-1 font-mono text-[0.625rem] tracking-[0.14em] text-white uppercase backdrop-blur">Day 3</span>
+              </div>
+              <figcaption class="mt-4 flex gap-4">
+                <span class="font-mono text-label text-earth">02</span>
+                <span>
+                  <span class="block font-display text-[0.9375rem] tracking-[0.08em] text-white uppercase">Lunar orbit</span>
+                  <span class="mt-1.5 block text-[0.875rem] leading-relaxed text-regolith/65">The far side scrolls past the window. Your hand on the glass.</span>
+                </span>
+              </figcaption>
+            </figure>
+          </li>
+          <li class="w-[70vw] shrink-0 origin-bottom sm:w-[44vw] md:w-[clamp(16rem,24vw,23rem)]" data-card>
+            <figure>
+              <div class="relative aspect-[3/4] overflow-hidden rounded-[6px] bg-void-2">
+                <img src="public/media/cards/m3-base.webp" alt="Base Tranquillity" width="840" height="1120" loading="lazy" class="size-full object-cover will-change-transform" data-img />
+                <span class="absolute top-3 left-3 rounded-[3px] bg-void/70 px-2 py-1 font-mono text-[0.625rem] tracking-[0.14em] text-white uppercase backdrop-blur">Day 4</span>
+              </div>
+              <figcaption class="mt-4 flex gap-4">
+                <span class="font-mono text-label text-earth">03</span>
+                <span>
+                  <span class="block font-display text-[0.9375rem] tracking-[0.08em] text-white uppercase">Base Tranquillity</span>
+                  <span class="mt-1.5 block text-[0.875rem] leading-relaxed text-regolith/65">Pressurised domes, a hot meal, and a skylight pointed home.</span>
+                </span>
+              </figcaption>
+            </figure>
+          </li>
+          <li class="w-[70vw] shrink-0 origin-bottom sm:w-[44vw] md:w-[clamp(16rem,24vw,23rem)]" data-card>
+            <figure>
+              <div class="relative aspect-[3/4] overflow-hidden rounded-[6px] bg-void-2">
+                <img src="public/media/cards/m4-walk.webp" alt="First steps" width="840" height="1120" loading="lazy" class="size-full object-cover will-change-transform" data-img />
+                <span class="absolute top-3 left-3 rounded-[3px] bg-void/70 px-2 py-1 font-mono text-[0.625rem] tracking-[0.14em] text-white uppercase backdrop-blur">Day 5</span>
+              </div>
+              <figcaption class="mt-4 flex gap-4">
+                <span class="font-mono text-label text-earth">04</span>
+                <span>
+                  <span class="block font-display text-[0.9375rem] tracking-[0.08em] text-white uppercase">First steps</span>
+                  <span class="mt-1.5 block text-[0.875rem] leading-relaxed text-regolith/65">Footprints that will outlast every building you have ever seen.</span>
+                </span>
+              </figcaption>
+            </figure>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- TRAJECTORY -->
+    <section id="trajectory" aria-labelledby="trajectory-title" class="relative bg-void" style="height:380svh">
+      <div class="sticky top-0 flex h-screen-s flex-col overflow-hidden px-4 pt-20 pb-8 sm:px-6 md:px-[6vw] md:pt-24">
+        <div class="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+          <div>
+            <p class="font-mono text-label text-earth uppercase">Trajectory</p>
+            <h2 id="trajectory-title" class="mt-3 max-w-[20ch] font-display text-display text-white">384,400 km, drawn as you scroll.</h2>
+          </div>
+          <p class="font-mono text-label text-regolith/60 uppercase">Distance flown <span id="km" class="text-white tabular-nums">0</span> km</p>
+        </div>
+        <div class="relative flex min-h-0 flex-1 items-center">
+          <svg viewBox="0 0 1200 600" class="h-auto max-h-full w-full" role="img" aria-label="The flight path from Earth to the Moon">
+            <defs>
+              <clipPath id="earth-clip"><circle cx="230" cy="320" r="92"/></clipPath>
+              <radialGradient id="moon-shade" cx="35%" cy="35%" r="75%">
+                <stop offset="0" stop-color="#e4e6ea"/><stop offset="0.7" stop-color="#8b909b"/><stop offset="1" stop-color="#2a2e36"/>
+              </radialGradient>
+              <radialGradient id="earth-glow">
+                <stop offset="0.8" stop-color="#6fb6ff" stop-opacity="0.35"/><stop offset="1" stop-color="#6fb6ff" stop-opacity="0"/>
+              </radialGradient>
+            </defs>
+            <g fill="#fff">
+              <circle cx="173" cy="97" r="0.7" opacity="0.3"/><circle cx="346" cy="194" r="0.7" opacity="0.25"/>
+              <circle cx="519" cy="291" r="1.4" opacity="0.4"/><circle cx="692" cy="388" r="0.7" opacity="0.2"/>
+              <circle cx="865" cy="485" r="0.7" opacity="0.35"/><circle cx="1038" cy="82" r="0.7" opacity="0.28"/>
+              <circle cx="211" cy="179" r="0.7" opacity="0.22"/><circle cx="384" cy="276" r="1.4" opacity="0.45"/>
+              <circle cx="557" cy="373" r="0.7" opacity="0.3"/><circle cx="730" cy="470" r="0.7" opacity="0.18"/>
+              <circle cx="903" cy="67" r="0.7" opacity="0.33"/><circle cx="76" cy="164" r="0.7" opacity="0.27"/>
+              <circle cx="249" cy="261" r="0.7" opacity="0.21"/><circle cx="422" cy="358" r="1.4" opacity="0.38"/>
+              <circle cx="595" cy="455" r="0.7" opacity="0.24"/><circle cx="768" cy="52" r="0.7" opacity="0.31"/>
+              <circle cx="941" cy="149" r="0.7" opacity="0.19"/><circle cx="114" cy="246" r="0.7" opacity="0.29"/>
+              <circle cx="287" cy="343" r="0.7" opacity="0.26"/><circle cx="460" cy="440" r="1.4" opacity="0.42"/>
+              <circle cx="633" cy="37" r="0.7" opacity="0.23"/><circle cx="806" cy="134" r="0.7" opacity="0.36"/>
+              <circle cx="979" cy="231" r="0.7" opacity="0.17"/><circle cx="152" cy="328" r="0.7" opacity="0.32"/>
+              <circle cx="325" cy="425" r="0.7" opacity="0.28"/><circle cx="498" cy="22" r="1.4" opacity="0.4"/>
+              <circle cx="671" cy="119" r="0.7" opacity="0.25"/><circle cx="844" cy="216" r="0.7" opacity="0.21"/>
+              <circle cx="1017" cy="313" r="0.7" opacity="0.34"/><circle cx="190" cy="410" r="0.7" opacity="0.2"/>
+              <circle cx="363" cy="7" r="0.7" opacity="0.3"/><circle cx="536" cy="104" r="1.4" opacity="0.37"/>
+              <circle cx="709" cy="201" r="0.7" opacity="0.22"/><circle cx="882" cy="298" r="0.7" opacity="0.29"/>
+              <circle cx="55" cy="395" r="0.7" opacity="0.18"/><circle cx="228" cy="492" r="0.7" opacity="0.33"/>
+              <circle cx="401" cy="89" r="0.7" opacity="0.26"/><circle cx="574" cy="186" r="1.4" opacity="0.41"/>
+              <circle cx="747" cy="283" r="0.7" opacity="0.24"/><circle cx="920" cy="380" r="0.7" opacity="0.31"/>
+              <circle cx="93" cy="477" r="0.7" opacity="0.19"/><circle cx="266" cy="74" r="0.7" opacity="0.35"/>
+              <circle cx="439" cy="171" r="0.7" opacity="0.27"/><circle cx="612" cy="268" r="1.4" opacity="0.39"/>
+              <circle cx="785" cy="365" r="0.7" opacity="0.23"/><circle cx="958" cy="462" r="0.7" opacity="0.28"/>
+              <circle cx="131" cy="59" r="0.7" opacity="0.32"/><circle cx="304" cy="156" r="0.7" opacity="0.21"/>
+              <circle cx="477" cy="253" r="0.7" opacity="0.3"/><circle cx="650" cy="350" r="1.4" opacity="0.44"/>
+              <circle cx="823" cy="447" r="0.7" opacity="0.25"/><circle cx="996" cy="44" r="0.7" opacity="0.18"/>
+              <circle cx="169" cy="141" r="0.7" opacity="0.34"/><circle cx="342" cy="238" r="0.7" opacity="0.22"/>
+              <circle cx="515" cy="335" r="0.7" opacity="0.29"/><circle cx="688" cy="432" r="1.4" opacity="0.36"/>
+              <circle cx="861" cy="29" r="0.7" opacity="0.27"/><circle cx="34" cy="126" r="0.7" opacity="0.31"/>
+              <circle cx="207" cy="223" r="0.7" opacity="0.2"/><circle cx="380" cy="320" r="0.7" opacity="0.33"/>
+              <circle cx="553" cy="417" r="1.4" opacity="0.4"/><circle cx="726" cy="14" r="0.7" opacity="0.24"/>
+              <circle cx="899" cy="111" r="0.7" opacity="0.28"/><circle cx="72" cy="208" r="0.7" opacity="0.19"/>
+              <circle cx="245" cy="305" r="0.7" opacity="0.35"/><circle cx="418" cy="402" r="0.7" opacity="0.26"/>
+              <circle cx="591" cy="499" r="1.4" opacity="0.38"/><circle cx="764" cy="96" r="0.7" opacity="0.23"/>
+              <circle cx="937" cy="193" r="0.7" opacity="0.3"/><circle cx="110" cy="290" r="0.7" opacity="0.21"/>
+            </g>
+            <circle cx="230" cy="320" r="108.56" fill="url(#earth-glow)"/>
+            <image href="public/layers/m/earth.webp" x="40.3" y="169.4" width="458.85" height="259.2" clip-path="url(#earth-clip)" preserveAspectRatio="none"/>
+            <circle cx="985" cy="300" r="46" fill="url(#moon-shade)"/>
+            <g fill="#5d626c" opacity="0.6">
+              <circle cx="971" cy="290" r="7"/><circle cx="997" cy="314" r="5"/><circle cx="1003" cy="282" r="3.5"/>
+            </g>
+            <path d="M230 192 a128 128 0 1 1 -0.1 0 a128 128 0 0 1 106 57" fill="none" stroke="#fff" stroke-opacity="0.08" stroke-width="1.5" stroke-dasharray="3 6"/>
+            <path d="M336 249 C 520 40, 820 70, 965 216" fill="none" stroke="#fff" stroke-opacity="0.08" stroke-width="1.5" stroke-dasharray="3 6"/>
+            <path d="M965 216 a86 86 0 1 1 -0.1 0.2 a86 86 0 0 1 20 1" fill="none" stroke="#fff" stroke-opacity="0.08" stroke-width="1.5" stroke-dasharray="3 6"/>
+            <path d="M985 214 Q 1025 230 1015 264" fill="none" stroke="#fff" stroke-opacity="0.08" stroke-width="1.5" stroke-dasharray="3 6"/>
+            <path id="leg0" d="M230 192 a128 128 0 1 1 -0.1 0 a128 128 0 0 1 106 57" pathLength="1" fill="none" stroke="#f2e6c9" stroke-width="2" stroke-linecap="round" stroke-dasharray="1 1" stroke-dashoffset="1"/>
+            <path id="leg1" d="M336 249 C 520 40, 820 70, 965 216" pathLength="1" fill="none" stroke="#6fb6ff" stroke-width="2" stroke-linecap="round" stroke-dasharray="1 1" stroke-dashoffset="1"/>
+            <path id="leg2" d="M965 216 a86 86 0 1 1 -0.1 0.2 a86 86 0 0 1 20 1" pathLength="1" fill="none" stroke="#f2e6c9" stroke-width="2" stroke-linecap="round" stroke-dasharray="1 1" stroke-dashoffset="1"/>
+            <path id="leg3" d="M985 214 Q 1025 230 1015 264" pathLength="1" fill="none" stroke="#f2e6c9" stroke-width="2" stroke-linecap="round" stroke-dasharray="1 1" stroke-dashoffset="1"/>
+            <g id="capsule" transform="translate(230 192)">
+              <circle r="11" fill="#6fb6ff" opacity="0.25"/><circle r="4.5" fill="#fff"/>
+            </g>
+            <g font-family="IBM Plex Mono, monospace" font-size="13" letter-spacing="2" fill="#8b909b">
+              <text x="230" y="470" text-anchor="middle">EARTH</text>
+              <text x="985" y="416" text-anchor="middle">MOON</text>
+            </g>
+          </svg>
+        </div>
+        <div class="grid gap-4 border-t border-white/10 pt-5 md:grid-cols-[auto_1fr_auto] md:items-end md:gap-10">
+          <p class="font-mono text-label text-earth uppercase" id="leg-label">Day 0 · Leg 1/4</p>
+          <div id="leg-info" class="animate-leg-in">
+            <h3 class="font-display text-[1.125rem] tracking-[0.08em] text-white uppercase md:text-[1.375rem]" id="leg-title">Parking orbit</h3>
+            <p class="mt-1.5 max-w-[40rem] text-body text-regolith/70" id="leg-body">Two laps of the Earth while the crew and craft are checked.</p>
+          </div>
+          <div class="flex gap-1.5" aria-hidden="true" id="leg-dots">
+            <span class="h-1 w-8 rounded-full bg-earth transition-colors duration-500"></span>
+            <span class="h-1 w-8 rounded-full bg-white/15 transition-colors duration-500"></span>
+            <span class="h-1 w-8 rounded-full bg-white/15 transition-colors duration-500"></span>
+            <span class="h-1 w-8 rounded-full bg-white/15 transition-colors duration-500"></span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MISSIONS -->
+    <section id="missions" aria-labelledby="missions-title" class="relative bg-void px-4 py-28 sm:px-6 md:px-[6vw] md:py-40">
+      <div class="flex flex-col gap-3 md:flex-row md:items-end md:justify-between" data-reveal>
+        <div>
+          <p class="font-mono text-label text-earth uppercase">Missions</p>
+          <h2 id="missions-title" class="mt-4 font-display text-display text-white">Three ways to leave.</h2>
+        </div>
+        <p class="font-mono text-label text-regolith/50 uppercase">Concept missions — durations illustrative.</p>
+      </div>
+      <ol class="mt-14 grid gap-4 md:mt-20 md:grid-cols-3 md:gap-5">
+        <li data-reveal style="transition-delay:0ms" class="group relative flex flex-col overflow-hidden rounded-[8px] p-6 ring-1 bg-void-2/60 ring-white/10 hover:ring-white/25 transition-[transform,box-shadow] duration-500 hover:-translate-y-1.5 md:p-8">
+          <svg aria-hidden="true" viewBox="0 0 200 200" class="absolute -top-10 -right-10 size-48 text-white/10 transition-transform duration-[1.2s] group-hover:rotate-45">
+            <ellipse cx="100" cy="100" rx="40" ry="18" fill="none" stroke="currentColor" transform="rotate(-20 100 100)"/>
+            <circle cx="100" cy="100" r="9" fill="currentColor"/>
+          </svg>
+          <h3 class="font-display text-[1.25rem] tracking-[0.14em] text-white uppercase">Orbiter</h3>
+          <p class="mt-6 flex items-baseline gap-2"><span class="font-display text-[3.5rem] leading-none text-white">6</span><span class="font-mono text-label text-regolith/60 uppercase">days</span></p>
+          <ul class="mt-8 space-y-2.5 border-t border-white/10 pt-6">
+            <li class="flex gap-3 text-[0.9375rem] text-regolith/80"><span aria-hidden="true" class="mt-2 size-1 shrink-0 rounded-full bg-earth"></span>Two lunar orbits</li>
+            <li class="flex gap-3 text-[0.9375rem] text-regolith/80"><span aria-hidden="true" class="mt-2 size-1 shrink-0 rounded-full bg-earth"></span>Far-side flyover</li>
+            <li class="flex gap-3 text-[0.9375rem] text-regolith/80"><span aria-hidden="true" class="mt-2 size-1 shrink-0 rounded-full bg-earth"></span>Earthrise from orbit</li>
+          </ul>
+          <a href="#reserve" class="mt-10 rounded-[4px] px-5 py-3.5 text-center font-mono text-label uppercase transition-colors text-white ring-1 ring-white/25 hover:bg-white hover:text-void" data-mission="Orbiter">Join the Orbiter list</a>
+        </li>
+        <li data-reveal style="transition-delay:110ms" class="group relative flex flex-col overflow-hidden rounded-[8px] p-6 ring-1 bg-void-2 ring-earth/60 hover:shadow-[0_30px_80px_-30px_rgb(111_182_255/0.45)] transition-[transform,box-shadow] duration-500 hover:-translate-y-1.5 md:p-8">
+          <svg aria-hidden="true" viewBox="0 0 200 200" class="absolute -top-10 -right-10 size-48 text-white/10 transition-transform duration-[1.2s] group-hover:rotate-45">
+            <ellipse cx="100" cy="100" rx="40" ry="18" fill="none" stroke="currentColor" transform="rotate(-20 100 100)"/>
+            <ellipse cx="100" cy="100" rx="58" ry="26" fill="none" stroke="currentColor" transform="rotate(-6 100 100)"/>
+            <circle cx="100" cy="100" r="9" fill="currentColor"/>
+          </svg>
+          <span class="self-start rounded-[3px] bg-earth px-2 py-1 font-mono text-[0.625rem] tracking-[0.14em] text-void uppercase">Most requested</span>
+          <h3 class="mt-5 font-display text-[1.25rem] tracking-[0.14em] text-white uppercase">Lander</h3>
+          <p class="mt-6 flex items-baseline gap-2"><span class="font-display text-[3.5rem] leading-none text-white">10</span><span class="font-mono text-label text-regolith/60 uppercase">days</span></p>
+          <ul class="mt-8 space-y-2.5 border-t border-white/10 pt-6">
+            <li class="flex gap-3 text-[0.9375rem] text-regolith/80"><span aria-hidden="true" class="mt-2 size-1 shrink-0 rounded-full bg-earth"></span>Four nights at Base Tranquillity</li>
+            <li class="flex gap-3 text-[0.9375rem] text-regolith/80"><span aria-hidden="true" class="mt-2 size-1 shrink-0 rounded-full bg-earth"></span>Two surface EVAs</li>
+            <li class="flex gap-3 text-[0.9375rem] text-regolith/80"><span aria-hidden="true" class="mt-2 size-1 shrink-0 rounded-full bg-earth"></span>Earthrise from the surface</li>
+          </ul>
+          <a href="#reserve" class="mt-10 rounded-[4px] px-5 py-3.5 text-center font-mono text-label uppercase transition-colors bg-earth text-void hover:bg-white" data-mission="Lander">Join the Lander list</a>
+        </li>
+        <li data-reveal style="transition-delay:220ms" class="group relative flex flex-col overflow-hidden rounded-[8px] p-6 ring-1 bg-void-2/60 ring-white/10 hover:ring-white/25 transition-[transform,box-shadow] duration-500 hover:-translate-y-1.5 md:p-8">
+          <svg aria-hidden="true" viewBox="0 0 200 200" class="absolute -top-10 -right-10 size-48 text-white/10 transition-transform duration-[1.2s] group-hover:rotate-45">
+            <ellipse cx="100" cy="100" rx="40" ry="18" fill="none" stroke="currentColor" transform="rotate(-20 100 100)"/>
+            <ellipse cx="100" cy="100" rx="58" ry="26" fill="none" stroke="currentColor" transform="rotate(-6 100 100)"/>
+            <ellipse cx="100" cy="100" rx="76" ry="34" fill="none" stroke="currentColor" transform="rotate(8 100 100)"/>
+            <ellipse cx="100" cy="100" rx="94" ry="42" fill="none" stroke="currentColor" transform="rotate(22 100 100)"/>
+            <circle cx="100" cy="100" r="9" fill="currentColor"/>
+          </svg>
+          <h3 class="font-display text-[1.25rem] tracking-[0.14em] text-white uppercase">Resident</h3>
+          <p class="mt-6 flex items-baseline gap-2"><span class="font-display text-[3.5rem] leading-none text-white">28</span><span class="font-mono text-label text-regolith/60 uppercase">days</span></p>
+          <ul class="mt-8 space-y-2.5 border-t border-white/10 pt-6">
+            <li class="flex gap-3 text-[0.9375rem] text-regolith/80"><span aria-hidden="true" class="mt-2 size-1 shrink-0 rounded-full bg-earth"></span>A full lunar day and night</li>
+            <li class="flex gap-3 text-[0.9375rem] text-regolith/80"><span aria-hidden="true" class="mt-2 size-1 shrink-0 rounded-full bg-earth"></span>Rover traverse to the highlands</li>
+            <li class="flex gap-3 text-[0.9375rem] text-regolith/80"><span aria-hidden="true" class="mt-2 size-1 shrink-0 rounded-full bg-earth"></span>Science crew rotation</li>
+          </ul>
+          <a href="#reserve" class="mt-10 rounded-[4px] px-5 py-3.5 text-center font-mono text-label uppercase transition-colors text-white ring-1 ring-white/25 hover:bg-white hover:text-void" data-mission="Resident">Join the Resident list</a>
+        </li>
+      </ol>
+    </section>
+
+    <!-- RESERVE -->
+    <section id="reserve" aria-labelledby="reserve-title" class="relative overflow-hidden bg-void px-4 pb-28 sm:px-6 md:px-[6vw] md:pb-40">
+      <div aria-hidden="true" class="pointer-events-none absolute -bottom-[62vw] left-1/2 size-[90vw] -translate-x-1/2 rounded-full" style="background:radial-gradient(circle at 50% 30%,rgba(111,182,255,0.35),rgba(111,182,255,0.05) 55%,transparent 70%)"></div>
+      <div class="relative grid gap-12 border-t border-white/10 pt-20 md:grid-cols-2 md:gap-16 md:pt-28">
+        <div data-reveal>
+          <p class="font-mono text-label text-earth uppercase">Reserve</p>
+          <h2 id="reserve-title" class="mt-4 font-display text-display text-white">Put your name on the manifest.</h2>
+          <p class="mt-5 max-w-[28rem] text-body text-regolith/70">No payment, no commitment. We’ll write when the next window opens.</p>
+          <div class="mt-10">
+            <p class="font-mono text-label text-regolith/50 uppercase">Next launch window (concept)</p>
+            <div class="mt-3 flex gap-2 md:gap-3" role="timer" id="countdown">
+              <div class="brackets min-w-[4.25rem] px-3 py-3 text-center text-white/25 md:min-w-[5.5rem]">
+                <span class="block font-display text-[1.5rem] text-white tabular-nums md:text-[2.25rem]" id="cd-d">00</span>
+                <span class="mt-1 block font-mono text-[0.625rem] tracking-[0.14em] text-regolith/60 uppercase">Days</span>
+              </div>
+              <div class="brackets min-w-[4.25rem] px-3 py-3 text-center text-white/25 md:min-w-[5.5rem]">
+                <span class="block font-display text-[1.5rem] text-white tabular-nums md:text-[2.25rem]" id="cd-h">00</span>
+                <span class="mt-1 block font-mono text-[0.625rem] tracking-[0.14em] text-regolith/60 uppercase">Hrs</span>
+              </div>
+              <div class="brackets min-w-[4.25rem] px-3 py-3 text-center text-white/25 md:min-w-[5.5rem]">
+                <span class="block font-display text-[1.5rem] text-white tabular-nums md:text-[2.25rem]" id="cd-m">00</span>
+                <span class="mt-1 block font-mono text-[0.625rem] tracking-[0.14em] text-regolith/60 uppercase">Min</span>
+              </div>
+              <div class="brackets min-w-[4.25rem] px-3 py-3 text-center text-white/25 md:min-w-[5.5rem]">
+                <span class="block font-display text-[1.5rem] text-white tabular-nums md:text-[2.25rem]" id="cd-s">00</span>
+                <span class="mt-1 block font-mono text-[0.625rem] tracking-[0.14em] text-regolith/60 uppercase">Sec</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <form id="manifest-form" novalidate class="space-y-3" data-reveal>
+          <label class="block">
+            <span class="mb-1.5 block font-mono text-label text-regolith/60 uppercase">Name</span>
+            <input name="name" required autocomplete="name" placeholder="As it should appear on the manifest" class="w-full rounded-[4px] bg-white/[0.04] px-4 py-3.5 text-body text-white ring-1 ring-white/15 outline-none placeholder:text-regolith/40 focus:ring-earth" />
+          </label>
+          <label class="block">
+            <span class="mb-1.5 block font-mono text-label text-regolith/60 uppercase">Email</span>
+            <input name="email" type="email" required autocomplete="email" placeholder="you@earth.com" class="w-full rounded-[4px] bg-white/[0.04] px-4 py-3.5 text-body text-white ring-1 ring-white/15 outline-none placeholder:text-regolith/40 focus:ring-earth" />
+          </label>
+          <label class="block">
+            <span class="mb-1.5 block font-mono text-label text-regolith/60 uppercase">Mission</span>
+            <select name="mission" id="mission-select" class="w-full rounded-[4px] bg-white/[0.04] px-4 py-3.5 text-body text-white ring-1 ring-white/15 outline-none appearance-none">
+              <option value="Orbiter" class="bg-void">Orbiter — 6 days</option>
+              <option value="Lander" selected class="bg-void">Lander — 10 days</option>
+              <option value="Resident" class="bg-void">Resident — 28 days</option>
+            </select>
+          </label>
+          <button type="submit" class="mt-2 w-full rounded-[4px] bg-white px-5 py-4 font-mono text-label text-void uppercase transition-colors hover:bg-earth">Add me to the manifest</button>
+          <p id="form-status" role="status" class="min-h-[1.25rem] text-[0.8125rem] text-regolith/70"></p>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <footer class="border-t border-white/10 bg-void px-4 py-8 sm:px-6 md:px-[6vw]">
+    <div class="flex flex-col gap-4 font-mono text-label text-regolith/50 uppercase md:flex-row md:items-center md:justify-between">
+      <span class="flex items-center gap-2.5 text-white/80">
+        <svg viewBox="0 0 24 24" aria-hidden="true" class="size-4"><path d="M15.5 3.2A9 9 0 1 0 20.8 16 7.2 7.2 0 0 1 15.5 3.2Z" fill="currentColor"/></svg>
+        SELENE · a concept
+      </span>
+      <span>© <span id="year"></span> · Imagery generated for this concept</span>
+      <a href="#top" class="hover:text-white" data-nav>Back to the surface ↑</a>
+    </div>
+  </footer>
+
+  <script>
+    const clamp = (v, min=0, max=1) => Math.min(max, Math.max(min, v));
+    const lerp = (a,b,t) => a + (b-a)*t;
+    const range = (v,a,b) => clamp((v-a)/(b-a));
+    const easeOutCubic = t => 1 - Math.pow(1-t, 3);
+    function pinProgress(el) {
+      const rect = el.getBoundingClientRect();
+      const vh = window.innerHeight;
+      const span = Math.max(1, rect.height - vh);
+      return { p: clamp(-rect.top / span), rect, vh };
+    }
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    const menuBtn = document.getElementById('menu-btn');
+    const menu = document.getElementById('menu');
+    let menuOpen = false;
+    menuBtn.addEventListener('click', () => {
+      menuOpen = !menuOpen;
+      menuBtn.setAttribute('aria-expanded', menuOpen);
+      menuBtn.textContent = menuOpen ? 'Close' : 'Menu';
+      menu.classList.toggle('opacity-0', !menuOpen);
+      menu.classList.toggle('pointer-events-none', !menuOpen);
+    });
+    document.querySelectorAll('[data-close]').forEach(a => a.addEventListener('click', () => {
+      menuOpen = false;
+      menuBtn.setAttribute('aria-expanded', false);
+      menuBtn.textContent = 'Menu';
+      menu.classList.add('opacity-0', 'pointer-events-none');
+    }));
+
+    document.querySelectorAll('[data-nav]').forEach(a => {
+      a.addEventListener('click', e => {
+        const hash = a.getAttribute('href');
+        if (!hash?.startsWith('#')) return;
+        e.preventDefault();
+        const target = hash === '#top' ? 0 : document.querySelector(hash);
+        if (target === null) return;
+        if (typeof target === 'number') window.scrollTo({ top: 0, behavior: reduced ? 'auto' : 'smooth' });
+        else target.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth' });
+        history.replaceState(null, '', hash === '#top' ? ' ' : hash);
+      });
+    });
+
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    const target = new Date('2031-07-20T20:17:00Z').getTime();
+    function tickCountdown() {
+      const ms = Math.max(0, target - Date.now());
+      const s = Math.floor(ms / 1000);
+      document.getElementById('cd-d').textContent = String(Math.floor(s / 86400)).padStart(2,'0');
+      document.getElementById('cd-h').textContent = String(Math.floor((s % 86400) / 3600)).padStart(2,'0');
+      document.getElementById('cd-m').textContent = String(Math.floor((s % 3600) / 60)).padStart(2,'0');
+      document.getElementById('cd-s').textContent = String(s % 60).padStart(2,'0');
+    }
+    tickCountdown();
+    setInterval(tickCountdown, 1000);
+
+    document.getElementById('manifest-form').addEventListener('submit', e => {
+      e.preventDefault();
+      const form = e.target;
+      const status = document.getElementById('form-status');
+      if (!form.checkValidity()) {
+        status.textContent = 'Name and a valid email, please — the manifest is strict.';
+        form.reportValidity();
+        return;
+      }
+      const data = new FormData(form);
+      const subject = encodeURIComponent(`Manifest: ${data.get('mission')}`);
+      const body = encodeURIComponent(`Name: ${data.get('name')}\nEmail: ${data.get('email')}\nMission: ${data.get('mission')}`);
+      window.location.href = `mailto:crew@selene.space?subject=${subject}&body=${body}`;
+      status.textContent = 'Your mail app should be open with your request drafted. If not: crew@selene.space.';
+    });
+    document.querySelectorAll('[data-mission]').forEach(a => {
+      a.addEventListener('click', e => {
+        e.preventDefault();
+        document.getElementById('mission-select').value = a.dataset.mission;
+        document.getElementById('reserve').scrollIntoView({ behavior: reduced ? 'auto' : 'smooth' });
+      });
+    });
+
+    const io = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-in');
+          io.unobserve(entry.target);
+        }
+      });
+    }, { rootMargin: '0px 0px -10% 0px' });
+    document.querySelectorAll('[data-reveal]').forEach(el => io.observe(el));
+
+    const dustCanvas = document.getElementById('dust');
+    const dustCtx = dustCanvas.getContext('2d');
+    let seed = 11;
+    const rand = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+    const motes = Array.from({length:140}, () => ({x:rand(), y:rand(), r:0.4+rand()*1.6, s:0.3+rand(), a:0.2+rand()*0.6}));
+    function syncDust() {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      dustCanvas.width = Math.round(dustCanvas.clientWidth * dpr);
+      dustCanvas.height = Math.round(dustCanvas.clientHeight * dpr);
+    }
+    syncDust();
+    new ResizeObserver(syncDust).observe(dustCanvas);
+
+    const layers = {};
+    document.querySelectorAll('[data-layer]').forEach(el => { layers[el.dataset.layer] = el; });
+    const setLayer = (name, y, scale=1, opacity=1) => {
+      const el = layers[name];
+      if (!el) return;
+      el.style.transform = `translate3d(0, ${y}vh, 0) scale(${scale})`;
+      el.style.opacity = String(opacity);
+    };
+
+    const earthriseRoot = document.getElementById('top');
+    const veil = document.getElementById('veil');
+    const title = document.getElementById('title');
+    const hud = document.getElementById('hud');
+    const clock = document.getElementById('clock');
+    const elev = document.getElementById('elev');
+    let lastP = -1, lastTime = 0;
+
+    const logRoot = document.getElementById('log');
+    const logTrack = document.getElementById('log-track');
+    const logCards = [...document.querySelectorAll('[data-card]')];
+    const logImgs = [...document.querySelectorAll('[data-img]')];
+    const logBar = document.getElementById('log-bar');
+    const logCount = document.getElementById('log-count');
+    let logLastP = -1;
+
+    const trajRoot = document.getElementById('trajectory');
+    const legPaths = [document.getElementById('leg0'), document.getElementById('leg1'), document.getElementById('leg2'), document.getElementById('leg3')];
+    const capsule = document.getElementById('capsule');
+    const kmEl = document.getElementById('km');
+    const legLabel = document.getElementById('leg-label');
+    const legTitle = document.getElementById('leg-title');
+    const legBody = document.getElementById('leg-body');
+    const legDots = [...document.getElementById('leg-dots').children];
+    const LEGS_DATA = [
+      {day:'Day 0', title:'Parking orbit', body:'Two laps of the Earth while the crew and craft are checked.'},
+      {day:'Day 0', title:'Trans-lunar injection', body:'A six-minute burn and you are on your way. No turning back for three days.'},
+      {day:'Day 3', title:'Lunar orbit insertion', body:'The engine fires behind the Moon, out of contact with Earth. Then: capture.'},
+      {day:'Day 4', title:'Descent', body:'Twelve minutes from orbit to the dust of Tranquillity.'},
+    ];
+    let trajLastP = -1, currentLeg = 0;
+
+    function frame(time) {
+      const dt = lastTime ? Math.min(0.1, (time - lastTime)/1000) : 1/60;
+      lastTime = time;
+
+      if (earthriseRoot) {
+        const {p, rect} = pinProgress(earthriseRoot);
+        if (rect.bottom >= 0) {
+          const veilAmt = 1 - range(p, 0, 0.18);
+          if (veilAmt > 0.001) {
+            const w = dustCanvas.clientWidth, h = dustCanvas.clientHeight;
+            const dpr = dustCanvas.width / Math.max(1, w);
+            dustCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            dustCtx.clearRect(0, 0, w, h);
+            dustCtx.fillStyle = '#dfe6f2';
+            for (const m of motes) {
+              if (!reduced) {
+                m.x += 0.006 * m.s * dt;
+                m.y -= 0.004 * m.s * dt;
+                if (m.x > 1) m.x -= 1;
+                if (m.y < 0) m.y += 1;
+              }
+              dustCtx.globalAlpha = m.a * veilAmt;
+              dustCtx.beginPath();
+              dustCtx.arc(m.x * w, (m.y - p * 0.6) * h, m.r * (1 + p * 4), 0, Math.PI * 2);
+              dustCtx.fill();
+            }
+            dustCtx.globalAlpha = 1;
+          }
+          if (Math.abs(p - lastP) >= 0.00005) {
+            lastP = p;
+            const exit = range(p, 0.7, 1);
+            const settle = easeOutCubic(range(p, 0, 0.5));
+            veil.style.opacity = String(veilAmt);
+            veil.style.transform = `translate3d(0, ${-range(p,0,0.18)*24}vh, 0) scale(${1 + range(p,0,0.18)*0.25})`;
+            dustCanvas.style.opacity = String(veilAmt);
+
+            setLayer('sky', lerp(0, -6, p), lerp(1.14, 1, settle));
+            const rise = easeOutCubic(range(p, 0.04, 0.5));
+            setLayer('earth', lerp(34, 0, rise) - exit * 12, lerp(0.92, 1, rise));
+            setLayer('moonscape', lerp(9, 0, settle) - exit * 26);
+            const rim = easeOutCubic(range(p, 0.28, 0.58));
+            setLayer('frame', -exit * 44, lerp(1.6, 1, rim), rim);
+            const up = easeOutCubic(range(p, 0.36, 0.62));
+            setLayer('astronaut', lerp(28, 0, up) - exit * 58, 1, clamp(up * 2));
+            const ground = easeOutCubic(range(p, 0.34, 0.6));
+            setLayer('ground', lerp(36, 0, ground) - exit * 78);
+
+            const tIn = easeOutCubic(range(p, 0.08, 0.24));
+            const tOut = range(p, 0.42, 0.52);
+            title.style.opacity = String(tIn * (1 - tOut));
+            title.style.letterSpacing = `${lerp(0.6, 0.24, tIn)}em`;
+            title.style.transform = `translate3d(0, ${-p * 6}vh, 0)`;
+            title.style.filter = tIn < 0.99 ? `blur(${(1 - tIn) * 10}px)` : '';
+
+            hud.style.opacity = String(range(p, 0.02, 0.1) * (1 - range(p, 0.62, 0.72)));
+            const secs = p * 5400;
+            clock.textContent = `T+ ${String(Math.floor(secs/3600)).padStart(2,'0')}:${String(Math.floor((secs%3600)/60)).padStart(2,'0')}:${String(Math.floor(secs%60)).padStart(2,'0')}`;
+            elev.textContent = `${(rise * 12.4).toFixed(1)}°`;
+          }
+        }
+      }
+
+      if (logRoot && logTrack) {
+        const {p, rect, vh} = pinProgress(logRoot);
+        if (rect.bottom >= 0 && rect.top <= vh && Math.abs(p - logLastP) >= 0.00005) {
+          logLastP = p;
+          const vw = window.innerWidth;
+          const k = range(p, 0.04, 0.96);
+          const travel = Math.max(0, logTrack.offsetLeft + logTrack.scrollWidth - vw * 0.94);
+          logTrack.style.transform = `translate3d(${-k * travel}px, 0, 0)`;
+          let nearest = 0, best = Infinity;
+          logCards.forEach((card, i) => {
+            const r = card.getBoundingClientRect();
+            const off = (r.left + r.width / 2 - vw * 0.62) / vw;
+            const a = clamp(Math.abs(off) * 1.6);
+            card.style.opacity = String(1 - a * 0.55);
+            card.style.transform = `scale(${1 - a * 0.07})`;
+            if (logImgs[i]) logImgs[i].style.transform = `translate3d(${off * -60}px, 0, 0) scale(1.15)`;
+            if (Math.abs(off) < best) { best = Math.abs(off); nearest = i; }
+          });
+          logBar.style.transform = `scaleX(${k})`;
+          logCount.textContent = `0${nearest + 1}`;
+        }
+      }
+
+      if (trajRoot) {
+        const {p, rect, vh} = pinProgress(trajRoot);
+        if (rect.bottom >= 0 && rect.top <= vh && Math.abs(p - trajLastP) >= 0.00005) {
+          trajLastP = p;
+          const WINDOW = [0.06, 0.92];
+          const u = range(p, ...WINDOW) * 4;
+          const s = clamp(Math.floor(u), 0, 3);
+          if (s !== currentLeg) {
+            currentLeg = s;
+            const d = LEGS_DATA[s];
+            legLabel.textContent = `${d.day} · Leg ${s+1}/4`;
+            legTitle.textContent = d.title;
+            legBody.textContent = d.body;
+            legDots.forEach((dot, i) => {
+              dot.className = `h-1 w-8 rounded-full transition-colors duration-500 ${i <= s ? 'bg-earth' : 'bg-white/15'}`;
+            });
+            const info = document.getElementById('leg-info');
+            info.classList.remove('animate-leg-in');
+            void info.offsetWidth;
+            info.classList.add('animate-leg-in');
+          }
+          legPaths.forEach((path, i) => {
+            const k = easeOutCubic(clamp(u - i));
+            path.style.strokeDashoffset = String(1 - k);
+            if (i === s) {
+              try {
+                const pt = path.getPointAtLength(path.getTotalLength() * k);
+                capsule.setAttribute('transform', `translate(${pt.x} ${pt.y})`);
+              } catch(e) {}
+            }
+          });
+          const coast = easeOutCubic(clamp(u - 1));
+          kmEl.textContent = Math.round(coast * 384400).toLocaleString('en-US');
+        }
+      }
+
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+
+    if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+    window.scrollTo(0, 0);
+  </script>
+</body>
+</html>

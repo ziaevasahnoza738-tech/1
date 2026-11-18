@@ -1,0 +1,392 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Buxoroi Sharif — Tundan Kunduzga Sehrli Sayohat</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Manrope:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --gold: #f3c653;
+  --cream: #f9f5e8;
+  --night: #03050a;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  height: 1400vh;
+  background: var(--night);
+  color: var(--cream);
+  font-family: 'Manrope', sans-serif;
+  overflow-x: hidden;
+}
+#canvas-container {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+}
+canvas { display: block; width: 100vw; height: 100vh; }
+.ui-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 40px 60px;
+}
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  pointer-events: auto;
+}
+.logo {
+  font-family: 'Cinzel', serif;
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--gold);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+nav {
+  display: flex;
+  gap: 40px;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+nav a {
+  color: var(--cream);
+  text-decoration: none;
+  transition: color 0.3s;
+}
+nav a:hover { color: var(--gold); }
+.hero {
+  position: absolute;
+  top: 48%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  pointer-events: auto;
+  transition: opacity 0.6s ease;
+}
+.hero h1 {
+  font-family: 'Cinzel', serif;
+  font-size: clamp(42px, 7vw, 88px);
+  font-weight: 800;
+  color: var(--cream);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  margin-bottom: 20px;
+  text-shadow: 0 10px 40px rgba(0,0,0,0.9);
+}
+.hero p {
+  font-size: 17px;
+  color: #d1c8b0;
+  max-width: 550px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+.scroll-indicator {
+  position: absolute;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  font-size: 11px;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+.scroll-bar {
+  width: 1px;
+  height: 50px;
+  background: linear-gradient(to bottom, var(--gold), transparent);
+  animation: scrollAnim 2s infinite;
+}
+@keyframes scrollAnim {
+  0% { transform: scaleY(0); transform-origin: top; }
+  50% { transform: scaleY(1); transform-origin: top; }
+  50.1% { transform: scaleY(1); transform-origin: bottom; }
+  100% { transform: scaleY(0); transform-origin: bottom; }
+}
+@media (max-width: 768px) {
+  .ui-layer { padding: 20px; }
+  nav { display: none; }
+}
+</style>
+</head>
+<body>
+
+<div id="canvas-container"></div>
+
+<div class="ui-layer">
+  <header>
+    <div class="logo">Buxoroi Sharif</div>
+    <nav>
+      <a href="#">Arxitektura</a>
+      <a href="#">Naqshlar</a>
+      <a href="#">Mahallalar</a>
+      <a href="#">Tarix</a>
+    </nav>
+  </header>
+
+  <div class="hero" id="hero">
+    <h1>Sehrli Ko'chalar</h1>
+    <p>Oy nuridan shafaq va quyosh nurigacha bo'lgan qadimiy Buxoro ko'chalari bo'ylab unutilmas sayohat.</p>
+  </div>
+
+  <div class="scroll-indicator">
+    <span>Sayohat uchun pastga suring</span>
+    <div class="scroll-bar"></div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+const container = document.getElementById('canvas-container');
+const scene = new THREE.Scene();
+
+const camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 1000);
+camera.position.set(0, 2.2, 0);
+
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+container.appendChild(renderer.domElement);
+
+// Lighting
+const ambientLight = new THREE.AmbientLight(0x151c2c, 1.5);
+scene.add(ambientLight);
+
+// --- YARAQLOVCHI OY (MOON) - To'g'ridan-to'g'ri ko'rinadigan qilib ---
+const moonGeo = new THREE.SphereGeometry(3.5, 32, 32);
+const moonMat = new THREE.MeshBasicMaterial({ color: 0xffffee });
+const moon = new THREE.Mesh(moonGeo, moonMat);
+scene.add(moon);
+const moonLight = new THREE.PointLight(0xddeeff, 2, 40);
+moon.add(moonLight);
+
+// --- YARAQLOVCHI QUYOSH (SUN) ---
+const sunGeo = new THREE.SphereGeometry(4.5, 32, 32);
+const sunMat = new THREE.MeshBasicMaterial({ color: 0xffaa00 });
+const sun = new THREE.Mesh(sunGeo, sunMat);
+scene.add(sun);
+const sunLight = new THREE.PointLight(0xffdd44, 3, 60);
+sun.add(sunLight);
+
+// --- SHAFAQ (SUNSET / SUNRISE GLOW HORIZON) ---
+const glowGeo = new THREE.PlaneGeometry(120, 40);
+const glowMat = new THREE.MeshBasicMaterial({
+  color: 0xff5522,
+  transparent: true,
+  opacity: 0.0,
+  blending: THREE.AdditiveBlending
+});
+const shafaq = new THREE.Mesh(glowGeo, glowMat);
+scene.add(shafaq);
+
+// Stars
+const starCount = 800;
+const starGeo = new THREE.BufferGeometry();
+const starPos = new Float32Array(starCount * 3);
+for (let i = 0; i < starCount * 3; i += 3) {
+  starPos[i] = (Math.random() - 0.5) * 120;
+  starPos[i+1] = Math.random() * 40 + 8;
+  starPos[i+2] = -Math.random() * 800;
+}
+starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
+const starMat = new THREE.PointsMaterial({ color: 0xffffff, size: 0.5, transparent: true, opacity: 1.0 });
+const stars = new THREE.Points(starGeo, starMat);
+scene.add(stars);
+
+// --- BULUTLAR (Ikki tomondan markazga keluvchi) ---
+const cloudGroup = new THREE.Group();
+scene.add(cloudGroup);
+const cloudMat = new THREE.MeshLambertMaterial({ color: 0xffeedd, transparent: true, opacity: 0.0 });
+
+for (let i = 0; i < 18; i++) {
+  const cloudGeo = new THREE.BoxGeometry(14 + Math.random()*8, 3, 6);
+  const cloud = new THREE.Mesh(cloudGeo, cloudMat);
+  const side = i % 2 === 0 ? -1 : 1;
+  cloud.position.set(side * (35 + Math.random() * 20), 15 + Math.random() * 10, -i * 50);
+  cloudGroup.add(cloud);
+}
+
+// --- BUXORO NAQSHLI DEVORLAR TEKSTURASI ---
+function createPatternTexture() {
+  const canvas = document.createElement('canvas');
+  canvas.width = 512; canvas.height = 512;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#6b301c'; ctx.fillRect(0, 0, 512, 512);
+  ctx.strokeStyle = '#3a160b'; ctx.lineWidth = 6;
+  for (let i = 0; i <= 512; i += 64) {
+    ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(512, i); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, 512); ctx.stroke();
+  }
+  ctx.fillStyle = '#0f5257'; ctx.strokeStyle = '#f3c653'; ctx.lineWidth = 4;
+  ctx.beginPath(); ctx.arc(256, 256, 120, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(256, 100); ctx.lineTo(412, 256); ctx.lineTo(256, 412); ctx.lineTo(100, 256); ctx.closePath(); ctx.stroke();
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.wrapS = THREE.RepeatWrapping; texture.wrapT = THREE.RepeatWrapping;
+  texture.repeat.set(1, 4);
+  return texture;
+}
+
+const wallTexture = createPatternTexture();
+const wallMaterial = new THREE.MeshStandardMaterial({ map: wallTexture, roughness: 0.8, metalness: 0.2 });
+const woodMaterial = new THREE.MeshStandardMaterial({ color: 0x2b150c, roughness: 0.9 });
+const tileAccentMat = new THREE.MeshStandardMaterial({ color: 0x0b4f6c, roughness: 0.3, metalness: 0.4 });
+
+// Alleyway Build
+const alleyGroup = new THREE.Group();
+scene.add(alleyGroup);
+const segmentLength = 12;
+const totalSegments = 85;
+
+const lanterns = [];
+for (let i = 0; i < totalSegments; i++) {
+  const zPos = -i * segmentLength;
+  const wallGeo = new THREE.BoxGeometry(2, 9, segmentLength);
+  
+  const leftWall = new THREE.Mesh(wallGeo, wallMaterial);
+  leftWall.position.set(-6.5, 4.5, zPos); alleyGroup.add(leftWall);
+  const rightWall = new THREE.Mesh(wallGeo, wallMaterial);
+  rightWall.position.set(6.5, 4.5, zPos); alleyGroup.add(rightWall);
+
+  const doorGeo = new THREE.BoxGeometry(2.8, 5.5, 0.6);
+  const leftDoor = new THREE.Mesh(doorGeo, woodMaterial);
+  leftDoor.position.set(-5.5, 2.75, zPos); alleyGroup.add(leftDoor);
+  const rightDoor = new THREE.Mesh(doorGeo, woodMaterial);
+  rightDoor.position.set(5.5, 2.75, zPos); alleyGroup.add(rightDoor);
+
+  const archGeo = new THREE.BoxGeometry(3.2, 0.8, 0.8);
+  const leftArch = new THREE.Mesh(archGeo, tileAccentMat);
+  leftArch.position.set(-5.5, 5.8, zPos); alleyGroup.add(leftArch);
+  const rightArch = new THREE.Mesh(archGeo, tileAccentMat);
+  rightArch.position.set(5.5, 5.8, zPos); alleyGroup.add(rightArch);
+
+  if (i % 2 === 0) {
+    const lampL = new THREE.PointLight(0xffaa33, 2.5, 14);
+    lampL.position.set(-4.5, 5, zPos); scene.add(lampL); lanterns.push(lampL);
+    const lampR = new THREE.PointLight(0xffaa33, 2.5, 14);
+    lampR.position.set(4.5, 5, zPos); scene.add(lampR); lanterns.push(lampR);
+  }
+}
+
+// Ground
+const groundGeo = new THREE.PlaneGeometry(15, totalSegments * segmentLength);
+const groundMat = new THREE.MeshStandardMaterial({ color: 0x0c0f16, roughness: 0.9 });
+const ground = new THREE.Mesh(groundGeo, groundMat);
+ground.rotation.x = -Math.PI / 2;
+ground.position.set(0, 0, - (totalSegments * segmentLength) / 2 + 6);
+scene.add(ground);
+
+// Scroll & Mouse
+let scrollProgress = 0;
+window.addEventListener('scroll', () => {
+  const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+  scrollProgress = window.scrollY / maxScroll;
+  
+  const hero = document.getElementById('hero');
+  if (scrollProgress > 0.04) {
+    hero.style.opacity = Math.max(0, 1 - (scrollProgress - 0.04) * 20);
+  } else {
+    hero.style.opacity = 1;
+  }
+});
+
+let mouseX = 0, mouseY = 0;
+window.addEventListener('mousemove', (e) => {
+  mouseX = (e.clientX / window.innerWidth - 0.5) * 0.4;
+  mouseY = (e.clientY / window.innerHeight - 0.5) * 0.25;
+});
+
+// Animation Loop
+function animate() {
+  requestAnimationFrame(animate);
+
+  const maxZ = -(totalSegments * segmentLength) + 30;
+  let targetZ = -scrollProgress * Math.abs(maxZ);
+  
+  camera.position.z += (targetZ - camera.position.z) * 0.06;
+  camera.rotation.y += (mouseX - camera.rotation.y) * 0.06;
+  camera.rotation.x += (-mouseY - camera.rotation.x) * 0.06;
+
+  const currentZ = camera.position.z;
+
+  // --- OY (Chapdan o'ngga, boshida yorqin ko'rinadi) ---
+  moon.position.set(
+    camera.position.x - 18 + (scrollProgress * 36),
+    camera.position.y + 12 - (scrollProgress * 4),
+    currentZ - 45
+  );
+  moon.visible = scrollProgress < 0.6;
+  moon.material.opacity = Math.max(0, 1 - scrollProgress * 1.8);
+
+  // --- QUYOSH (30% dan keyin chapdan o'ngga chiqib keladi) ---
+  sun.position.set(
+    camera.position.x - 22 + ((scrollProgress - 0.3) * 45),
+    camera.position.y + 8 + ((scrollProgress - 0.3) * 8),
+    currentZ - 50
+  );
+  sun.visible = scrollProgress > 0.25;
+  sun.material.opacity = Math.min(1, (scrollProgress - 0.25) * 3);
+
+  // --- SHAFAQ (Quyosh botish/chiqish qizg'ish nurlari - 40% dan 70% gacha) ---
+  if (scrollProgress >= 0.35 && scrollProgress <= 0.8) {
+    const shafaqProgress = (scrollProgress - 0.35) / 0.45;
+    glowMat.opacity = Math.sin(shafaqProgress * Math.PI) * 0.6;
+    shafaq.position.set(camera.position.x, camera.position.y + 6, currentZ - 55);
+  } else {
+    glowMat.opacity = 0;
+  }
+
+  // --- OSMON VA YORUG'LIK RANGINI TUNDAN KUNDUZGA O'TKAZISH ---
+  const r = Math.min(1, 0.02 + scrollProgress * 0.7);
+  const g = Math.min(1, 0.03 + scrollProgress * 0.85);
+  const b = Math.min(1, 0.06 + scrollProgress * 0.95);
+  scene.background = new THREE.Color(r, g, b);
+  scene.fog = new THREE.FogExp2(new THREE.Color(r, g, b), 0.03);
+
+  // Yulduzlar
+  stars.material.opacity = Math.max(0, 1 - scrollProgress * 2.5);
+
+  // Chiroqlar
+  const lanternIntensity = Math.max(0.3, 2.5 - scrollProgress * 3);
+  lanterns.forEach(l => l.intensity = lanternIntensity);
+
+  // --- BULUTLAR (50% dan ikkala tomondan kelishi) ---
+  if (scrollProgress >= 0.45) {
+    const p = (scrollProgress - 0.45) / 0.55;
+    cloudMat.opacity = Math.min(0.9, p * 2);
+    
+    cloudGroup.children.forEach((cloud, idx) => {
+      const side = idx % 2 === 0 ? 1 : -1;
+      const startX = camera.position.x + side * 30;
+      const endX = camera.position.x + side * (4 + (idx % 3) * 3);
+      cloud.position.x = startX + (endX - startX) * Math.min(1, p * 1.2);
+      cloud.position.z = currentZ - (idx * 45);
+    });
+  } else {
+    cloudMat.opacity = 0;
+  }
+
+  renderer.render(scene, camera);
+}
+animate();
+
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+</script>
+
+</body>
+</html>

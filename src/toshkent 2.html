@@ -1,0 +1,493 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Toshkent — Qishloqdan Zamonaviy Megapolisgacha</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Manrope:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --gold: #f3c653;
+  --cream: #f9f5e8;
+  --night: #050811;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  height: 3500vh; /* Keng, batafsil va uzoq davom etuvchi sayohat uchun */
+  background: var(--night);
+  color: var(--cream);
+  font-family: 'Manrope', sans-serif;
+  overflow-x: hidden;
+}
+#canvas-container {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+}
+canvas { display: block; width: 100vw; height: 100vh; }
+.ui-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 40px 60px;
+}
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  pointer-events: auto;
+}
+.logo {
+  font-family: 'Cinzel', serif;
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--gold);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+nav {
+  display: flex;
+  gap: 40px;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+nav a {
+  color: var(--cream);
+  text-decoration: none;
+  transition: color 0.3s;
+}
+nav a:hover { color: var(--gold); }
+.hero {
+  position: absolute;
+  top: 48%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  pointer-events: auto;
+  transition: opacity 0.6s ease;
+}
+.hero h1 {
+  font-family: 'Cinzel', serif;
+  font-size: clamp(38px, 6vw, 80px);
+  font-weight: 800;
+  color: var(--cream);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  margin-bottom: 20px;
+  text-shadow: 0 10px 40px rgba(0,0,0,0.9);
+}
+.hero p {
+  font-size: 17px;
+  color: #d1c8b0;
+  max-width: 600px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+.scroll-indicator {
+  position: absolute;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  font-size: 11px;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+.scroll-bar {
+  width: 1px;
+  height: 50px;
+  background: linear-gradient(to bottom, var(--gold), transparent);
+  animation: scrollAnim 2s infinite;
+}
+@keyframes scrollAnim {
+  0% { transform: scaleY(0); transform-origin: top; }
+  50% { transform: scaleY(1); transform-origin: top; }
+  50.1% { transform: scaleY(1); transform-origin: bottom; }
+  100% { transform: scaleY(0); transform-origin: bottom; }
+}
+@media (max-width: 768px) {
+  .ui-layer { padding: 20px; }
+  nav { display: none; }
+}
+</style>
+</head>
+<body>
+
+<div id="canvas-container"></div>
+
+<div class="ui-layer">
+  <header>
+    <div class="logo">Toshkent Sayohati</div>
+    <nav>
+      <a href="#">Mahalla</a>
+      <a href="#">Bozorlar</a>
+      <a href="#">Markaz</a>
+      <a href="#">Teleminora</a>
+    </nav>
+  </header>
+
+  <div class="hero" id="hero">
+    <h1>Qishloqdan Zamonaviy Poytaxtgacha</h1>
+    <p>Qadimiy loy uylar, do'konlar, chodirli bozor rastalari va ulkan zamonaviy megapolis bo'ylab sekin sayohat.</p>
+  </div>
+
+  <div class="scroll-indicator">
+    <span>Sayohat uchun pastga suring</span>
+    <div class="scroll-bar"></div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+const container = document.getElementById('canvas-container');
+const scene = new THREE.Scene();
+
+const camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 2500);
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+container.appendChild(renderer.domElement);
+
+// Lighting
+const ambientLight = new THREE.AmbientLight(0x2a3550, 1.6);
+scene.add(ambientLight);
+
+const dirLight = new THREE.DirectionalLight(0xffeedd, 1.3);
+dirLight.position.set(15, 35, 20);
+scene.add(dirLight);
+
+// --- OY, QUYOSH VA SHAFAQ ---
+const moon = new THREE.Mesh(new THREE.SphereGeometry(3.5, 32, 32), new THREE.MeshBasicMaterial({ color: 0xffffee }));
+scene.add(moon);
+moon.add(new THREE.PointLight(0xddeeff, 2, 40));
+
+const sun = new THREE.Mesh(new THREE.SphereGeometry(4.5, 32, 32), new THREE.MeshBasicMaterial({ color: 0xffaa00 }));
+scene.add(sun);
+sun.add(new THREE.PointLight(0xffdd44, 3, 60));
+
+const shafaq = new THREE.Mesh(new THREE.PlaneGeometry(150, 50), new THREE.MeshBasicMaterial({ color: 0xff5522, transparent: true, opacity: 0.0, blending: THREE.AdditiveBlending }));
+scene.add(shafaq);
+
+// Stars
+const starGeo = new THREE.BufferGeometry();
+const starPos = new Float32Array(1000 * 3);
+for (let i = 0; i < 1000 * 3; i += 3) {
+  starPos[i] = (Math.random() - 0.5) * 180;
+  starPos[i+1] = Math.random() * 50 + 15;
+  starPos[i+2] = -Math.random() * 1400;
+}
+starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
+const stars = new THREE.Points(starGeo, new THREE.PointsMaterial({ color: 0xffffff, size: 0.5, transparent: true, opacity: 1.0 }));
+scene.add(stars);
+
+// Clouds
+const cloudGroup = new THREE.Group();
+scene.add(cloudGroup);
+const cloudMat = new THREE.MeshLambertMaterial({ color: 0xffeedd, transparent: true, opacity: 0.0 });
+for (let i = 0; i < 25; i++) {
+  const cloud = new THREE.Mesh(new THREE.BoxGeometry(16, 3, 7), cloudMat);
+  const side = i % 2 === 0 ? -1 : 1;
+  cloud.position.set(side * 40, 28, -i * 50);
+  cloudGroup.add(cloud);
+}
+
+// --- TOSHHKENT TELEMINORASI (Oxirgi nuqtada) ---
+const towerGroup = new THREE.Group();
+towerGroup.position.set(0, 0, -1350);
+scene.add(towerGroup);
+
+const towerBaseMat = new THREE.MeshStandardMaterial({ color: 0x8899aa, metalness: 0.8, roughness: 0.2 });
+const towerGlassMat = new THREE.MeshStandardMaterial({ color: 0x113355, metalness: 0.9, roughness: 0.1 });
+
+const lowerTower = new THREE.Mesh(new THREE.CylinderGeometry(1.8, 4.5, 40, 16), towerBaseMat);
+lowerTower.position.set(0, 20, 0);
+towerGroup.add(lowerTower);
+
+const restaurantCabin = new THREE.Mesh(new THREE.CylinderGeometry(4.5, 3.5, 9, 16), towerGlassMat);
+restaurantCabin.position.set(0, 42, 0);
+towerGroup.add(restaurantCabin);
+
+const upperSpire = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 1.4, 35, 12), towerBaseMat);
+upperSpire.position.set(0, 63, 0);
+towerGroup.add(upperSpire);
+
+const towerLight = new THREE.PointLight(0xff0000, 5, 60);
+towerLight.position.set(0, 81, 0);
+towerGroup.add(towerLight);
+
+
+// --- YO'L YO'NALISHI ---
+const pathPoints = [
+  new THREE.Vector3(0, 7.0, 0),
+  new THREE.Vector3(0, 7.2, -120),
+  new THREE.Vector3(25, 7.5, -300),   // Mahalladan burilish
+  new THREE.Vector3(-25, 8.0, -500),  // Do'konlar va bozorlar hududi
+  new THREE.Vector3(0, 8.5, -750),    // Keng shoh ko'chalar
+  new THREE.Vector3(0, 9.0, -1000),   // Zamonaviy supermarketlar va binolar
+  new THREE.Vector3(0, 9.5, -1250),   // Teleminoraga to'g'rilanish
+  new THREE.Vector3(0, 9.5, -1330)    // To'xtash nuqtasi
+];
+const curve = new THREE.CatmullRomCurve3(pathPoints);
+
+
+// --- MATERIAL_LAR (Qishloq uyi, Do'kon, Chodir, Shisha binolar) ---
+function createVillageWallTexture() {
+  const canvas = document.createElement('canvas');
+  canvas.width = 512; canvas.height = 512;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#8c6239'; ctx.fillRect(0, 0, 512, 512); // Loy-shuvoq rang
+  ctx.strokeStyle = '#5a3d22'; ctx.lineWidth = 4;
+  for (let i = 0; i <= 512; i += 64) {
+    ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(512, i); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, 512); ctx.stroke();
+  }
+  return new THREE.CanvasTexture(canvas);
+}
+
+const villageMat = new THREE.MeshStandardMaterial({ map: createVillageWallTexture(), roughness: 0.9 });
+const shopMat = new THREE.MeshStandardMaterial({ color: 0xc27803, roughness: 0.5 }); // Do'kon rangi
+const tentMat = new THREE.MeshStandardMaterial({ color: 0xd90429, roughness: 0.4 }); // Sotuv chodiri (tent)
+const roofMat = new THREE.MeshStandardMaterial({ color: 0x4a3525, roughness: 0.8 }); // Tomlar
+const treeGreenMat = new THREE.MeshStandardMaterial({ color: 0x2d6a4f, roughness: 0.7 }); // Daraxtlar
+const treeTrunkMat = new THREE.MeshStandardMaterial({ color: 0x5c4033, roughness: 0.9 });
+
+const modernConcreteMat = new THREE.MeshStandardMaterial({ color: 0xe0e0e0, roughness: 0.4 });
+const modernGlassMat = new THREE.MeshStandardMaterial({ color: 0x1d3557, roughness: 0.1, metalness: 0.9 });
+const marketMegaMat = new THREE.MeshStandardMaterial({ color: 0x457b9d, roughness: 0.3 }); // Katta amgazin / Supermarket
+
+const cityGroup = new THREE.Group();
+scene.add(cityGroup);
+
+const totalSegments = 160;
+const lanterns = [];
+
+for (let i = 0; i < totalSegments; i++) {
+  const t = i / totalSegments;
+  const pos = curve.getPoint(t);
+  const tangent = curve.getTangent(t);
+
+  const segmentGroup = new THREE.Group();
+  segmentGroup.position.copy(pos);
+  segmentGroup.lookAt(pos.clone().add(tangent));
+
+  const progressRatio = i / totalSegments;
+
+  // 1. QISMLARGA BO'LISH: 
+  // 0 -> 0.35: Qishloq, loy uylar, daraxtlar, do'konlar, chodirlar
+  // 0.35 -> 0.70: O'rtacha mahalla, balandlashgan uylar, rastalar
+  // 0.70 -> 1.0: Zamonaviy megapolis, supermarketlar, 4 qator baland binolar
+
+  if (progressRatio < 0.35) {
+    // --- QISHLOQ / MAHALLA QISMI ---
+    const h = 6 + (i % 3) * 1.5;
+    const houseL = new THREE.Mesh(new THREE.BoxGeometry(5, h, 6), villageMat);
+    const houseR = new THREE.Mesh(new THREE.BoxGeometry(5, h, 6), shopMat); // Do'kon
+
+    houseL.position.set(-10, h/2, 0);
+    houseR.position.set(10, h/2, 0);
+    segmentGroup.add(houseL);
+    segmentGroup.add(houseR);
+
+    // Sotuv chodirlari (Tentlar) va rastalar
+    if (i % 3 === 0) {
+      const tent = new THREE.Mesh(new THREE.ConeGeometry(2.5, 2, 4), tentMat);
+      tent.position.set(7, 1, 2);
+      segmentGroup.add(tent);
+    }
+
+    // Daraxtlar
+    if (i % 2 === 0) {
+      const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.4, 3, 8), treeTrunkMat);
+      const leaves = new THREE.Mesh(new THREE.SphereGeometry(1.8, 8, 8), treeGreenMat);
+      trunk.position.set(-13, 1.5, 1);
+      leaves.position.set(-13, 3.5, 1);
+      segmentGroup.add(trunk);
+      segmentGroup.add(leaves);
+    }
+
+  } else if (progressRatio >= 0.35 && progressRatio < 0.70) {
+    // --- O'RTACHA MAHALLA VA KENGAYISH ---
+    const h = 10 + (i % 4) * 3;
+    const bMat = (i % 2 === 0) ? villageMat : modernConcreteMat;
+    
+    const bL = new THREE.Mesh(new THREE.BoxGeometry(7, h, 8), bMat);
+    const bR = new THREE.Mesh(new THREE.BoxGeometry(7, h, 8), bMat);
+
+    bL.position.set(-14, h/2, 0);
+    bR.position.set(14, h/2, 0);
+    segmentGroup.add(bL);
+    segmentGroup.add(bR);
+
+    // Orqa qatordagi uylar (4 ta uy uzoqlikda ko'rinib turishi uchun)
+    const bBackL = new THREE.Mesh(new THREE.BoxGeometry(8, h + 4, 10), modernConcreteMat);
+    const bBackR = new THREE.Mesh(new THREE.BoxGeometry(8, h + 4, 10), modernConcreteMat);
+    bBackL.position.set(-24, (h+4)/2, -10);
+    bBackR.position.set(24, (h+4)/2, -10);
+    segmentGroup.add(bBackL);
+    segmentGroup.add(bBackR);
+
+  } else {
+    // --- ZAMONAVIY TOSHHKENT, SUPERMARKETLAR, 4 QATOR ULKAN BINOLAR ---
+    const h = 22 + (progressRatio * 35);
+    const megaMat = (i % 2 === 0) ? modernGlassMat : marketMegaMat;
+
+    // 1-qator binolar (Supermarket va magazinlar)
+    const frontL = new THREE.Mesh(new THREE.BoxGeometry(10, h, 12), megaMat);
+    const frontR = new THREE.Mesh(new THREE.BoxGeometry(10, h, 12), megaMat);
+    frontL.position.set(-18, h/2, 0);
+    frontR.position.set(18, h/2, 0);
+    segmentGroup.add(frontL);
+    segmentGroup.add(frontR);
+
+    // 2-qator va 3-qator orqa binolar (4 ta tomondan o'ralgan ko'rinish)
+    if (i % 2 === 0) {
+      const backL = new THREE.Mesh(new THREE.BoxGeometry(12, h + 10, 14), modernGlassMat);
+      const backR = new THREE.Mesh(new THREE.BoxGeometry(12, h + 10, 14), modernGlassMat);
+      backL.position.set(-35, (h+10)/2, -12);
+      backR.position.set(35, (h+10)/2, -12);
+      segmentGroup.add(backL);
+      segmentGroup.add(backR);
+    }
+  }
+
+  // Chiroqlar
+  if (i % 2 === 0) {
+    const lampL = new THREE.PointLight(progressRatio > 0.5 ? 0xffffff : 0xffaa33, 2.2, 16);
+    lampL.position.set(-8, 6, 0);
+    segmentGroup.add(lampL); 
+    lanterns.push(lampL);
+  }
+
+  cityGroup.add(segmentGroup);
+}
+
+// --- ASFALT YO'L VA PİYODALAR YO'LAGI (Trotuar) ---
+const roadGeo = new THREE.PlaneGeometry(18, 1800);
+const roadMat = new THREE.MeshStandardMaterial({ color: 0x1a1c23, roughness: 0.9 }); // Qora asfalt
+const road = new THREE.Mesh(roadGeo, roadMat);
+road.rotation.x = -Math.PI / 2;
+road.position.set(0, -0.1, -600);
+scene.add(road);
+
+// Asfalt chiziqlari (Oq yo'l chizig'i)
+const lineGeo = new THREE.PlaneGeometry(0.4, 1800);
+const lineMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+const centerLine = new THREE.Mesh(lineGeo, lineMat);
+centerLine.rotation.x = -Math.PI / 2;
+centerLine.position.set(0, 0.01, -600);
+scene.add(centerLine);
+
+// Ground (Yon atroflar tuproq / maysazor)
+const groundGeo = new THREE.PlaneGeometry(300, 1800);
+const groundMat = new THREE.MeshStandardMaterial({ color: 0x0d111a, roughness: 0.95 });
+const ground = new THREE.Mesh(groundGeo, groundMat);
+ground.rotation.x = -Math.PI / 2;
+ground.position.set(0, -0.5, -600);
+scene.add(ground);
+
+
+// Scroll & Animation
+let scrollProgress = 0;
+window.addEventListener('scroll', () => {
+  const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+  scrollProgress = window.scrollY / maxScroll;
+  
+  const hero = document.getElementById('hero');
+  if (scrollProgress > 0.04) {
+    hero.style.opacity = Math.max(0, 1 - (scrollProgress - 0.04) * 20);
+  } else {
+    hero.style.opacity = 1;
+  }
+});
+
+let mouseX = 0, mouseY = 0;
+window.addEventListener('mousemove', (e) => {
+  mouseX = (e.clientX / window.innerWidth - 0.5) * 0.15;
+  mouseY = (e.clientY / window.innerHeight - 0.5) * 0.1;
+});
+
+let currentT = 0;
+function animate() {
+  requestAnimationFrame(animate);
+
+  const targetT = Math.min(0.999, scrollProgress);
+  currentT += (targetT - currentT) * 0.03;
+
+  const cameraPos = curve.getPoint(currentT);
+  const lookAtTarget = curve.getPoint(Math.min(0.999, currentT + 0.015));
+
+  // Kamera balandligi: Uylarga yetsak binolardan sal pastroq, lekin yerdan ancha baland (xavfsiz va qulay)
+  camera.position.copy(cameraPos);
+  camera.lookAt(lookAtTarget);
+
+  camera.rotation.y += mouseX * 0.05;
+  camera.rotation.x += mouseY * 0.05;
+
+  const currentZ = camera.position.z;
+
+  // Oy
+  moon.position.set(camera.position.x - 20 + (scrollProgress * 40), camera.position.y + 14, currentZ - 40);
+  moon.visible = scrollProgress < 0.6;
+  moon.material.opacity = Math.max(0, 1 - scrollProgress * 1.8);
+
+  // Quyosh
+  sun.position.set(camera.position.x - 25 + ((scrollProgress - 0.3) * 50), camera.position.y + 10, currentZ - 45);
+  sun.visible = scrollProgress > 0.25;
+  sun.material.opacity = Math.min(1, (scrollProgress - 0.25) * 3);
+
+  // Shafaq
+  if (scrollProgress >= 0.35 && scrollProgress <= 0.8) {
+    const sp = (scrollProgress - 0.35) / 0.45;
+    shafaq.material.opacity = Math.sin(sp * Math.PI) * 0.6;
+    shafaq.position.set(camera.position.x, camera.position.y + 6, currentZ - 50);
+  } else {
+    shafaq.material.opacity = 0;
+  }
+
+  // Tundan kunduzga o'tish
+  const r = Math.min(1, 0.02 + scrollProgress * 0.7);
+  const g = Math.min(1, 0.03 + scrollProgress * 0.85);
+  const b = Math.min(1, 0.06 + scrollProgress * 0.95);
+  scene.background = new THREE.Color(r, g, b);
+  scene.fog = new THREE.FogExp2(new THREE.Color(r, g, b), 0.03);
+
+  stars.material.opacity = Math.max(0, 1 - scrollProgress * 2.5);
+
+  const lanternIntensity = Math.max(0.3, 2.5 - scrollProgress * 3);
+  lanterns.forEach(l => l.intensity = lanternIntensity);
+
+  // Bulutlar
+  if (scrollProgress >= 0.45) {
+    const p = (scrollProgress - 0.45) / 0.55;
+    cloudMat.opacity = Math.min(0.9, p * 2);
+    cloudGroup.children.forEach((cloud, idx) => {
+      const side = idx % 2 === 0 ? 1 : -1;
+      cloud.position.set(camera.position.x + side * (12 + (idx%3)*4), camera.position.y + 16, currentZ - (idx * 40));
+    });
+  } else {
+    cloudMat.opacity = 0;
+  }
+
+  renderer.render(scene, camera);
+}
+animate();
+
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+</script>
+
+</body>
+</html>

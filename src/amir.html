@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Oʻzbekistonning buyuk siymolari</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;700&family=Noto+Serif:wght@400;700&display=swap">
+<style>
+:root{box-sizing:border-box;--lapis:#0b1f4a;--lapis2:#071433;--teal:#1fb5b0;--g1:#f4dc94;--g2:#c3902f;--g3:#7a5410;--mat:#f0e6cd;--ink:#eaf0fb;--paper:#f7eed9;--pi:#2a2014;color-scheme:dark}
+html{scroll-behavior:smooth}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:radial-gradient(ellipse at top,var(--lapis),var(--lapis2) 70%) fixed;color:var(--ink);font:17px/1.65 "Noto Serif",Georgia,serif}
+#bg{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
+.z{position:relative;z-index:1}
+.hero{text-align:center;padding:56px 20px 16px}
+.hero svg{width:90px;height:90px;margin-bottom:10px;filter:drop-shadow(0 0 14px rgba(244,220,148,.4))}
+h1{font:700 clamp(2.1rem,7vw,4rem)/1.05 "Cormorant Garamond",Georgia,serif;margin:0 0 10px;color:var(--g1)}
+.hero p{max-width:42em;margin:0 auto;opacity:.9}
+.stats{display:flex;justify-content:center;gap:22px;flex-wrap:wrap;margin-top:18px;color:var(--g2);font-style:italic}
+.stats b{display:block;font:700 1.8rem/1 "Cormorant Garamond",serif;color:var(--g1);font-style:normal}
+.bar{position:sticky;top:0;z-index:5;display:flex;flex-wrap:wrap;gap:7px;justify-content:center;align-items:center;padding:9px 11px;background:rgba(7,20,51,.93);backdrop-filter:blur(8px);border-bottom:2px solid var(--g3)}
+.bar button,.bar .sw{font:inherit;font-size:.88rem;border:1px solid var(--g2);background:transparent;color:var(--ink);padding:5px 12px;border-radius:18px;cursor:pointer}
+.bar button.on{background:var(--g2);color:#1b1204;font-weight:700}
+.bar .sw{display:flex;align-items:center;gap:6px;padding:4px 11px 4px 9px;min-width:180px}
+.bar .sw svg{width:15px;height:15px;opacity:.85;flex-shrink:0}
+.bar input{all:unset;width:100%;font:inherit;font-size:.88rem;color:var(--ink)}
+.bar input::placeholder{color:#9fb0cf}
+:focus-visible{outline:3px solid var(--teal);outline-offset:2px}
+main{max-width:1180px;margin:0 auto;padding:26px 14px 44px;display:grid;gap:34px 20px;grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+.item{display:flex;flex-direction:column;align-items:center;opacity:0;transform:translateY(18px);transition:opacity .55s,transform .55s}
+.item.in{opacity:1;transform:none}
+.item[hidden]{display:none}
+.fw{position:relative;width:100%;max-width:228px}
+.frame{all:unset;cursor:pointer;display:block;width:100%;padding:12px;background:linear-gradient(135deg,var(--g1),var(--g2) 40%,var(--g3) 60%,var(--g1));box-shadow:0 11px 24px rgba(0,0,0,.55),inset 0 0 0 2px rgba(255,255,255,.25),inset 0 0 0 6px var(--g3);transition:transform .2s}
+.frame:hover,.frame:focus-visible{transform:translateY(-4px) rotate(-.35deg)}
+.frame::before,.frame::after{content:"❖";position:absolute;font-size:16px;color:#fff3c4;text-shadow:0 0 3px #5a3c06}
+.frame::before{top:0;left:1px}.frame::after{bottom:0;right:1px}
+.mat{background:var(--mat);padding:8px;box-shadow:inset 0 0 7px rgba(0,0,0,.4)}
+.mat svg,.mat img{display:block;width:100%;height:auto;aspect-ratio:4/5;object-fit:cover}
+.fav{position:absolute;top:-7px;right:-7px;width:30px;height:30px;border-radius:50%;border:2px solid var(--g2);background:var(--lapis2);color:#d4c4a0;font-size:13px;cursor:pointer;z-index:2;display:grid;place-items:center}
+.fav.on{color:#ff5d7a;background:#1a0f08}
+.plate{margin-top:12px;background:linear-gradient(#d4ad55,#a8832f);color:#2a1a05;padding:5px 10px;text-align:center;min-width:160px;max-width:228px;box-shadow:0 2px 7px rgba(0,0,0,.4)}
+.plate b{display:block;font:700 1.02rem/1.2 "Cormorant Garamond",serif}
+.plate span{font-size:.78rem}
+.none{grid-column:1/-1;text-align:center;opacity:.85;padding:32px 18px}
+dialog{border:none;padding:0;max-width:720px;width:calc(100% - 20px);max-height:90vh;background:var(--paper);color:var(--pi);box-shadow:0 0 0 5px var(--g2),0 0 0 8px var(--g3),0 20px 50px #000}
+dialog::backdrop{background:rgba(3,8,24,.86)}
+.dc{padding:22px 20px 26px;overflow:auto;max-height:90vh}
+.x{position:absolute;top:4px;right:8px;font:700 1.5rem/1 Georgia;background:none;border:none;color:var(--pi);cursor:pointer;padding:5px 8px;z-index:3}
+dialog h2{font:700 1.7rem/1.15 "Cormorant Garamond",serif;margin:0 32px 2px 0;color:#1a1208}
+.tag{margin:0 0 12px;font-style:italic;color:#8a5f10;font-size:.92rem}
+.modal-top{display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start;margin-bottom:14px}
+.modal-pic{width:125px;flex-shrink:0;background:var(--mat);padding:6px;box-shadow:0 0 0 3px var(--g3)}
+.modal-pic svg,.modal-pic img{display:block;width:100%;height:auto;aspect-ratio:4/5;object-fit:cover}
+.sec{margin-top:13px}
+.sec h3{font:700 1rem "Cormorant Garamond",serif;margin:0 0 4px;color:#5c3d0e;border-bottom:1px solid #cdb98c;padding-bottom:2px}
+.sec p,.sec ul{margin:0;font-size:.93rem}
+.sec ul{padding-left:1.1em}
+.family{background:linear-gradient(to right,#f8f0d8,#f3e6c4);padding:11px 13px;border-radius:3px;border-left:4px solid var(--g2);margin-top:12px}
+.family h3{border:none;color:#5c3d0e;margin-bottom:5px}
+.tech{max-width:880px;margin:0 auto;padding:4px 16px 32px;text-align:center}
+.tech h2{font:700 1.5rem "Cormorant Garamond",serif;color:var(--g1)}
+.tech span{display:inline-block;margin:2px;padding:2px 10px;border:1px solid var(--g2);border-radius:14px;font-size:.82rem}
+footer{text-align:center;padding:0 14px 34px;font-size:.8rem;opacity:.7;max-width:660px;margin:0 auto}
+@media (prefers-reduced-motion:reduce){.item{transition:none;opacity:1;transform:none}}
+@media (max-width:500px){.modal-top{flex-direction:column;align-items:center;text-align:center}.modal-pic{width:110px}}
+</style>
+</head>
+<body>
+<canvas id="bg" aria-hidden="true"></canvas>
+<div class="z">
+<header class="hero">
+  <svg viewBox="0 0 100 100" aria-hidden="true">
+    <defs><linearGradient id="gold" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#f8e7b0"/><stop offset="55%" stop-color="#e2b84a"/><stop offset="100%" stop-color="#b8860b"/></linearGradient></defs>
+    <path fill="url(#gold)" d="M62 18c-18 4-30 20-30 38 0 22 16 38 36 38 8 0 15-2 21-6-12 8-28 10-42 2C25 78 14 58 18 38 22 20 38 10 56 12c2 0 4 0 6 1z"/>
+    <path fill="#f4dc94" d="M78 28l2.2 6.8h7.2l-5.8 4.2 2.2 6.8-5.8-4.2-5.8 4.2 2.2-6.8-5.8-4.2h7.2z"/>
+  </svg>
+  <h1>Oʻzbekistonning buyuk siymolari</h1>
+  <p>Ilm, adolat, jasorat va yaratuvchanlik bilan dunyoga nur sochgan ajdodlarimiz va zamondoshlarimiz.</p>
+  <div class="stats"><div><b id="cnt">0</b>siymo</div><div><b>7</b>boʻlim</div><div><b id="fv">0</b>sevimli</div></div>
+</header>
+<nav class="bar" id="bar" aria-label="Boʻlimlar"></nav>
+<main id="g"></main>
+<section class="tech"><h2>Texnologiyalar</h2>
+<span>HTML5</span><span>CSS3</span><span>JavaScript</span><span>SVG</span><span>Canvas</span><span>Dialog</span><span>localStorage</span></section>
+<footer>Portretlar stylized SVG koʻrinishida. Tarixiy shaxslarning aksariyatida haqiqiy rasm saqlanmagan. Maʼlumotlar ochiq manbalarga asoslangan.</footer>
+</div>
+
+<dialog id="d"><button class="x" id="x" aria-label="Yopish">×</button><div class="dc" id="c"></div></dialog>
+
+<script>
+const C=["Hammasi","Allomalar","Hukmdorlar","Shoirlar va adiblar","Jadidlar","Avliyolar","Zamonaviy rahbarlar"];
+const P=[
+{n:"Muhammad al-Xorazmiy",y:"~780–~850",c:1,b:"Xorazm",d:"Bagʻdod",fam:"Ota-onasi haqida aniq maʼlumot saqlanmagan.",o:"Matematik, astronom",bio:"Algebra faniga asos solgan. “Algoritm” atamasi uning nomidan.",works:["Al-jabr val-muqobala","Astronomik jadvallar"]},
+{n:"Ahmad al-Fargʻoniy",y:"~800–~870",c:1,b:"Fargʻona",d:"Misr",fam:"Maʼlumot cheklangan.",o:"Astronom, muhandis",bio:"Yer meridiani va Nil sathi oʻlchovlarida ishtirok etgan.",works:["Astronomiya asoslari"]},
+{n:"Abu Rayhon Beruniy",y:"973–1048",c:1,b:"Kot (Xorazm)",d:"Gʻazna",fam:"Maʼlumot cheklangan.",o:"Qomusiy olim",bio:"Astronomiya, geodeziya, tarix, minerologiya. Yer radiusini hisoblagan.",works:["Qonuni Masʼudiy","Hindiston"]},
+{n:"Ibn Sino",y:"980–1037",c:1,b:"Afshona (Buxoro)",d:"Hamadon",fam:"Otasi Abdulloh — Samanylер xizmatida.",o:"Tabib, faylasuf",bio:"“Tib qonunlari” asrlar davomida asosiy tibbiy darslik boʻlgan.",works:["Tib qonunlari","Kitob ash-Shifo"]},
+{n:"Mirzo Ulugʻbek",y:"1394–1449",c:1,b:"Sultoniya",d:"Samarqand",fam:"Otasi: Shohrux. Onasi: Gavharshod. Bobosi: Amir Temur.",o:"Astronom, hukmdor",bio:"Samarqand rasadxonasi va 1018 yulduz katalogi.",works:["Ziji jadidi Koʻragoniy"]},
+{n:"Abu Nasr Forobiy",y:"~872–950",c:1,b:"Forob",d:"Damashq",fam:"Maʼlumot cheklangan.",o:"Faylasuf",bio:"“Muallimi soniy”. Falsafa va musiqa nazariyasi.",works:["Fozil odamlar shahri"]},
+{n:"Amir Temur",y:"1336–1405",c:2,b:"Kesh (Shahrisabz)",d:"Oʻtrar",fam:"Otasi: Muhammad Taragʻay (Barlos). Onasi: Tekina Moh. Oʻgʻillari: Jahongir, Umarshayx, Mironshoh, Shohrux.",o:"Davlat arbobi, sarkarda",bio:"Temuriylar saltanatini barpo etgan. Samarqandni buyuk markazga aylantirgan.",works:["Temur tuzuklari"]},
+{n:"Jaloliddin Manguberdi",y:"1199–1231",c:2,b:"Gurganj",d:"Kurdiston",fam:"Otasi: Muhammad Xorazmshoh.",o:"Xorazmshoh, sarkarda",bio:"Moʻgʻullarga qarshi jasorat bilan kurashgan.",works:["Parvon jangi gʻalabasi"]},
+{n:"Zahiriddin Bobur",y:"1483–1530",c:2,b:"Andijon",d:"Agra",fam:"Otasi: Umarshayx Mirzo. Onasi: Qutlugʻ Nigorxonim.",o:"Hukmdor, shoir",bio:"Boburiylar saltanatiga asos solgan. “Boburnoma” muallifi.",works:["Boburnoma"]},
+{n:"Nodira",y:"1792–1842",c:2,b:"Andijon",d:"Buxoro",fam:"Maʼlumot cheklangan.",o:"Shoira, hukmdor",bio:"Qoʻqon xonligini boshqargan, madaniyatni qoʻllab-quvvatlagan.",works:["Devon"]},
+{n:"Alisher Navoiy",y:"1441–1501",c:3,b:"Hirot",d:"Hirot",fam:"Otasi: Gʻiyosiddin Muhammad (Kichkina Bahodir). Onasi: Kobul amirzodalari oilasidan.",o:"Shoir, mutafakkir",bio:"Oʻzbek tilini yuksak adabiy tilga koʻtargan. Xamsa muallifi.",works:["Xamsa","Muhokamat ul-lugʻatayn"]},
+{n:"Furqat",y:"1859–1909",c:3,b:"Qoʻqon",d:"Yarkand",fam:"Maʼlumot cheklangan.",o:"Shoir, maʼrifatparvar",bio:"Jadidchilik gʻoyalarini tarqatgan.",works:["Sheʼrlar"]},
+{n:"Muqimiy",y:"1850–1903",c:3,b:"Qoʻqon",d:"Qoʻqon",fam:"Maʼlumot cheklangan.",o:"Shoir",bio:"Satira va xalq hayoti sheʼrlari.",works:["Devon"]},
+{n:"Hamza Hakimzoda Niyoziy",y:"1889–1929",c:3,b:"Qoʻqon",d:"Shohimardon",fam:"Maʼlumot cheklangan.",o:"Shoir, dramaturg",bio:"Yangi oʻzbek teatri asoschilaridan.",works:["Boy ila xizmatchi"]},
+{n:"Oybek",y:"1905–1968",c:3,b:"Toshkent",d:"Toshkent",fam:"Maʼlumot cheklangan.",o:"Yozuvchi",bio:"“Navoiy” tarixiy romani muallifi.",works:["Navoiy","Qutlugʻ qon"]},
+{n:"Gʻafur Gʻulom",y:"1903–1966",c:3,b:"Toshkent",d:"Toshkent",fam:"Maʼlumot cheklangan.",o:"Shoir, yozuvchi",bio:"“Shum bola” va boshqa asarlar.",works:["Shum bola"]},
+{n:"Abdulla Qahhor",y:"1907–1968",c:3,b:"Qoʻqon",d:"Moskva",fam:"Maʼlumot cheklangan.",o:"Yozuvchi",bio:"Oʻzbek qisqa hikoyasining ustasi.",works:["Oʻtmishdan ertaklar"]},
+{n:"Erkin Vohidov",y:"1936–2016",c:3,b:"Oltiariq",d:"Toshkent",fam:"Maʼlumot cheklangan.",o:"Shoir",bio:"“Oʻzbegim” sheʼri bilan mashhur.",works:["Oʻzbegim"]},
+{n:"Abdulla Oripov",y:"1941–2016",c:3,b:"Qashqadaryo",d:"Toshkent",fam:"Maʼlumot cheklangan.",o:"Shoir",bio:"Madhiya matni muallifi. Oʻzbekiston Qahramoni.",works:["Madhiya","Yurtim sirlari"]},
+{n:"Zulfiya",y:"1915–1996",c:3,b:"Toshkent",d:"Toshkent",fam:"Maʼlumot cheklangan.",o:"Shoira",bio:"Oʻzbek ayol sheʼriyatining bayroqdori.",works:["Sheʼrlar"]},
+{n:"Mahmudxoʻja Behbudiy",y:"1875–1919",c:4,b:"Samarqand",d:"Qarshi",fam:"Maʼlumot cheklangan.",o:"Dramaturg, jadid",bio:"“Padarkush” — milliy dramaturgiya boshi.",works:["Padarkush"]},
+{n:"Abdurauf Fitrat",y:"1886–1938",c:4,b:"Buxoro",d:"Toshkent",fam:"Maʼlumot cheklangan.",o:"Olim, jadid",bio:"Buxoro jadidlari yetakchisi.",works:["Munozara"]},
+{n:"Abdulla Qodiriy",y:"1894–1938",c:4,b:"Toshkent",d:"Toshkent",fam:"Maʼlumot cheklangan.",o:"Yozuvchi",bio:"Birinchi oʻzbek romani muallifi.",works:["Oʻtkan kunlar"]},
+{n:"Abdulhamid Choʻlpon",y:"1897–1938",c:4,b:"Andijon",d:"Toshkent",fam:"Maʼlumot cheklangan.",o:"Shoir, yozuvchi",bio:"Vatan va ozodlik sheʼrlari.",works:["Kecha va kunduz"]},
+{n:"Imom al-Buxoriy",y:"810–870",c:5,b:"Buxoro",d:"Xartang",fam:"Otasi: Ismoil ibn Ibrohim.",o:"Muhaddis",bio:"Eng ishonchli hadislar toʻplamini yaratgan.",works:["Al-Jome as-sahih"]},
+{n:"Imom at-Termiziy",y:"824–892",c:5,b:"Termiz",d:"Termiz",fam:"Maʼlumot cheklangan.",o:"Muhaddis",bio:"Sunan at-Termiziy muallifi.",works:["Sunan at-Termiziy"]},
+{n:"Bahouddin Naqshband",y:"1318–1389",c:5,b:"Qasri Hinduvon",d:"Buxoro",fam:"Maʼlumot cheklangan.",o:"Tasavvuf allomasi",bio:"Naqshbandiya tariqati asoschisi.",works:["Naqshbandiya taʼlimoti"]},
+{n:"Ahmad Yassaviy",y:"~1093–1166",c:5,b:"Sayram",d:"Turkiston",fam:"Otasi: Shayx Ibrohim.",o:"Tasavvuf shayxi",bio:"Hikmatlar muallifi.",works:["Hikmatlar"]},
+{n:"Islom Karimov",y:"1938–2016",c:6,b:"Samarqand",d:"Toshkent",fam:"Otasi: Abdugʻani Karimov (1894). Onasi: Sanobar Karimova (1902). Oilada 8 farzand.",o:"Birinchi Prezident",bio:"Mustaqillikni eʼlon qilgan va mustahkamlagan.",works:["Mustaqillik asoslari"]},
+{n:"Shavkat Mirziyoyev",y:"1957–hozir",c:6,b:"Jizzax viloyati",d:"—",fam:"Otasi: Miromon Mirziyoyev. Rafiqasi: Ziroatxon Mirziyoyeva.",o:"Prezident",bio:"2016-yildan islohotlar va ochiqlik siyosatini olib bormoqda.",works:["Yangi Oʻzbekiston strategiyasi"]}
+];
+
+const g=document.getElementById('g'),bar=document.getElementById('bar'),d=document.getElementById('d'),c=document.getElementById('c');
+let fav={},cur=0,q='';
+try{fav=JSON.parse(localStorage.getItem('fav')||'{}')}catch(e){}
+function save(){try{localStorage.setItem('fav',JSON.stringify(fav))}catch(e){}document.getElementById('fv').textContent=Object.keys(fav).length}
+
+/* Yaxshilangan SVG portret — har bir shaxs uchun biroz farqli */
+function pic(i,cat){
+  const hues=[210,25,145,310,15,255,175];
+  const h=hues[cat]||40;
+  const skin=`hsl(${h+20},25%,78%)`;
+  const cloth=`hsl(${h},30%,28%)`;
+  const accent=`hsl(${h+40},45%,55%)`;
+  return `<svg viewBox="0 0 200 250" role="img" aria-label="Portret">
+    <defs><linearGradient id="bg${i}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="hsl(${h},20%,85%)"/><stop offset="1" stop-color="hsl(${h},25%,45%)"/></linearGradient></defs>
+    <rect width="200" height="250" fill="url(#bg${i})"/>
+    <!-- yelka -->
+    <ellipse cx="100" cy="230" rx="78" ry="45" fill="${cloth}"/>
+    <!-- boʻyin -->
+    <rect x="85" y="145" width="30" height="30" fill="${skin}"/>
+    <!-- bosh -->
+    <circle cx="100" cy="105" r="42" fill="${skin}"/>
+    <!-- soch / salla -->
+    <path d="M58 95 Q100 55 142 95 Q140 75 100 68 Q60 75 58 95" fill="${cloth}"/>
+    <path d="M55 100 Q100 70 145 100" fill="none" stroke="${accent}" stroke-width="3"/>
+    <!-- yuz detallari -->
+    <ellipse cx="85" cy="105" rx="5" ry="6" fill="#2a1f14"/>
+    <ellipse cx="115" cy="105" rx="5" ry="6" fill="#2a1f14"/>
+    <path d="M90 125 Q100 132 110 125" fill="none" stroke="#5a4030" stroke-width="2"/>
+  </svg>`;
+}
+
+const io=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{threshold:.1});
+
+P.forEach((p,i)=>{
+  const e=document.createElement('div');
+  e.className='item';e.dataset.cat=p.c;e.dataset.idx=i;
+  e.dataset.name=(p.n+' '+(p.bio||'')+' '+(p.works||[]).join(' ')).toLowerCase();
+  e.innerHTML=`<div class="fw"><button class="fav" aria-label="Sevimli">★</button><button class="frame" aria-label="${p.n}"><div class="mat">${pic(i,p.c)}</div></button></div><div class="plate"><b>${p.n}</b><span>${p.y}</span></div>`;
+  const f=e.querySelector('.fav');if(fav[i])f.classList.add('on');
+  f.onclick=ev=>{ev.stopPropagation();if(fav[i]){delete fav[i];f.classList.remove('on')}else{fav[i]=1;f.classList.add('on')}save();if(cur===-1)apply()};
+  e.querySelector('.frame').onclick=()=>{
+    const works=(p.works||[]).map(w=>`<li>${w}</li>`).join('')||'<li>—</li>';
+    c.innerHTML=`<div class="modal-top"><div class="modal-pic">${pic(i,p.c)}</div><div><h2>${p.n}</h2><p class="tag">${p.o} · ${p.y}</p></div></div>
+    <div class="family"><h3>Oila va ajdodlar</h3><p>${p.fam||'Maʼlumot cheklangan.'}</p></div>
+    <div class="sec"><h3>Tugʻilgan joyi</h3><p>${p.b||'—'}</p></div>
+    <div class="sec"><h3>Vafot etgan joyi</h3><p>${p.d||'—'}</p></div>
+    <div class="sec"><h3>Faoliyati</h3><p>${p.bio||'—'}</p></div>
+    <div class="sec"><h3>Asarlari va yutuqlari</h3><ul>${works}</ul></div>`;
+    d.showModal()};
+  g.appendChild(e);io.observe(e);
+});
+
+function apply(){let n=0;[...g.children].forEach(e=>{if(e.classList.contains('none'))return;const ok=(cur===0||(cur===-1?fav[e.dataset.idx]:e.dataset.cat==cur))&&e.dataset.name.includes(q);e.hidden=!ok;if(ok)n++});
+  let m=g.querySelector('.none');if(!n&&!m){m=document.createElement('p');m.className='none';m.textContent='Hech narsa topilmadi.';g.appendChild(m)}else if(n&&m)m.remove()}
+
+C.forEach((t,i)=>{const b=document.createElement('button');b.textContent=t;if(!i)b.className='on';b.onclick=()=>{cur=i;[...bar.querySelectorAll('button')].forEach(x=>x.classList.remove('on'));b.classList.add('on');apply()};bar.appendChild(b)});
+const favBtn=document.createElement('button');favBtn.textContent='★ Sevimlilar';favBtn.onclick=()=>{cur=-1;[...bar.querySelectorAll('button')].forEach(x=>x.classList.remove('on'));favBtn.classList.add('on');apply()};bar.appendChild(favBtn);
+const sw=document.createElement('div');sw.className='sw';sw.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3-3"/></svg>`;
+const s=document.createElement('input');s.type='search';s.placeholder='Ism yoki maʼlumot...';s.oninput=()=>{q=s.value.toLowerCase().trim();apply()};sw.appendChild(s);bar.appendChild(sw);
+
+document.getElementById('cnt').textContent=P.length;save();
+document.getElementById('x').onclick=()=>d.close();d.addEventListener('click',e=>{if(e.target===d)d.close()});
+
+(function(){const cv=document.getElementById('bg'),x=cv.getContext('2d');let S=[],W,H;
+function rs(){W=cv.width=innerWidth;H=cv.height=innerHeight;S=[];for(let i=0;i<Math.min(70,W/15);i++)S.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.18,vy:(Math.random()-.5)*.18,r:Math.random()*1.3+.3})}
+function f(){x.clearRect(0,0,W,H);S.forEach((a,i)=>{a.x+=a.vx;a.y+=a.vy;if(a.x<0||a.x>W)a.vx*=-1;if(a.y<0||a.y>H)a.vy*=-1;x.fillStyle='rgba(244,220,148,.75)';x.beginPath();x.arc(a.x,a.y,a.r,0,7);x.fill();for(let j=i+1;j<S.length;j++){const b=S[j],dx=a.x-b.x,dy=a.y-b.y,dd=dx*dx+dy*dy;if(dd<9000){x.strokeStyle=`rgba(244,220,148,${.12-dd/80000})`;x.beginPath();x.moveTo(a.x,a.y);x.lineTo(b.x,b.y);x.stroke()}}});if(!matchMedia('(prefers-reduced-motion:reduce)').matches)requestAnimationFrame(f)}
+rs();addEventListener('resize',rs);f()})();
+</script>
+</body>
+</html>

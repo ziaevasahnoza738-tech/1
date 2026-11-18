@@ -1,0 +1,1699 @@
+/* =========================================================================
+   Oʻzbekistonning buyuk siymolari — bitta faylli React (JSX) versiyasi
+   Asl HTML saytning toʻliq koʻchirmasi: CSS, maʼlumotlar, xarita, modallar.
+   Ishlatish:  import App from "./eng.jsx";  <App />
+   ========================================================================= */
+   
+import React, { useEffect, useMemo, useRef, useState } from "react";
+
+/* ─────────────── USLUBLAR (asl <style> bloki) ─────────────── */
+const CSS = `:root{
+  box-sizing:border-box;color-scheme:dark;
+  --lapis:#0a1734;--lapis2:#040a18;--ink:#eef3ff;--mut:#a9b8d8;--topbar-h:48px;
+  --g0:#fff9dc;--g1:#f6e6ab;--g2:#e7c766;--g3:#c39a38;--g4:#8f6a17;--g5:#5b3f08;
+  --paper:#f8efdb;--paper2:#eedcbb;--pi:#2a2014;--pi2:#5b4a2f;--teal:#38b6ab;
+  --nq:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='72' viewBox='0 0 72 72'%3E%3Cg fill='none' stroke='%23c39a38' stroke-width='.8' stroke-opacity='.40'%3E%3Cpath d='M36 2 43 15 57 8 53 23 68 27 56 36 68 45 53 49 57 64 43 57 36 70 29 57 15 64 19 49 4 45 16 36 4 27 19 23 15 8 29 15z'/%3E%3Ccircle cx='36' cy='36' r='8'/%3E%3C/g%3E%3C/svg%3E");
+  --nqp:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'%3E%3Cg fill='none' stroke='%238f6a17' stroke-width='.7' stroke-opacity='.22'%3E%3Cpath d='M32 2 38 13 51 7 47 21 61 24 50 32 61 40 47 43 51 57 38 51 32 62 26 51 13 57 17 43 3 40 14 32 3 24 17 21 13 7 26 13z'/%3E%3Ccircle cx='32' cy='32' r='7'/%3E%3C/g%3E%3C/svg%3E");
+}
+html{scroll-behavior:smooth}
+*,*::before,*::after{box-sizing:inherit}
+body{padding-top:var(--topbar-h);margin:0;background:
+  radial-gradient(ellipse 90% 60% at 50% -10%,#16306b 0%,transparent 60%),
+  radial-gradient(ellipse at top,var(--lapis),var(--lapis2) 72%) fixed;
+  color:var(--ink);font:17px/1.7 "Noto Serif",Georgia,serif;-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0;background-image:var(--nq),radial-gradient(circle,rgba(231,199,102,.3) 1px,transparent 1.5px);background-size:72px 72px,26px 26px;opacity:.18;pointer-events:none;z-index:0;mask-image:radial-gradient(ellipse at center,#000 30%,transparent 78%)}
+/* ── MILTILLOVCHI YULDUZLAR QATLAMI ── */
+.ornsky{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;mask-image:radial-gradient(ellipse at 50% 32%,#000 34%,transparent 82%)}
+.ornsky .tw{position:absolulor:#ffe9a8;text-shadow:0 0 10px rgba(255,215,94,.85);animation:twinkle var(--d,4s) ease-in-out infinite;animation-delay:var(--dl,0s)}
+@keyframes twinkle{0%,100%{opacity:.8;transform:scale(1) rotate(0)}50%{opacity:.16;transform:scale(.68) rotate(45deg)}}
+.ornsky .shoot{position:absolute;left:-14%;width:120px;height:2px;border-radius:2px;background:linear-gradient(90deg,rgba(255,246,214,0),#ffe9a8);opacity:0;animation:shoot 12s ease-in infinite}
+.ornsky .shoot.s1{top:16%}
+.ornsky .shoot.s2{top:46%;animation-duration:17s;animation-delay:6s}
+@keyframes shoot{0%{opacity:0;transform:translate(0,0) rotate(16deg) scaleX(.35)}5%{opacity:.9}13%{opacity:0;transform:translate(62vw,17vh) rotate(16deg) scaleX(1)}14%,100%{opacity:0}}
+#bg{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
+.z{position:relative;z-index:1}
+.skip{position:absolute;left:-999px;top:0;background:var(--g2);color:#1b1204;padding:10px 16px;z-index:99;font-weight:700}
+.skip:focus{left:8px;top:8px}
+/* ── HERO ── */
+.hero{position:relative;text-align:center;padding:clamp(38px,7vw,74px) 20px 30px;overflow:hidden}
+.hero::before,.hero::after{content:"";position:absolute;width:min(260px,45vw);height:min(260px,45vw);border:2px solid var(--g3);opacity:.28;border-radius:50%;top:-130px;pointer-events:none}
+.hero::before{left:-90px;box-shadow:inset 0 0 0 8px transparent,inset 0 0 0 12px var(--g3)}
+.hero::after{right:-90px;box-shadow:inset 0 0 0 8px transparent,inset 0 0 0 12px var(--g3)}
+.crest{width:96px;height:96px;margin:0 auto 6px;filter:drop-shadow(0 0 18px rgba(231,199,102,.45));display:block}
+.eyebrow{margin:0 0 10px;font-size:.74rem;letter-spacing:.34em;text-transform:uppercase;color:var(--g2)}
+h1{font:700 clamp(2.05rem,6.6vw,4.1rem)/1.04 "Cormorant Garamond",Georgia,serif;margin:0 auto 14px;max-width:16em;color:var(--g1);text-shadow:0 2px 0 rgba(0,0,0,.4)}
+h1 em{font-style:italic;color:#fff6d6}
+.lede{max-width:44em;margin:0 auto;color:#dbe4f7;opacity:.92}
+.divider{width:min(420px,80%);height:26px;margin:20px auto 4px;display:block;opacity:.9}
+.stats{display:flex;justify-content:center;gap:clamp(16px,4vw,42px);flex-wrap:wrap;margin:14px 0 0;padding:0;list-style:none;color:var(--g2);font-style:italic;font-size:.95rem}
+.stats b{display:block;font:700 2rem/1 "Cormorant Garamond",serif;color:var(--g1);font-style:normal}
+/* ── TOOLBAR ── */
+/* ── YUQORI PANEL: yulduz + tashrif soni (chap) / hisob (oʻng) ── */
+.topbar{position:fixed;top:0;left:0;right:0;height:var(--topbar-h);display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 clamp(10px,2.6vw,24px);z-index:45;background:linear-gradient(#08142e,#050d22);border-bottom:1px solid rgba(195,154,56,.45);box-shadow:0 6px 18px rgba(0,0,0,.35)}
+.visit{display:flex;align-items:center;gap:7px;height:32px;padding:0 13px;border:1px solid rgba(195,154,56,.55);border-radius:20px;background:rgba(231,199,102,.09);font:700 .95rem/1 "Cormorant Garamond",Georgia,serif;color:#ffe9a8;letter-spacing:.05em;max-width:42vw}
+#visitCount{min-width:1.2em;text-align:right;font-variant-numeric:tabular-nums;color:#fff8dc}
+.star{font-size:1.3rem;line-height:1;color:#ffd75e;filter:drop-shadow(0 0 5px rgba(255,215,94,.95)) drop-shadow(0 0 13px rgba(231,199,102,.6));animation:starPulse 2.6s ease-in-out infinite}
+@keyframes starPulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.13);opacity:.82}}
+.topbar .btn{height:32px;padding:0 14px;display:inline-flex;align-items:center;gap:6px;max-width:46vw}
+.bar{position:sticky;top:var(--topbar-h);z-index:20;background:linear-gradient(#08142eeb,#050d22f2);backdrop-filter:blur(10px);border-bottom:2px solid var(--g4);box-shadow:0 8px 24px rgba(0,0,0,.35)}
+.row{display:flex;gap:8px;align-items:center;justify-content:center;flex-wrap:wrap;padding:9px 12px;max-width:1240px;margin:0 auto}
+.row+.row{border-top:1px solid rgba(195,154,56,.22);padding-top:8px}
+.chips{flex-wrap:nowrap;justify-content:flex-start;gap:7px;overflow-x:auto;scrollbar-width:none;scroll-snap-type:x proximity;padding:1px 0}
+.chips::-webkit-scrollbar{display:none}
+.chips .btn{flex:0 0 auto;scroll-snap-align:center;display:inline-flex;align-items:center;gap:8px;padding:6px 13px 6px 7px;border-radius:999px;font-size:.84rem}
+@media (min-width:960px){.chips{justify-content:center}}
+.chips .n{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;background:rgba(231,199,102,.16);border:1px solid rgba(195,154,56,.5);color:#ffe9a8;font:700 .7rem/1 "Noto Serif",Georgia,serif;flex:none}
+.chips .cnt{font-size:.72rem;font-weight:600;color:var(--mut);min-width:1em;text-align:right}
+.btn.on .n{background:rgba(27,18,4,.16);border-color:rgba(27,18,4,.4);color:#1b1204}
+.btn.on .cnt{color:#1b1204;opacity:.7}
+.chips #favBtn{padding:7px 14px}
+.btn,.sw,select{font:inherit;font-size:.86rem;border:1px solid var(--g3);background:rgba(255,255,255,.03);color:var(--ink);padding:6px 13px;border-radius:20px;cursor:pointer;white-space:nowrap;transition:background .18s,color .18s,transform .18s}
+.btn:hover,.sw:hover,select:hover{background:rgba(231,199,102,.12)}
+.btn.on{background:linear-gradient(180deg,var(--g2),var(--g3));color:#1b1204;font-weight:700;border-color:var(--g1)}
+select{appearance:none;padding-right:28px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23e7c766'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 11px center}
+select option{background:#0a1734;color:var(--ink)}
+.sw{display:flex;align-items:center;gap:7px;padding:6px 13px;min-width:210px;flex:1 1 260px;max-width:400px}
+.sw svg{width:15px;height:15px;opacity:.8;flex:none}
+.sw input{all:unset;width:100%;font:inherit;font-size:.86rem;color:var(--ink)}
+.sw input::placeholder{color:#8b9cc0}
+.sw{border-radius:999px;background:rgba(255,255,255,.04);transition:border-color .18s,box-shadow .18s,background .18s}
+.sw:focus-within{border-color:var(--g2);background:rgba(231,199,102,.09);box-shadow:0 0 0 2px rgba(231,199,102,.16)}
+.sw .clear{all:unset;cursor:pointer;width:20px;height:20px;border-radius:50%;display:grid;place-items:center;color:#ffe9a8;font:700 .95rem/1 Georgia,serif;background:rgba(231,199,102,.14);flex:none}
+.sw .clear:hover{background:rgba(231,199,102,.3)}
+.sw .clear[hidden]{display:none}
+:focus-visible{outline:3px solid var(--teal);outline-offset:2px}
+#count{font-size:.8rem;color:var(--mut);letter-spacing:.04em;min-width:104px;text-align:center}
+/* ── GRID ── */
+main[hidden]{display:none}
+main{max-width:1240px;margin:0 auto;padding:34px 16px 30px;display:grid;gap:40px 22px;grid-template-columns:repeat(auto-fill,minmax(214px,1fr))}
+.item{position:relative;display:flex;flex-direction:column;align-items:center;opacity:0;transform:translateY(20px);transition:opacity .5s,transform .5s}
+.item.in{opacity:1;transform:none}
+.item[hidden]{display:none}
+.frame{all:unset;cursor:pointer;display:block;width:100%;max-width:250px;border-radius:4px;transition:transform .25s,filter .25s;filter:drop-shadow(0 14px 22px rgba(0,0,0,.5))}
+.frame .pic{display:block;width:100%;height:auto;border-radius:4px}
+.frame:hover,.frame:focus-visible{transform:translateY(-6px);filter:drop-shadow(0 20px 30px rgba(231,199,102,.3)) rotate(-.4deg)}
+.frame:active{transform:translateY(-2px) scale(.985);transition-duration:.08s}
+.plate::before{content:"";display:block;width:54px;height:9px;margin:0 auto 5px;opacity:.85;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='54' height='9' viewBox='0 0 54 9'%3E%3Cpath d='M27 0l2 4 4 2-4 2-2 4-2-4-4-2 4-2z' fill='%23e7c766'/%3E%3Cpath d='M0 4.5h18M36 4.5h18' stroke='%23c39a38' stroke-width='.8' stroke-opacity='.7'/%3E%3C/svg%3E") center/contain no-repeat}
+.fav{position:absolute;top:-4px;right:calc(50% - 122px);width:32px;height:32px;border-radius:50%;border:2px solid var(--g3);background:#071026;color:#cbbd97;font-size:14px;cursor:pointer;z-index:3;display:grid;place-items:center;transition:transform .15s,color .15s}
+.fav:hover{transform:scale(1.12)}
+.fav[aria-pressed="true"]{color:#ff6b86;background:#1c0c10;border-color:#ff6b86}
+.plate{margin-top:14px;width:100%;max-width:250px;text-align:center}
+.plate b{display:block;font:700 1.12rem/1.25 "Cormorant Garamond",serif;color:var(--g1)}
+.plate span{display:block;font-size:.78rem;color:var(--mut);margin-top:2px}
+.plate em{display:block;font-size:.8rem;color:var(--g2);font-style:italic;margin-top:4px}
+.empty{grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--mut)}
+.empty b{display:block;font:700 1.5rem "Cormorant Garamond",serif;color:var(--g1);margin-bottom:8px}
+/* ── TIMELINE ── */
+#tl{max-width:900px;margin:0 auto;padding:30px 18px 40px;list-style:none}
+#tl[hidden]{display:none}
+#tl>li{position:relative;padding:0 0 26px 34px;border-left:2px solid rgba(195,154,56,.4)}
+#tl>li::before{content:"❖";position:absolute;left:-9px;top:-2px;background:var(--lapis2);color:var(--g2);font-size:14px;animation:twinkle 6.5s ease-in-out infinite}
+#tl h3{margin:0 0 10px;font:700 1.35rem "Cormorant Garamond",serif;color:var(--g1)}
+#tl ul{list-style:none;padding:0;margin:0;display:grid;gap:8px}
+#tl button{all:unset;cursor:pointer;display:flex;justify-content:space-between;gap:14px;width:100%;padding:9px 14px;border:1px solid rgba(195,154,56,.35);border-radius:6px;background:rgba(255,255,255,.03);transition:background .18s}
+#tl button:hover,#tl button:focus-visible{background:rgba(231,199,102,.14)}
+#tl button b{font-weight:600;color:#f2e6c6}
+#tl button span{color:var(--mut);font-size:.85rem;white-space:nowrap}
+/* ── DIALOG ── */
+dialog{border:none;padding:0;max-width:760px;width:calc(100% - 18px);max-height:92vh;background:var(--paper);color:var(--pi);box-shadow:0 0 0 1px rgba(255,248,220,.55),0 0 0 4px var(--g3),0 0 0 8px var(--g5),0 30px 70px #000;border-radius:3px}
+/* ── OCHILISH ANIMATSIYASI (0.5s) ── */
+dialog[open]{animation:mdlIn .5s cubic-bezier(.2,.75,.25,1) both}
+dialog[open]::backdrop{animation:mdlFade .5s ease both}
+dialog[open] .mhead{animation:mdlHead .5s .05s ease both}
+dialog[open] .mfoot{animation:mdlFade .5s .14s ease both}
+@keyframes mdlIn{from{opacity:0;transform:translateY(22px) scale(.955)}to{opacity:1;transform:none}}
+@keyframes mdlFade{from{opacity:0}to{opacity:1}}
+@keyframes mdlHead{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+/* ── TEPADAN PASTGA "KARTA" BOʻLIB TIZILISH ── */
+.rise{animation:riseIn .52s cubic-bezier(.22,.72,.24,1) both}
+.rise-in{animation:riseSoft .42s cubic-bezier(.22,.72,.24,1) both}
+@keyframes riseIn{from{opacity:0;transform:translateY(18px) scale(.992)}to{opacity:1;transform:none}}
+@keyframes riseSoft{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:none}}
+dialog::backdrop{background:rgba(2,6,18,.9);backdrop-filter:blur(3px)}
+.dc{position:relative;overflow:auto;max-height:92vh;padding:0 0 26px;background-image:var(--nqp);background-attachment:local}
+.x{position:absolute;top:8px;right:10px;font:700 1.4rem/1 Georgia;background:rgba(255,255,255,.55);border:1px solid #cbb98d;color:var(--pi);cursor:pointer;padding:6px 10px;border-radius:50%;z-index:5}
+.x:hover{background:#fff}
+.mhead{position:relative;padding:34px 22px 22px;background:radial-gradient(circle at 50% -12%,rgba(231,199,102,.3),transparent 62%),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'%3E%3Cpath d='M32 6l3 9 9 3-9 3-3 9-3-9-9-3 9-3z' fill='%23e7c766' fill-opacity='.16'/%3E%3C/svg%3E"),linear-gradient(#122346,#0a1734 70%);background-size:auto,64px 64px,auto;color:var(--ink);border-bottom:3px double var(--g3);text-align:center}
+.mhead::before{content:"✦";position:absolute;left:50%;top:-18px;font-size:min(124px,30vw);line-height:1;color:rgba(231,199,102,.10);text-shadow:0 0 46px rgba(231,199,102,.22);pointer-events:none;animation:mspin 74s linear infinite}
+@keyframes mspin{from{transform:translateX(-50%) rotate(0)}to{transform:translateX(-50%) rotate(360deg)}}
+.mhead::after{content:"❖";position:absolute;bottom:-14px;left:50%;transform:translateX(-50%);background:var(--paper);color:var(--g3);font-size:15px;padding:0 8px}
+.mhead h2{font:700 clamp(1.5rem,4.4vw,2.15rem)/1.15 "Cormorant Garamond",serif;margin:8px 26px 4px;color:var(--g1)}
+.mhead .mh-sub{margin:0;color:#dbe4f7;font-style:italic;font-size:.95rem}
+.mhead .mh-meta{margin:10px 0 0;font-size:.8rem;letter-spacing:.12em;text-transform:uppercase;color:var(--g2)}
+.mtop{display:flex;gap:20px;padding:22px 20px 4px;align-items:flex-start;flex-wrap:wrap}
+.mpic{width:176px;flex:none;padding:5px;border:1px solid #c9a95c;background:linear-gradient(160deg,rgba(255,248,220,.85),rgba(195,154,56,.22));box-shadow:0 0 0 3px rgba(195,154,56,.14),0 12px 24px rgba(0,0,0,.25);filter:drop-shadow(0 8px 16px rgba(0,0,0,.25))}
+.mpic .pic{display:block;width:100%;height:auto}
+.mfacts{flex:1 1 230px;min-width:200px;font-size:.92rem}
+.mfacts dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:6px 14px}
+.mfacts dt{color:var(--pi2);font-size:.8rem;text-transform:uppercase;letter-spacing:.08em;padding-top:3px}
+.mfacts dd{margin:0;font-weight:600}
+.body{padding:6px 22px 0;counter-reset:msec}
+.orn{display:block;margin:16px auto;width:min(320px,80%);height:18px;opacity:.75;animation:ornGlow 5.5s ease-in-out infinite}
+@keyframes ornGlow{0%,100%{opacity:.55;filter:drop-shadow(0 0 0 transparent)}50%{opacity:.98;filter:drop-shadow(0 0 7px rgba(231,199,102,.55))}}
+.sec{margin:16px 0 0}
+.sec h3{font:700 1.12rem "Cormorant Garamond",serif;margin:0 0 6px;color:#6b4a10;display:flex;align-items:center;gap:8px}
+.sec h3{counter-increment:msec}
+.sec h3::before{content:counter(msec);width:22px;height:22px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(180deg,#f6e6ab,#c39a38);color:#2a1c04;font:700 .72rem/1 "Noto Serif",Georgia,serif;flex:none;box-shadow:0 1px 3px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.6)}
+.sec p{margin:0;font-size:.95rem;hyphens:auto}
+
+.sec ul{margin:0;padding-left:0;list-style:none;font-size:.94rem}
+.sec ul li{position:relative;padding-left:22px;margin-bottom:5px}
+.sec ul li::before{content:"✦";position:absolute;left:2px;color:var(--g3)}
+.chipsrow{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.tag{font-size:.74rem;letter-spacing:.06em;text-transform:uppercase;border:1px solid #c2ac7c;color:#6b5426;padding:3px 9px;border-radius:12px;background:rgba(255,255,255,.4)}
+.tag-plain{text-transform:none;font-size:.82rem;letter-spacing:0}
+.tag-link{text-transform:none;font-size:.82rem;letter-spacing:0;cursor:pointer;border-color:#a8811f;color:#4b3510;background:rgba(231,199,102,.34);font-weight:600;font-family:inherit}
+.tag-link:hover{background:#f3dd9a}
+.relrow{margin:0 0 9px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.relrow b{font:700 .72rem/1.6 "Noto Serif",serif;color:#6b4a10;text-transform:uppercase;letter-spacing:.08em;min-width:112px}
+.mfoot{position:sticky;bottom:0;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin:18px 0 0;padding:12px 22px;border-top:1px solid #cdb98c;background:var(--paper);box-shadow:0 -12px 18px rgba(248,239,219,.92);font-size:.82rem;z-index:4}
+body.modal-open{overflow:hidden}
+.mfoot a{color:#7a5410}
+.mnav{display:flex;gap:8px}
+.mbtn{font:inherit;font-size:.82rem;border:1px solid var(--g4);background:rgba(255,255,255,.5);color:#3a2a10;padding:5px 12px;border-radius:16px;cursor:pointer}
+.mbtn:hover{background:#fff}
+/* ── NAQSHLI, BOYITILGAN MODAL ── */
+dialog{max-width:840px}
+.mstars{margin:8px 0 0;font-size:.78rem;letter-spacing:.55em;color:var(--g2);text-align:center;animation:twinkle 7.5s ease-in-out infinite}
+.mstars.end{margin:18px 0 0;font-size:.9rem;letter-spacing:.7em}
+.mband{height:16px;margin:2px 0 0;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='16' viewBox='0 0 26 16'%3E%3Cpath d='M13 1l2 5 5 2-5 2-2 5-2-5-5-2 5-2z' fill='%23c39a38' fill-opacity='.55'/%3E%3Ccircle cx='2' cy='8' r='1' fill='%23c39a38' fill-opacity='.45'/%3E%3Ccircle cx='24' cy='8' r='1' fill='%23c39a38' fill-opacity='.45'/%3E%3C/svg%3E");background-repeat:repeat-x;background-position:center;opacity:.9}
+.sec h3::after{content:"";flex:1;height:1px;margin-left:10px;background:linear-gradient(90deg,rgba(195,154,56,.6),rgba(195,154,56,0))}
+.life{list-style:none;margin:4px 0 0;padding:0 0 0 4px}
+.life li{position:relative;margin:0 0 12px;padding:0 0 0 24px;border-left:1px solid rgba(195,154,56,.45)}
+.life li:last-child{margin-bottom:0;border-left-color:transparent}
+.life li::before{content:"★";position:absolute;left:-7px;top:-2px;font-size:11px;line-height:1;color:var(--g3)}
+.life b{display:inline-block;min-width:4.4em;margin-right:6px;font:700 .84rem/1.5 "Noto Serif",Georgia,serif;color:#7a5410;font-variant-numeric:tabular-nums}
+.life span{font-size:.93rem;color:var(--pi)}
+.deed{list-style:none;margin:0;padding:0;font-size:.93rem}
+.deed li{position:relative;margin-bottom:6px;padding-left:20px}
+.deed li::before{content:"✦";position:absolute;left:1px;color:var(--g3)}
+.trip{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.trip span{font-size:.79rem;padding:3px 10px;border:1px dashed #b99a55;border-radius:14px;color:#5b4a2f;background:rgba(255,255,255,.4)}
+/* ── FOOTER ── */
+.wrap{max-width:980px;margin:0 auto;padding:10px 18px 46px;text-align:center}
+.wrap h2{font:700 1.6rem "Cormorant Garamond",serif;color:var(--g1);margin:12px 0 10px}
+.tech{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-bottom:26px}
+.tech span{border:1px solid var(--g3);border-radius:14px;padding:3px 11px;font-size:.8rem;color:#dfe7fa}
+footer{max-width:720px;margin:0 auto;padding:0 18px 40px;text-align:center;font-size:.8rem;color:var(--mut);line-height:1.8}
+footer b{color:var(--g2)}
+/* ── MUALLIF ISMI ── */
+footer .author{margin:0 0 10px;font:700 clamp(1.06rem,3.6vw,1.5rem)/1.35 "Cormorant Garamond",Georgia,serif;color:var(--g2);letter-spacing:.055em;text-shadow:0 0 18px rgba(231,199,102,.4)}
+footer .author::before,footer .author::after{content:"✦";font-size:.62em;color:var(--g3);margin:0 .5em;vertical-align:.16em}
+footer .by{margin:0 0 18px;font-size:.76rem;letter-spacing:.12em;text-transform:uppercase;color:#b9a97f}
+footer .by b{color:var(--g2);letter-spacing:.18em;font-weight:700}
+#toast{position:fixed;left:50%;bottom:26px;transform:translate(-50%,20px);background:#0f2148;border:1px solid var(--g2);color:var(--g1);padding:10px 18px;border-radius:24px;font-size:.86rem;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;z-index:60}
+#toast.on{opacity:1;transform:translate(-50%,0)}
+/* ── BOSILGANDA MAYDA YULDUZCHALAR ── */
+.clickfx{position:fixed;inset:0;z-index:70;pointer-events:none;overflow:hidden}
+.clickfx .spark{position:absolute;line-height:1;color:#ffe27a;text-shadow:0 0 8px rgba(255,215,94,.85);transform:translate(-50%,-50%);animation:sparkPop .8s cubic-bezier(.2,.7,.3,1) forwards}
+@keyframes sparkPop{0%{opacity:0;transform:translate(-50%,-50%) scale(.35) rotate(0)}22%{opacity:1}100%{opacity:0;transform:translate(calc(-50% + var(--dx,0px)),calc(-50% + var(--dy,0px))) scale(.85) rotate(var(--rot,0deg))}}
+/* ── HISOB ── */
+#auth{border:none;padding:0;max-width:430px;width:calc(100% - 22px);background:var(--paper);color:var(--pi);box-shadow:0 0 0 4px var(--g3),0 0 0 8px var(--g5),0 30px 70px #000;border-radius:3px}
+#auth::backdrop{background:rgba(2,6,18,.9);backdrop-filter:blur(3px)}
+#auth .ac{position:relative;padding:26px 22px 22px;background-image:var(--nqp);max-height:90vh;overflow:auto}
+#auth h2{font:700 1.6rem/1.2 "Cormorant Garamond",serif;margin:0 0 4px;color:#3a2a10}
+#auth .sub{margin:0 0 14px;font-size:.86rem;color:#6b5a3a;line-height:1.5}
+#auth .tabs{display:flex;gap:6px;margin-bottom:14px}
+#auth .tabs button{flex:1;font:inherit;font-size:.84rem;padding:7px 6px;border:1px solid #c2ac7c;background:rgba(255,255,255,.45);border-radius:4px;cursor:pointer;color:#4b3510}
+#auth .tabs button.on{background:linear-gradient(180deg,#c39a38,#8f6a17);color:#fff6d6;border-color:#5b3f08;font-weight:700}
+#auth .field{margin-bottom:10px}
+#auth .field label{display:block;font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:#6b4a10;margin-bottom:3px}
+#auth .field input{width:100%;font:inherit;font-size:.9rem;padding:8px 10px;border:1px solid #c2ac7c;border-radius:4px;background:#fffaf0;color:var(--pi)}
+#auth .field input:focus{outline:2px solid #a8811f;outline-offset:1px}
+.authbtn{display:block;width:100%;font:inherit;font-weight:700;font-size:.9rem;padding:10px;border:1px solid #5b3f08;border-radius:4px;background:linear-gradient(180deg,#e7c766,#c39a38);color:#2a1c04;cursor:pointer;margin-top:6px}
+.authbtn:hover{filter:brightness(1.06)}
+.authbtn.ghost{background:none;color:#7a5410;border-color:#c2ac7c;font-weight:600}
+#auth .err{color:#9c2a2a;font-size:.8rem;margin:2px 0 0;min-height:1.1em}
+#auth .note{font-size:.72rem;color:#7a6a4a;line-height:1.55;margin:12px 0 0}
+#acctBtn{max-width:180px;overflow:hidden;text-overflow:ellipsis}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.001ms!important;transition-duration:.001ms!important}.item{opacity:1;transform:none}.rise,.rise-in{animation:none!important;opacity:1!important;transform:none!important}}
+@media (max-width:560px){
+  :root{--topbar-h:44px}
+  .row{padding:7px 8px;gap:6px}
+  .bar .row:last-child{flex-wrap:nowrap;overflow-x:auto;justify-content:flex-start;scrollbar-width:none}
+  .bar .row:last-child::-webkit-scrollbar{display:none}
+  .sw{max-width:none;flex:0 0 58vw}
+  #count{flex:none;order:20;min-width:0}
+  select,.btn{flex:none;font-size:.8rem;padding:5px 10px}
+  .sw{font-size:.8rem;flex:0 0 58vw}
+  .chips{flex-wrap:nowrap;justify-content:flex-start;overflow-x:auto;scroll-snap-type:x proximity;padding-bottom:1px}
+  .chips .btn{flex:0 0 auto;scroll-snap-align:center;gap:6px;padding:5px 11px 5px 6px;font-size:.8rem}
+  .chips .n{width:17px;height:17px;font-size:.64rem}
+  .mtop{justify-content:center;text-align:center}
+  .mpic{width:126px}
+  .sec p{text-align:left}
+  .fav{right:2px}
+  .mfnav{justify-content:center}
+}
+@media print{
+  body{background:#fff;color:#000}
+  #bg,.bar,.topbar,.hero::before,.hero::after,#toast,.skip{display:none}
+  body{padding-top:0}
+  .hero,h1,.plate b,.wrap h2,footer .author{color:#000;text-shadow:none}
+  main{grid-template-columns:repeat(3,1fr)}
+  .frame{filter:none}
+  dialog{position:static;max-height:none;box-shadow:none}
+}
+
+/* ── Xarita tugmasi (tepada) ── */
+.topbar-right{display:flex;align-items:center;gap:8px}
+.xbtn-top{
+  background:linear-gradient(180deg,rgba(231,199,102,.22),rgba(195,154,56,.14)) !important;
+  border-color:var(--g2) !important;
+  color:#ffe9a8 !important;
+  font-weight:700;
+  letter-spacing:.03em;
+}
+.xbtn-top:hover{
+  background:linear-gradient(180deg,var(--g2),var(--g3)) !important;
+  color:#1b1204 !important;
+  border-color:var(--g1) !important;
+}
+
+/* ═══════ XARITA BOʻLIMI ═══════ */
+#xarita{max-width:1240px;margin:0 auto;padding:34px 16px 30px;scroll-margin-top:calc(var(--topbar-h,48px) + 8px)}
+#xarita h2{font:700 clamp(1.7rem,4.8vw,2.4rem)/1.15 "Cormorant Garamond",Georgia,serif;color:var(--g1);margin:0 0 6px;text-align:center}
+#xarita .xs{text-align:center;color:var(--mut);font-size:.9rem;margin:0 0 16px}
+.xtabs{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:14px}
+.xtabs button{font:inherit;font-size:.86rem;border:1px solid var(--g3);background:rgba(255,255,255,.03);color:var(--ink);padding:7px 15px;border-radius:20px;cursor:pointer;transition:background .18s}
+.xtabs button:hover{background:rgba(231,199,102,.12)}
+.xtabs button.on{background:linear-gradient(180deg,var(--g2),var(--g3));color:#1b1204;font-weight:700;border-color:var(--g1)}
+.xwrap{display:grid;grid-template-columns:1fr 290px;gap:14px;align-items:start}
+@media(max-width:820px){.xwrap{grid-template-columns:1fr}}
+.xmapbox{border:2px solid var(--g4);border-radius:6px;background:#06102a;overflow:hidden;box-shadow:0 14px 30px rgba(0,0,0,.45)}
+#xmap{display:block;width:100%;height:auto;touch-action:manipulation}
+#xmap .xc{fill:#16294f;stroke:#0a1734;stroke-width:1;vector-effect:non-scaling-stroke;cursor:pointer;transition:transform .28s cubic-bezier(.2,.75,.25,1),filter .28s,fill .3s,opacity .3s;transform-box:fill-box;transform-origin:center}
+#xmap .xc.dim{opacity:.6}
+#xmap .xc.hl{fill:#e7c766}
+#xmap .xc.nb{fill:#1c7a6c}
+#xmap .xc.cq{fill:#b8324a}
+#xmap .xc.tk{fill:#2b6fd0}
+/* sichqoncha ustiga kelsa tepaga koʻtariladi, chiqsa oʻz holiga qaytadi */
+#xmap .xc:hover,#xmap .xc:focus-visible{transform:translateY(-5px) scale(1.03);filter:drop-shadow(0 9px 6px rgba(0,0,0,.7));stroke:#f6e6ab;stroke-width:2;opacity:1;outline:none}
+#xmap text{pointer-events:none;fill:#fff8dc;font-family:"Cormorant Garamond",Georgia,serif;font-weight:700;text-anchor:middle;paint-order:stroke;stroke:#06102a;stroke-linejoin:round}
+.xinfo{border:1px solid var(--g3);border-radius:6px;background:rgba(255,255,255,.04);padding:16px 18px;min-height:150px}
+.xinfo h3{font:700 1.4rem "Cormorant Garamond",serif;color:var(--g1);margin:0 0 4px}
+.xinfo .k{font-size:.8rem;color:var(--g2);margin:0 0 8px;font-style:italic}
+.xinfo p{margin:0;font-size:.92rem}
+.xinfo .k:empty{display:none}
+.xleg{list-style:none;margin:14px 0 0;padding:0;font-size:.82rem;color:var(--mut);display:grid;gap:5px}
+.xleg i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:8px;vertical-align:-1px}
+@media(prefers-reduced-motion:reduce){#xmap .xc{transition:none}#xdlg[open]{animation:none}}
+
+#xdlg{border:none;padding:0;width:calc(100% - 18px);max-width:640px;max-height:90vh;background:#f8efdb;color:#2a2014;border-radius:3px;box-shadow:0 0 0 1px rgba(255,248,220,.55),0 0 0 4px #c39a38,0 0 0 8px #5b3f08,0 30px 70px #000;overflow:hidden}
+#xdlg[open]{animation:xin .4s cubic-bezier(.2,.75,.25,1) both}
+@keyframes xin{from{opacity:0;transform:translateY(20px) scale(.96)}to{opacity:1;transform:none}}
+#xdlg::backdrop{background:rgba(2,6,18,.9);backdrop-filter:blur(3px)}
+.xdc{max-height:90vh;overflow:auto;padding-bottom:22px}
+.xdh{position:relative;padding:34px 22px 22px;text-align:center;background:radial-gradient(circle at 50% -12%,rgba(231,199,102,.3),transparent 62%),linear-gradient(#122346,#0a1734 75%);border-bottom:3px double #c39a38;color:#eef3ff}
+.xdh h2{font:700 clamp(1.6rem,5vw,2.2rem)/1.15 "Cormorant Garamond",Georgia,serif;color:#f6e6ab;margin:0 28px 4px}
+.xdh p{margin:0;color:#dbe4f7;font-style:italic;font-size:.94rem}
+.xtg{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:12px}
+.xtg span{font-size:.76rem;border:1px solid #c39a38;color:#f6e6ab;padding:3px 10px;border-radius:12px;background:rgba(231,199,102,.1)}
+.xdb{padding:4px 22px 0}
+.xdb h3{font:700 1.15rem "Cormorant Garamond",Georgia,serif;color:#6b4a10;margin:18px 0 5px;display:flex;align-items:center;gap:10px}
+.xdb h3::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,rgba(195,154,56,.6),rgba(195,154,56,0))}
+.xdb p{margin:0;font-size:.96rem}
+.xch{display:flex;flex-wrap:wrap;gap:6px}
+.xch span,.xch button{font:inherit;font-size:.84rem;padding:4px 11px;border-radius:14px;border:1px dashed #b99a55;color:#5b4a2f;background:rgba(255,255,255,.45)}
+.xch button.xl{cursor:pointer;border:1px solid #a8811f;color:#4b3510;background:rgba(231,199,102,.38);font-weight:600}
+.xch button.xl:hover{background:#f3dd9a}
+.xdx{position:absolute;top:8px;right:10px;z-index:3;font:700 1.4rem/1 Georgia;background:rgba(255,255,255,.55);border:1px solid #cbb98d;color:#2a2014;cursor:pointer;padding:6px 10px;border-radius:50%}
+.xdx:hover{background:#fff}
+#xdlg :focus-visible,#xmap .xc:focus-visible{outline:3px solid #38b6ab;outline-offset:2px}
+`;
+
+/* ─────────────── MAʼLUMOTLAR ─────────────── */
+/* ─────────────── MAʼLUMOTLAR ─────────────── */
+const C = ["Hammasi", "Allomalar", "Hukmdorlar", "Shoirlar va adiblar", "Jadidlar", "Avliyolar", "Zamonaviy rahbarlar"];
+
+const P = [
+{n:"Muhammad al-Xorazmiy",s:"xorazmiy",y:"taxminan 780–850",f:780,c:1,r:"Xorazm",e:"IX asr",m:"Algebra fanining otasi",o:"Matematik, astronom, geograf",
+ b:"Xorazm",d:"Bagʻdod",fam:"Tugʻilgan yili va oilasi haqida ishonchli maʼlumot saqlanmagan; nomidan Xorazmda tugʻilgani maʼlum.",
+ hayot:"Xorazmda tugʻilgan, keyinchalik Bagʻdodga koʻchib oʻtib, xalifa al-Maʼmun saroyidagi «Bayt al-hikma» — Donishmandlar uyida ilmiy ish olib borgan. U yerda hind, yunon va fors bilimlarini birlashtirib, oʻz davrining eng ilgʻor ilmiy markazini yaratishda qatnashgan.",
+ hissa:["«Al-jabr val-muqobala» asari bilan algebrani mustaqil fanga aylantirgan","Hind raqamlari va oʻnlik sanoq tizimini ilmiy muomalaga kiritgan","«Algoritm» atamasi uning nomining lotinlashtirilgan shaklidan kelib chiqqan","Yer yuzasi xaritasi va astronomik jadvallar tuzgan"],
+ asar:["Al-jabr val-muqobala","Zij (astronomik jadvallar)","Kitob surat al-arz"],
+ meros:"Muhammad al-Xorazmiy nomidagi Toshkent axborot texnologiyalari universiteti uning nomini olgan."},
+{n:"Ahmad al-Fargʻoniy",s:"fargoniy",y:"taxminan 800–870",f:800,c:1,r:"Fargʻona",e:"IX asr",m:"Astronomiya va geodeziya olimi",o:"Astronom, muhandis",
+ b:"Fargʻona",d:"Misr",fam:"Oilasi haqida maʼlumot cheklangan.",
+ hayot:"Fargʻonada tugʻilgan, Bagʻdodda astronomiya maktabida yetishib, keyin Misrda yashab ijod qilgan. «Astronomiya asoslari» asari XII asrda lotin tiliga tarjima qilinib, «Alfraganus» nomi bilan Yevropa universitetlarida darslik boʻlgan.",
+ hissa:["«Astronomiya asoslari» — oʻrta asr astronomiyasining asosiy qoʻllanmasi","Yer shari oʻlchamlari va meridian yoyini hisoblashda qatnashgan","Nil daryosi suv sathini oʻlchovchi inshoot qurilishiga rahbarlik qilgan","Astronomik asboblar yasash bilan shugʻullangan"],
+ asar:["Astronomiya asoslari","Yulduzlar harakati haqida"],
+ meros:"Uning asarlari asrlar davomida Sharq va Gʻarb rasadxonalarida qoʻllanma boʻlgan."},
+{n:"Abu Rayhon Beruniy",s:"beruniy",y:"973–1048",f:973,c:1,r:"Xorazm",e:"X–XI asr",m:"Qomusiy olim, Yer radiusini oʻlchagan",o:"Astronom, geodezist, tarixchi",
+ b:"Kot (Xorazm)",d:"Gʻazna",fam:"Oilasi va ustozlari haqida maʼlumot cheklangan; Xorazmda tahsil olgani maʼlum.",
+ hayot:"Xorazmning Kot shahrida tugʻilgan. Xorazmshohlar saroyida, soʻng Mahmud Gʻaznaviy xizmatida faoliyat yuritgan. Hindistonda uzoq yillar yashab, hind madaniyati va tilini chuqur oʻrgangan. Merosi astronomiya, geodeziya, matematika, minerologiya, tarix va tilshunoslikni qamrab oladi.",
+ hissa:["Yer radiusini trigonometrik usulda hisoblab, haqiqiy qiymatga juda yaqin natija olgan","«Qonuni Masʼudiy» — astronomiyaning yirik qomusi","«Hindiston» asari — boshqa madaniyatni ilmiy oʻrganishning ilk namunasi","«Kitob al-jamohir» — qimmatbaho toshlar va minerallar haqidagi asar"],
+ asar:["Qonuni Masʼudiy","Hindiston","Kitob al-jamohir","At-Tafhim"],
+ meros:"Toshkent metrosining «Beruniy» bekati va koʻplab taʼlim muassasalari uning nomi bilan ataladi."},
+{n:"Ibn Sino",s:"ibnsino",y:"980–1037",f:980,c:1,r:"Buxoro",e:"X–XI asr",m:"«Tib qonunlari» muallifi",o:"Tabib, faylasuf",
+ b:"Afshona (Buxoro)",d:"Hamadon",fam:"Otasi Abdulloh Somoniylar xizmatida boʻlgan, onasi Setora ismli ayol edi.",
+ hayot:"Buxoro yaqinidagi Afshona qishlogʻida tugʻilgan. Yoshligida Buxoro hukmdori kutubxonasida tahsil olgan, keyin Xorazmda Beruniy bilan birga ishlagan. «Tib qonunlari» besh kitobdan iborat boʻlib, 600 yil davomida Yevropa va Sharq tibbiyot maktablarida asosiy darslik boʻlgan.",
+ hissa:["«Al-Qonun fit-tib» — jahon tibbiyotining eng uzoq qoʻllangan darsligi","«Kitob ash-Shifo» — falsafa va tabiatshunoslik qomusi","Kasalliklarning suv va havo orqali tarqalishini taxmin qilgan","Klinik kuzatuv va dori tayyorlash amaliyotini tizimlashtirgan"],
+ asar:["Tib qonunlari","Kitob ash-Shifo","An-Najot"],
+ meros:"Buxorodagi tibbiyot universiteti va koʻplab shifoxonalar uning nomini olgan."},
+{n:"Mirzo Ulugʻbek",s:"ulugbek",y:"1394–1449",f:1394,c:1,r:"Samarqand",e:"XIV–XV asr",m:"Rasadxona qurgan astronom hukmdor",o:"Astronom, hukmdor",
+ b:"Sultoniya",d:"Samarqand",fam:"Otasi Shohrux, onasi Gavharshodbegim, bobosi Amir Temur.",
+ hayot:"Sultoniya shahrida tugʻilgan, Amir Temurning nabirasi. 1409-yildan Samarqandda hukmdor sifatida ilm-fanni qoʻllab-quvvatlagan, 1420-yillarda mashhur rasadxonani qurdirgan. «Ziji jadidi Koʻragoniy» jadvali 1018 yulduzning koordinatalarini oʻz ichiga oladi.",
+ hissa:["Samarqand rasadxonasi — XV asrning eng katta observatoriyalaridan biri","1018 yulduzning joylashuvi aniqlangan «Ziji Koʻragoniy» katalogi","Yil uzunligini yuqori aniqlikda hisoblagan","Samarqandda madrasa va ilmiy maktab barpo etgan"],
+ asar:["Ziji jadidi Koʻragoniy","Risola-i Ulugʻbek"],
+ meros:"Mirzo Ulugʻbek nomidagi Oʻzbekiston Milliy universiteti va Toshkent metrosining shu nomdagi bekati bor."},
+{n:"Abu Nasr Forobiy",s:"forobiy",y:"taxminan 872–950",f:872,c:1,r:"Turkiston",e:"IX–X asr",m:"«Muallimi soniy»",o:"Faylasuf, musiqashunos",
+ b:"Forob",d:"Damashq",fam:"Oilasi haqida maʼlumot cheklangan; turkiy zodagon oilasidan boʻlgani taxmin qilinadi.",
+ hayot:"Forob shahrida tugʻilgan. Bagʻdod, Halab va Damashqda yashab, falsafa, mantiq, siyosat va musiqa nazariyasi boʻyicha asarlar yozgan. Aristoteldan keyin ikkinchi buyuk mantiqshunos sifatida «Muallimi soniy» deb atalgan.",
+ hissa:["«Fozil odamlar shahri» — ideal jamiyat haqidagi falsafiy taʼlimot","«Kitob al-musiqi al-kabir» — musiqa nazariyasi qomusi","Aristotel merosini sharhlab, falsafani Sharqda tizimlashtirgan","Mantiq va bilish nazariyasiga oid fundamental ishlar"],
+ asar:["Fozil odamlar shahri","Kitob al-musiqi al-kabir","Ihso al-ulum"],
+ meros:"Toshkent metrosining «Farobiy» bekati va koʻplab maktablar uning nomini olgan."},
+{n:"Amir Temur",s:"temur",y:"1336–1405",f:1336,c:2,r:"Qashqadaryo",e:"XIV–XV asr",m:"Temuriylar saltanati asoschisi",o:"Davlat arbobi, sarkarda",
+ b:"Kesh (Shahrisabz)",d:"Oʻtrar",fam:"Otasi Muhammad Taragʻay (barlos), onasi Tekina Moh; oʻgʻillari Jahongir, Umarshayx, Mironshoh, Shohrux.",
+ hayot:"Shahrisabz yaqinidagi Keshda barlos qabilasida tugʻilgan. 1370-yilda markazlashgan davlatga asos solib, poytaxtni Samarqandga koʻchirgan. Uning davrida shahar Sharqning eng yirik savdo va ilm-fan markazlaridan biriga aylangan.",
+ hissa:["Temuriylar saltanati va markazlashgan davlat asoschisi","Samarqandni obod qilib, ilm-fan markaziga aylantirgan","Harbiy tuzum va qonunchilikni tartibga solgan","Savdo yoʻllari xavfsizligini taʼminlagan"],
+ asar:["Temur tuzuklari (rivoyat tarzida saqlangan)"],
+ meros:"Shahrisabzdagi Oqsaroy va Samarqanddagi Goʻri Amir majmuasi uning davri obidalaridir."},
+{n:"Jaloliddin Manguberdi",s:"manguberdi",y:"1199–1231",f:1199,c:2,r:"Xorazm",e:"XII–XIII asr",m:"Moʻgʻullarga qarshi kurash ramzi",o:"Xorazmshoh, sarkarda",
+ b:"Gurganj",d:"Kurdiston",fam:"Otasi Xorazmshoh Muhammad, onasi turkman zodagonlaridan.",
+ hayot:"Gurganjda tugʻilgan, Xorazmshoh Muhammadning oʻgʻli. 1221-yilda Parvon jangida moʻgʻul qoʻshinini yirik magʻlubiyatga uchratgan, soʻng Sind daryosi boʻyida afsonaviy jasorat koʻrsatgan. 1231-yilda Kurdistonda halok boʻlgan.",
+ hissa:["Parvon jangi — moʻgʻullar ustidan qozonilgan yirik gʻalaba","Sind boʻyidagi jangda koʻrsatgan jasorati tarixda ramz boʻlgan","Xorazmshohlar davlati qoldiqlarini birlashtirishga urinish"],
+ asar:["Janglar tarixi solnomachilar asarlarida"],
+ meros:"Harbiy va maʼnaviy tarbiyada jasorat namunasi sifatida tilga olinadi."},
+{n:"Zahiriddin Bobur",s:"bobur",y:"1483–1530",f:1483,c:2,r:"Andijon",e:"XV–XVI asr",m:"Boburiylar sulolasi asoschisi",o:"Hukmdor, shoir, memuarist",
+ b:"Andijon",d:"Agra",fam:"Otasi Umarshayx Mirzo, onasi Qutlugʻ Nigorxonim; nabirasi — Temur.",
+ hayot:"Andijonda tugʻilib, 11 yoshida Fargʻona hukmdori boʻlgan. Taxt uchun kurashlardan soʻng Kobulga, keyin Hindistonga yurish qilib, 1526-yilda Panipat jangida gʻalaba qozonib Boburiylar saltanatiga asos solgan. «Boburnoma» jahon memuar adabiyotining nodir namunasidir.",
+ hissa:["1526-yilda Hindistonda Boburiylar sulolasiga asos solgan","«Boburnoma» — tabiat, tarix va inson taqdirini aks ettirgan memuar","«Aruz risolasi» — sheʼr vazni haqidagi ilmiy ish","Hindistonda bogʻ va bogʻdorchilik anʼanasini boshlagan"],
+ asar:["Boburnoma","Devon","Aruz risolasi"],
+ meros:"Boburiylar sulolasi merosi — Agradagi Toj Mahal kabi jahon obidalarida davom etgan."},
+{n:"Nodira",s:"nodira",y:"1792–1842",f:1792,c:2,r:"Andijon",e:"XVIII–XIX asr",m:"Shoira va Qoʻqon hukmdori",o:"Shoira, davlat arbobi",
+ b:"Andijon",d:"Buxoro",fam:"Qoʻqon xoni Umarxonning rafiqasi, Muhammad Alixonning onasi.",
+ hayot:"Andijonda tugʻilgan. Qoʻqon xonligida madaniyat va adabiyotni qoʻllab-quvvatlagan, sheʼriy devon yaratgan. 1842-yilda Buxoro amiri istilosi paytida fojiali halok boʻlgan.",
+ hissa:["Qoʻqon xonligida ilm va adabiyot homiysi boʻlgan","Lirik sheʼrlardan iborat devon muallifi","Shoirlar va sanʼatkorlarni qoʻllab-quvvatlagan"],
+ asar:["Devon"],
+ meros:"Oʻzbek adabiyotida ayol shoiralik anʼanasining yorqin namoyandasi."},
+{n:"Alisher Navoiy",s:"navoiy",y:"1441–1501",f:1441,c:3,r:"Hirot",e:"XV asr",m:"Turk adabiyotining buyuk mutafakkiri",o:"Shoir, davlat arbobi",
+ b:"Hirot",d:"Hirot",fam:"Otasi Gʻiyosiddin Muhammad (Kichkina Bahodir), onasi Kobul amirzodalari oilasidan.",
+ hayot:"Hirotda tugʻilib, umrining katta qismini shu shaharda oʻtkazgan. Husayn Boyqaro davrida vazir boʻlib xizmat qilgan, madrasa, shifoxona va kanallar qurilishiga rahbarlik qilgan. 1483–1485-yillarda «Xamsa»ning besh dostonini yaratgan.",
+ hissa:["«Xamsa» — besh dostondan iborat buyuk epik toʻplam","«Muhokamat ul-lugʻatayn» bilan turkiy tilning adabiy qudratini isbotlagan","«Majolis un-nafois», «Mezon ul-avzon» ilmiy asarlari","Hirotda ilm-maʼrifat va xayriya ishlari homiysi"],
+ asar:["Xamsa","Muhokamat ul-lugʻatayn","Majolis un-nafois","Mezon ul-avzon"],
+ meros:"Alisher Navoiy nomidagi Toshkent davlat oʻzbek tili va adabiyoti universiteti, Navoiy viloyati uning nomini olgan."},
+{n:"Furqat",s:"furqat",y:"1859–1909",f:1859,c:3,r:"Fargʻona",e:"XIX–XX asr",m:"Shoir, maʼrifatparvar",o:"Shoir, publitsist",
+ b:"Qoʻqon",d:"Yarkand",fam:"Oilasi haqida maʼlumot cheklangan.",
+ hayot:"Qoʻqonda tugʻilgan, maʼrifat va yangi usul maktablari gʻoyalari bilan yaqinlashgan. 1891-yilda mustamlakachilikka qarshi sheʼrlari uchun Turkistondan chiqarib yuborilgan, Yarkandda yashab ijod etgan va shu yerda vafot etgan.",
+ hissa:["Ilm va hunarga chorlovchi sheʼrlar","Yangi usul maktablari gʻoyasini qoʻllab-quvvatlagan","Turkiston matbuoti va maʼrifatparvarlari bilan faol aloqada boʻlgan"],
+ asar:["Sheʼriy devon","Safarnoma sheʼrlari"],
+ meros:"Uning sheʼrlari jadid maktablari uchun dasturiy matn boʻlib xizmat qilgan."},
+{n:"Muqimiy",s:"muqimiy",y:"1850–1903",f:1850,c:3,r:"Fargʻona",e:"XIX asr",m:"Hajv ustasi",o:"Shoir",
+ b:"Qoʻqon",d:"Qoʻqon",fam:"Oilasi haqida maʼlumot cheklangan.",
+ hayot:"Qoʻqonda tugʻilib, umrining katta qismini shu yerda oʻtkazgan. Sheʼrlarida jamiyatdagi adolatsizlik, ochkoʻzlik va jaholatni hajv ostiga olgan.",
+ hissa:["«Tanobchilar» dostoni bilan ijtimoiy tengsizlikni fosh etgan","Lirik gʻazallar va hajviy sheʼrlar muallifi","Xalq tilini adabiyotga olib kirgan"],
+ asar:["Tanobchilar","Hajviy sheʼrlar"],
+ meros:"Oʻzbek satirasi va hajviy adabiyotining asoschilaridan biri."},
+{n:"Hamza Hakimzoda Niyoziy",s:"hamza",y:"1889–1929",f:1889,c:3,r:"Fargʻona",e:"XIX–XX asr",m:"Yangi oʻzbek teatri asoschisi",o:"Shoir, dramaturg",
+ b:"Qoʻqon",d:"Shohimardon",fam:"Oilasi haqida maʼlumot cheklangan.",
+ hayot:"Qoʻqonda tugʻilgan, maktabdor, shoir, dramaturg va rejissyor sifatida faoliyat yuritgan. «Boy ila xizmatchi» spektakli bilan yangi oʻzbek teatriga asos solgan. 1929-yilda Shohimardonda fojiali tarzda halok boʻlgan.",
+ hissa:["«Boy ila xizmatchi» — yangi oʻzbek dramaturgiyasining ilk namunalaridan","Maktab va maorif ishlarini tashkil etgan","Sheʼr, qissa va publitsistik asarlar muallifi"],
+ asar:["Boy ila xizmatchi","Yangi saodat"],
+ meros:"Oʻzbek teatr sanʼati tarixida uning nomi alohida oʻrin tutadi."},
+{n:"Oybek",s:"oybek",y:"1905–1968",f:1905,c:3,r:"Toshkent",e:"XX asr",m:"«Navoiy» romani muallifi",o:"Yozuvchi",
+ b:"Toshkent",d:"Toshkent",fam:"Toshkent ziyolilari oilasida tugʻilgan.",
+ hayot:"Toshkentda tugʻilgan. «Qutlugʻ qon» romani bilan oʻzbek romanchiligini yangi bosqichga olib chiqqan, «Navoiy» tarixiy-biografik romanida buyuk shoir hayotini badiiy talqin qilgan.",
+ hissa:["«Navoiy» tarixiy-biografik romani","«Qutlugʻ qon» romani","«Bolalik» qissasi","Adabiyotshunoslik va tarjima ishlari"],
+ asar:["Navoiy","Qutlugʻ qon","Bolalik"],
+ meros:"Oʻzbek adabiyotshunosligida uning ilmiy badiiy merosi alohida oʻrganiladi."},
+{n:"Gʻafur Gʻulom",s:"ghafurgulom",y:"1903–1966",f:1903,c:3,r:"Toshkent",e:"XX asr",m:"Xalq shoiri",o:"Shoir, yozuvchi",
+ b:"Toshkent",d:"Toshkent",fam:"Toshkentda tugʻilgan, oilasi haqida maʼlumot cheklangan.",
+ hayot:"Toshkentda tugʻilgan. Sheʼrlari, qissalari va tarjimalari bilan oʻzbek adabiyotini boyitgan. «Shum bola» qissasi avlodlar uchun sevimli asarga aylangan.",
+ hissa:["«Shum bola» qissasi","Urush yillari sheʼriyati","«Mening oʻgʻrigina bolam» sheʼri","Pushkin va boshqa shoirlardan tarjimalar"],
+ asar:["Shum bola","Yodgor","Mening oʻgʻrigina bolam"],
+ meros:"Toshkentdagi Gʻafur Gʻulom nomidagi adabiyot va sanʼat instituti hamda bogʻ uning nomini olgan."},
+{n:"Abdulla Qahhor",s:"qahhor",y:"1907–1968",f:1907,c:3,r:"Fargʻona",e:"XX asr",m:"Oʻzbek hikoyasining ustasi",o:"Yozuvchi",
+ b:"Qoʻqon",d:"Moskva",fam:"Oilasi haqida maʼlumot cheklangan.",
+ hayot:"Qoʻqonda tugʻilgan. Qisqa hikoya janrida mukammal namunalar yaratib, oʻzbek nasrini yangi bosqichga koʻtargan. «Sarob» romani va «Oʻtmishdan ertaklar» qissasi uning eng mashhur asarlaridir.",
+ hissa:["«Sarob» romani","«Qoʻshchinor chiroqlari» qissasi","«Oʻtmishdan ertaklar»","«Sinchalak» qissasi"],
+ asar:["Sarob","Qoʻshchinor chiroqlari","Oʻtmishdan ertaklar"],
+ meros:"Oʻzbek hikoyachiligida «Qahhor maktabi» deb ataladigan anʼana shakllangan."},
+{n:"Erkin Vohidov",s:"vohidov",y:"1936–2016",f:1936,c:3,r:"Fargʻona",e:"XX asr",m:"«Oʻzbegim» sheʼri muallifi",o:"Shoir",
+ b:"Oltiariq",d:"Toshkent",fam:"Fargʻona viloyati Oltiariq tumanida tugʻilgan.",
+ hayot:"Fargʻona viloyatining Oltiariq tumanida tugʻilgan. Sheʼriyati teran falsafiyligi va xalqona tili bilan ajralib turadi. «Ruhlar isyoni» dostoni va «Oʻzbegim» sheʼri uning nomini xalq xotirasiga muhrlagan.",
+ hissa:["«Oʻzbegim» sheʼri — milliy iftixor ramzi","«Ruhlar isyoni» dostoni","«Yoshlik devoni»","Jahon shoirlaridan tarjimalar"],
+ asar:["Oʻzbegim","Ruhlar isyoni","Yoshlik devoni"],
+ meros:"Erkin Vohidov nomidagi ijod maktabi va koʻchalar uning xotirasini saqlaydi."},
+{n:"Abdulla Oripov",s:"oripov",y:"1941–2016",f:1941,c:3,r:"Qashqadaryo",e:"XX asr",m:"Madhiya matni muallifi",o:"Shoir",
+ b:"Qashqadaryo",d:"Toshkent",fam:"Qashqadaryo viloyatida tugʻilgan.",
+ hayot:"Qashqadaryo viloyatida tugʻilgan. Sheʼriyati milliy ruh va falsafiy mushohada bilan yoʻgʻrilgan. Oʻzbekiston Respublikasi madhiyasining matnini yozgan, Oʻzbekiston Qahramoni unvoniga sazovor boʻlgan.",
+ hissa:["Oʻzbekiston Respublikasi madhiyasi matni muallifi","Koʻplab sheʼriy toʻplamlar","Tarjima va publitsistika","Oʻzbekiston Qahramoni unvoni sohibi"],
+ asar:["Sheʼriy toʻplamlar","Madhiya matni"],
+ meros:"Mustaqil Oʻzbekiston madhiyasi uning soʻzlari bilan yangramoqda."},
+{n:"Zulfiya",s:"zulfiya",y:"1915–1996",f:1915,c:3,r:"Toshkent",e:"XX asr",m:"Oʻzbek ayol sheʼriyatining bayrogʻdori",o:"Shoira",
+ b:"Toshkent",d:"Toshkent",fam:"Toshkentda tugʻilgan.",
+ hayot:"Toshkentda tugʻilgan. Lirik sheʼrlari bilan oʻzbek adabiyotida ayol ovozi va hissiyotini yorqin ifodalagan, xalqaro adabiy aloqalarda faol qatnashgan.",
+ hissa:["Lirik sheʼrlar devonlari","Ayol qalbining nozik talqini","Xalqaro adabiy aloqalar"],
+ asar:["Sheʼriy devonlar","Xotira"],
+ meros:"Zulfiya nomidagi davlat mukofoti ayol ijodkorlar uchun nufuzli mukofot hisoblanadi."},
+{n:"Mahmudxoʻja Behbudiy",s:"behbudiy",y:"1875–1919",f:1875,c:4,r:"Samarqand",e:"XIX–XX asr",m:"Jadidchilik harakati yetakchisi",o:"Dramaturg, publitsist",
+ b:"Samarqand",d:"Qarshi",fam:"Samarqandda tugʻilgan, oilasi haqida maʼlumot cheklangan.",
+ hayot:"Samarqandda tugʻilgan, yangi usul maktablari va milliy matbuotni tashkil etishda faol qatnashgan. 1911-yilda «Padarkush» dramasi bilan oʻzbek dramaturgiyasiga asos solgan. 1919-yilda Qarshida fojiali tarzda halok boʻlgan.",
+ hissa:["«Padarkush» — birinchi oʻzbek dramasi","«Samarqand» gazetasi va matbuot ishlari","Jadid maktablari va maorif harakati","Milliy ozodlik gʻoyalari targʻiboti"],
+ asar:["Padarkush","Maqolalar va publitsistika"],
+ meros:"Jadidchilik harakati va milliy matbuot tarixida uning nomi birinchi oʻrinlarda tilga olinadi."},
+{n:"Abdurauf Fitrat",s:"fitrat",y:"1886–1938",f:1886,c:4,r:"Buxoro",e:"XIX–XX asr",m:"Olim va jadid lideri",o:"Olim, dramaturg",
+ b:"Buxoro",d:"Toshkent",fam:"Buxoroda tugʻilgan, oilasi haqida maʼlumot cheklangan.",
+ hayot:"Buxoroda tugʻilgan, Buxoro jadidlarining yetakchisi sifatida maorif va islohot harakatiga boshchilik qilgan. Tilshunoslik, adabiyotshunoslik va dramaturgiya boʻyicha asarlar yaratgan. 1938-yilda repressiya qurboni boʻlgan.",
+ hissa:["Buxoro jadidlarining yetakchisi","Tilshunoslik va adabiyotshunoslik asarlari","Buxoro Xalq Sovet Respublikasi tashkilotchilaridan","«Munozara» va dramatik asarlar"],
+ asar:["Munozara","Abulfayzxon","Adabiyot qoidalari"],
+ meros:"Jadid madaniyati va oʻzbek ilmiy tafakkurida chuqur iz qoldirgan."},
+{n:"Abdulla Qodiriy",s:"qodiriy",y:"1894–1938",f:1894,c:4,r:"Toshkent",e:"XIX–XX asr",m:"Birinchi oʻzbek romani muallifi",o:"Yozuvchi",
+ b:"Toshkent",d:"Toshkent",fam:"Toshkentda tugʻilgan, oilasi haqida maʼlumot cheklangan.",
+ hayot:"Toshkentda tugʻilgan. 1926-yilda «Oʻtkan kunlar» romani bilan oʻzbek adabiyotida roman janriga asos solgan, «Mehrobdan chayon» romanida jamiyat illatlarini koʻrsatgan. 1938-yilda repressiya qurboni boʻlgan.",
+ hissa:["«Oʻtkan kunlar» — birinchi oʻzbek romani (1926)","«Mehrobdan chayon» romani","Hikoya va feletonlar","Adabiy til va uslub islohi"],
+ asar:["Oʻtkan kunlar","Mehrobdan chayon","Julqunboy"],
+ meros:"Oʻzbek romanchiligi «Qodiriy maktabi»dan boshlanadi."},
+{n:"Abdulhamid Choʻlpon",s:"cholpon",y:"1897–1938",f:1897,c:4,r:"Andijon",e:"XIX–XX asr",m:"Milliy sheʼriyatning yorqin yulduzi",o:"Shoir, yozuvchi",
+ b:"Andijon",d:"Toshkent",fam:"Andijonda tugʻilgan, oilasi haqida maʼlumot cheklangan.",
+ hayot:"Andijonda tugʻilgan. Sheʼrlarida milliy uygʻonish va istiqlol gʻoyalarini kuylagan, «Kecha va kunduz» romani oʻzbek nasrining nodir asarlaridan biridir. 1938-yilda repressiya qurboni boʻlgan.",
+ hissa:["«Kecha va kunduz» romani","Milliy istiqlol sheʼrlari","Tarjima va adabiy tanqid","Lirik sheʼrlar"],
+ asar:["Kecha va kunduz","Sheʼrlar","Tarjimalar"],
+ meros:"Uning sheʼrlari mustaqillik davrida qayta kashf etildi va yangramoqda."},
+{n:"Imom al-Buxoriy",s:"buxoriy",y:"810–870",f:810,c:5,r:"Buxoro",e:"IX asr",m:"«Sahih» muallifi",o:"Muhaddis",
+ b:"Buxoro",d:"Xartang",fam:"Otasi Ismoil ibn Ibrohim, oilasi ilm ahliga mansub.",
+ hayot:"Buxoroda tugʻilib, yoshligidan hadis ilmini oʻrgangan. Uzoq yillar Sharq shaharlarini kezib, hadislarni toʻplagan. «Al-Jome as-sahih» toʻplami Qurʼondan keyingi eng ishonchli kitob sifatida tan olingan.",
+ hissa:["«Al-Jome as-sahih» — islom olamidagi eng moʻtabar hadis toʻplami","Yuz minglab rivoyatlarni tekshirib, ishonchlilarini tanlab olgan","«Al-adab al-mufrad» — odob haqidagi toʻplam","Hadis ilmining isnod va tanqid uslubini takomillashtirgan"],
+ asar:["Al-Jome as-sahih","Al-adab al-mufrad","At-Tarix al-kabir"],
+ meros:"Samarqand yaqinidagi Xartang qishlogʻida uning maqbarasi ziyoratgoh hisoblanadi."},
+{n:"Imom at-Termiziy",s:"termiziy",y:"824–892",f:824,c:5,r:"Surxondaryo",e:"IX asr",m:"«Sunan» muallifi",o:"Muhaddis",
+ b:"Termiz",d:"Termiz",fam:"Termizda tugʻilgan, oilasi haqida maʼlumot cheklangan.",
+ hayot:"Termizda tugʻilib, umrining katta qismini shu yerda oʻtkazgan. Hadis ilmi boʻyicha yirik asarlar yozgan, rivoyatlarning ishonchlilik darajasini baholashda oʻziga xos maktab yaratgan.",
+ hissa:["«Sunan at-Termiziy» — oltita asosiy hadis toʻplamidan biri","«Ash-shamoil al-Muhammadiya» — Paygʻambar siyratiga oid asar","Hadislarni tasniflash va baholash uslubi"],
+ asar:["Sunan at-Termiziy","Ash-shamoil al-Muhammadiya"],
+ meros:"Termiz shahrida uning nomi keng eʼzozlanadi, ilmiy merosi oʻrganilmoqda."},
+{n:"Bahouddin Naqshband",s:"naqshband",y:"1318–1389",f:1318,c:5,r:"Buxoro",e:"XIV asr",m:"Naqshbandiya tariqati asoschisi",o:"Tasavvuf allomasi",
+ b:"Qasri Hinduvon (Buxoro)",d:"Buxoro",fam:"Buxoro yaqinidagi Hunudvon qishlogʻida tugʻilgan.",
+ hayot:"Buxoro yaqinida tugʻilib, umrini shu yerda oʻtkazgan. Naqshbandiya tariqatini tizimlashtirgan, «dil ba yoru, dast ba kor» tamoyilini ilgari surgan.",
+ hissa:["Naqshbandiya tariqati asoschisi","«Dil ba yoru, dast ba kor» — mehnat va poklik tamoyili","Tasavvufiy tarbiya uslubini tizimlashtirgan"],
+ asar:["Naqshbandiya taʼlimoti (shogirdlari orqali)"],
+ meros:"Buxorodagi Bahouddin Naqshband majmuasi — mashhur ziyoratgohlardan biri."},
+{n:"Ahmad Yassaviy",s:"yassaviy",y:"taxminan 1093–1166",f:1093,c:5,r:"Turkiston",e:"XI–XII asr",m:"Yassaviya tariqati asoschisi",o:"Tasavvuf shayxi, shoir",
+ b:"Sayram",d:"Turkiston",fam:"Otasi Shayx Ibrohim.",
+ hayot:"Sayramda tugʻilib, keyin Turkistonda yashagan. Yassaviya tariqatiga asos solgan, xalqqa tushunarli tilda hikmatlar yozgan. Uning maqbarasi Turkistonda Amir Temur davrida qurilgan.",
+ hissa:["Yassaviya tariqati asoschisi","«Devoni hikmat» — xalqona tildagi tasavvufiy sheʼrlar","Turkistonda maqbara-majmua qurilga"],
+ asar:["Devoni hikmat"],
+ meros:"Turkistondagi Yassaviy maqbarasi — Oʻzbekistonning eng yirik meʼmoriy obidalaridan biri."},
+{n:"Islom Karimov",s:"karimov",y:"1938–2016",f:1938,c:6,r:"Samarqand",e:"XX–XXI asr",m:"Oʻzbekistonning Birinchi Prezidenti",o:"Davlat arbobi",
+ b:"Samarqand",d:"Toshkent",fam:"Otasi Abdugʻani Karimov, onasi Sanobar Karimova; oilada sakkiz farzand.",
+ hayot:"Samarqandda tugʻilgan. 1991-yil 31-avgustda Oʻzbekiston mustaqilligi eʼlon qilingach, davlat rahbari sifatida mustaqil davlat asoslarini qurish ishlariga rahbarlik qilgan.",
+ hissa:["Mustaqillikni eʼlon qilish va mustahkamlash","1992-yil Konstitutsiyasining qabul qilinishi","Oʻzbekistonning BMT kabi xalqaro tashkilotlarga aʼzo boʻlishi","Iqtisodiy islohotlar va davlat institutlarining shakllanishi"],
+ asar:["Mustaqillik asoslari","Yuksak maʼnaviyat — yengilmas kuch"],
+ meros:"Oʻzbekistonning Birinchi Prezidenti sifatida tarixda qoldi."},
+{n:"Shavkat Mirziyoyev",s:"mirziyoyev",y:"1957–hozir",f:1957,c:6,r:"Jizzax",e:"XX–XXI asr",m:"Oʻzbekiston Respublikasi Prezidenti",o:"Davlat arbobi",
+ b:"Jizzax viloyati",d:"—",fam:"Otasi Miromon Mirziyoyev, rafiqasi Ziroatxon Mirziyoyeva.",
+ hayot:"Jizzax viloyatida tugʻilgan. 2016-yildan Oʻzbekiston Respublikasi Prezidenti. Islohotlar, ochiqlik va iqtisodiy modernizatsiya siyosatini olib bormoqda.",
+ hissa:["2016-yildan Prezident","2017–2021 Harakatlar strategiyasi","2022–2026 Taraqqiyot strategiyasi","Ochiqlik va tashabbuskorlik siyosati"],
+ asar:["Yangi Oʻzbekiston strategiyasi"],
+ meros:"Amaldagi davlat rahbari sifatida islohotlar davom etmoqda."}
+];
+
+const ROMAN = ["I","II","III","IV","V","VI","VII","VIII","IX","X","XI","XII","XIII","XIV","XV","XVI","XVII","XVIII","XIX","XX","XXI"];
+
+/* Shajara: ota-ona, turmush oʻrtogʻi, farzandlar, ajdod-avlodlar */
+const REL = {
+ temur:{o:"Muhammad Taragʻay",m:"Tekina Mohbegim",k:["Jahongir","Umarshayx","Mironshoh","Shohrux"],a:["Mirzo Ulugʻbek","Zahiriddin Bobur"]},
+ ulugbek:{o:"Shohrux",m:"Gavharshodbegim",k:["Abdu-Latif","Abdulaziz"],a:["Amir Temur"]},
+ bobur:{o:"Umarshayx Mirzo",m:"Qutlugʻ Nigorxonim",k:["Humoyun"],a:["Amir Temur"]},
+ ibnsino:{o:"Abdulloh ibn Sino",m:"Setora"},
+ buxoriy:{o:"Ismoil ibn Ibrohim"},
+ yassaviy:{o:"Shayx Ibrohim",a:["Ahmad Yassaviy"]},
+ manguberdi:{o:"Muhammad Xorazmshoh"},
+ nodira:{j:"Umarxon",k:["Muhammad Alixon"]},
+ navoiy:{o:"Gʻiyosiddin Muhammad (Kichkina Bahodir)"},
+ zulfiya:{j:"Hamid Olimjon"},
+ karimov:{o:"Abdugʻani Karimov",m:"Sanobar Karimova",j:"Tatyana Karimova",k:["Gulnora Karimova","Lola Karimova"]},
+ mirziyoyev:{o:"Miromon Mirziyoyev",j:"Ziroatxon Mirziyoyeva",k:["Saida Mirziyoyeva","Shahnoza Mirziyoyeva"]}
+};
+P.forEach(p => { const r = REL[p.s]; if (r) p.rel = r; });
+
+/* ─────────── QOʻSHIMCHA MAʼLUMOTLAR: sanalar, safarlar, gʻalabalar, toʻliq shajara ─────────── */
+const EXTRA = {
+ xorazmiy:{sanalar:[["780","Xorazmda tugʻilgani taxmin qilinadi"],["813","Bagʻdodda «Bayt al-hikma»da ilmiy ish boshlagan"],["820","Astronomik jadvallar (Zij) ustida ishlagan"],["830","«Al-jabr val-muqobala» yozilgan"],["850","Bagʻdodda vafot etgan (taxminan)"]],safar:["Xorazm","Bagʻdod"]},
+ fargoniy:{sanalar:[["800","Fargʻonada tugʻilgan (taxminan)"],["825","Bagʻdodda astronomiya maktabida ishlagan"],["833","Xalifa al-Maʼmun davrida kuzatishlar olib borgan"],["861","Misrda Nil daryosi oʻlchagichini qurgan"],["870","Misrda vafot etgan"]],safar:["Fargʻona","Bagʻdod","Misr"]},
+ beruniy:{sanalar:[["973","Xorazmning Kot shahrida tugʻilgan"],["995","Abu Nasr Mansur ibn Iroq qoʻlida tahsil olgan"],["1017","Gʻaznaga koʻchib oʻtgan"],["1030","«Hindiston» asari tugallangan"],["1037","«Qonuni Masʼudiy» yozilgan"],["1048","Gʻaznada vafot etgan"]],safar:["Kot","Gurganj","Gʻazna","Hindiston"],rel:{ustoz:["Abu Nasr Mansur ibn Iroq"]}},
+ ibnsino:{sanalar:[["980","Afshona qishlogʻida tugʻilgan"],["990","Buxoro hukmdori kutubxonasida tahsil olgan"],["1002","Otasi vafot etgach Xorazmga koʻchgan"],["1015","Jurjon va Ray shaharlarida ishlagan"],["1025","«Tib qonunlari» tugallangan (taxminan)"],["1037","Hamadonda vafot etgan"]],safar:["Afshona","Buxoro","Gurganj","Jurjon","Ray","Hamadon","Isfahon"],rel:{ustoz:["Abu Abdulloh an-Notiliy"]}},
+ ulugbek:{sanalar:[["1394","Sultoniyada tugʻilgan"],["1409","Samarqand hukmdori boʻlgan"],["1420","Samarqand rasadxonasi qurilishi boshlangan"],["1437","«Ziji Koʻragoniy» tugallangan"],["1449","Samarqandda fojiali halok boʻlgan"]],safar:["Sultoniya","Samarqand"],rel:{a:["Amir Temur","Shohrux"]}},
+ forobiy:{sanalar:[["872","Forob shahrida tugʻilgan (taxminan)"],["900","Bagʻdodda falsafa va mantiqni oʻrgangan"],["941","Halabda Sayf ad-Davla saroyida xizmat qilgan"],["950","Damashqda vafot etgan"]],safar:["Forob","Bagʻdod","Halab","Damashq"],rel:{ustoz:["Yuhanna ibn Haylon"]}},
+ temur:{sanalar:[["1336","Kesh (Shahrisabz) yaqinida tugʻilgan"],["1360","Taxt uchun kurashlar boshlangan"],["1370","Markazlashgan davlatga asos solgan, poytaxt — Samarqand"],["1391","Qunduzcha jangida Toʻxtamishni magʻlub etgan"],["1398","Hindistonga yurish qilib Dehlini egallagan"],["1402","Anqara jangida Usmonli sultoni Bayazidni asir olgan"],["1405","Oʻtrarda vafot etgan"]],safar:["Kesh","Samarqand","Hirot","Isfahon","Sheroz","Dehli","Halab","Damashq","Anqara","Oʻtrar"],yutuq:["1370 — Temuriylar saltanati va markazlashgan davlat asoslandi","1391 — Qunduzcha jangida Oltin Oʻrda qoʻshini tor-mor etildi","1395 — Terek jangida Toʻxtamish ustidan gʻalaba","1398 — Hindistonga yurish, Dehli egallandi","1402 — Anqara jangida Usmonlilar magʻlub etildi"],rel:{a:["Amir Barqul"],m:"Tekina Mohbegim",k:["Jahongir","Umarshayx","Mironshoh","Shohrux"],nv:["Mirzo Ulugʻbek","Boysunqur"],avlod:["Abu Said","Umarshayx Mirzo","Zahiriddin Bobur","Humoyun","Akbar"]}},
+ manguberdi:{sanalar:[["1199","Gurganjda tugʻilgan"],["1220","Otasi vafot etib, xorazmshohlik uchun kurash boshlagan"],["1221","Parvon jangida moʻgʻullarni magʻlub etgan"],["1221","Sind daryosi boʻyida afsonaviy jasorat koʻrsatgan"],["1231","Kurdistonda halok boʻlgan"]],safar:["Gurganj","Gʻazna","Sind","Hindiston","Ozarbayjon","Kurdiston"],yutuq:["1221 — Parvon jangida moʻgʻul qoʻshini magʻlub etildi","1221 — Sind boʻyida moʻgʻullarga qarshi kurash","1225–1230 — Eron va Ozarbayjonda yurishlar"]},
+ bobur:{sanalar:[["1483","Andijonda tugʻilgan"],["1494","11 yoshida Fargʻona hukmdori boʻlgan"],["1504","Kobulni egallagan"],["1526","Panipat jangida gʻalaba — Boburiylar saltanati asoslandi"],["1530","Agrada vafot etgan"]],safar:["Andijon","Samarqand","Kobul","Panipat","Dehli","Agra"],yutuq:["1504 — Kobul egallandi","1526 — Panipat jangida Ibrohim Lodi magʻlub etildi","1527 — Xonua jangida gʻalaba"],rel:{a:["Amir Temur","Mironshoh","Abu Said"],k:["Humoyun","Kamron","Askariy","Hindol"],nv:["Akbar"],avlod:["Jahongir","Shohjahon","Aurangzeb"]}},
+ nodira:{sanalar:[["1792","Andijonda tugʻilgan"],["1842","Buxoro amiri istilosi paytida fojiali halok boʻlgan"]],safar:["Andijon","Qoʻqon"]},
+ navoiy:{sanalar:[["1441","Hirotda tugʻilgan"],["1469","Husayn Boyqaro taxtga chiqib, vazir boʻlgan"],["1483","«Xamsa» ustida ish boshlagan"],["1485","«Xamsa»ning besh dostoni tugallangan"],["1501","Hirotda vafot etgan"]],safar:["Hirot","Mashhad","Marv"]},
+ furqat:{sanalar:[["1859","Qoʻqonda tugʻilgan"],["1891","Turkistondan Yarkandga surgun qilingan"],["1909","Yarkandda vafot etgan"]],safar:["Qoʻqon","Toshkent","Yarkand"]},
+ muqimiy:{sanalar:[["1850","Qoʻqonda tugʻilgan"],["1903","Qoʻqonda vafot etgan"]]},
+ hamza:{sanalar:[["1889","Qoʻqonda tugʻilgan"],["1915","«Boy ila xizmatchi» asari yaratilgan"],["1929","Shohimardonda fojiali halok boʻlgan"]]},
+ oybek:{sanalar:[["1905","Toshkentda tugʻilgan"],["1943","«Navoiy» romani nashr etila boshlagan"],["1968","Toshkentda vafot etgan"]]},
+ ghafurgulom:{sanalar:[["1903","Toshkentda tugʻilgan"],["1936","«Shum bola» qissasi yozilgan"],["1966","Toshkentda vafot etgan"]]},
+ qahhor:{sanalar:[["1907","Qoʻqonda tugʻilgan"],["1934","«Sarob» romani nashr etilgan"],["1968","Moskvada vafot etgan"]]},
+ vohidov:{sanalar:[["1936","Fargʻona viloyati Oltiariq tumanida tugʻilgan"],["2016","Toshkentda vafot etgan"]]},
+ oripov:{sanalar:[["1941","Qashqadaryo viloyatida tugʻilgan"],["1992","Oʻzbekiston madhiyasi matni qabul qilingan"],["2016","Toshkentda vafot etgan"]]},
+ zulfiya:{sanalar:[["1915","Toshkentda tugʻilgan"],["1996","Toshkentda vafot etgan"]]},
+ behbudiy:{sanalar:[["1875","Samarqandda tugʻilgan"],["1911","«Padarkush» dramasi yozilgan"],["1913","«Samarqand» gazetasiga asos solgan"],["1919","Qarshida fojiali halok boʻlgan"]],safar:["Samarqand","Buxoro","Qarshi"]},
+ fitrat:{sanalar:[["1886","Buxoroda tugʻilgan"],["1920","Buxoro Xalq Sovet Respublikasi tashkil etilishida qatnashgan"],["1938","Repressiya qurboni boʻlgan"]]},
+ qodiriy:{sanalar:[["1894","Toshkentda tugʻilgan"],["1926","«Oʻtkan kunlar» romani nashr etilgan"],["1938","Repressiya qurboni boʻlgan"]]},
+ cholpon:{sanalar:[["1897","Andijonda tugʻilgan"],["1936","«Kecha va kunduz» romani nashr etilgan"],["1938","Repressiya qurboni boʻlgan"]]},
+ buxoriy:{sanalar:[["810","Buxoroda tugʻilgan"],["846","«Al-Jome as-sahih» tugallangan"],["870","Xartang qishlogʻida vafot etgan"]],safar:["Buxoro","Makka","Madina","Bagʻdod","Nishopur","Xartang"]},
+ termiziy:{sanalar:[["824","Termizda tugʻilgan"],["892","Termizda vafot etgan"]]},
+ naqshband:{sanalar:[["1318","Buxoro yaqinidagi Qasri Hinduvonda tugʻilgan"],["1389","Buxoroda vafot etgan"]],rel:{ustoz:["Muhammad Bobo Samosiy","Amir Kulol"]}},
+ yassaviy:{sanalar:[["1093","Sayramda tugʻilgan (taxminan)"],["1166","Turkistonda vafot etgan"]],rel:{o:"Shayx Ibrohim",a:[],ustoz:["Arslonbob","Yusuf Hamadoniy"]}},
+ karimov:{sanalar:[["1938","Samarqandda tugʻilgan"],["1990","Oʻzbekiston Prezidenti etib saylangan"],["1991","Mustaqillik eʼlon qilingan"],["1992","Oʻzbekiston Konstitutsiyasi qabul qilingan"],["2016","Toshkentda vafot etgan"]]},
+ mirziyoyev:{sanalar:[["1957","Jizzax viloyatida tugʻilgan"],["2016","Oʻzbekiston Respublikasi Prezidenti etib saylangan"],["2017","Harakatlar strategiyasi qabul qilingan"],["2022","Taraqqiyot strategiyasi qabul qilingan"]]}
+};
+P.forEach(p => {
+  const x = EXTRA[p.s];
+  if (x) { Object.assign(p, x); if (x.rel) p.rel = Object.assign({}, p.rel || {}, x.rel); }
+});
+
+/* ─────────── SHAJARA: ajdod, farzand, avlod, ustoz, shogird va hamdavrlar ─────────── */
+const REL2 = {
+ xorazmiy:{hamdavr:["Banu Muso aka-ukalari","Xalifa al-Maʼmun"]},
+ fargoniy:{hamdavr:["Xalifa al-Maʼmun","Xalifa Mutavakkil"]},
+ beruniy:{hamdavr:["Ibn Sino","Mahmud Gʻaznaviy"]},
+ ibnsino:{shogird:["Abu Ubayd al-Juzjoniy"],hamdavr:["Abu Rayhon Beruniy"]},
+ ulugbek:{shogird:["Ali Qushchi","Gʻiyosiddin Jamshid al-Koshiy"]},
+ forobiy:{shogird:["Yahyo ibn Adiy"]},
+ manguberdi:{a:["Xorazmshoh Tekish"],uka:["Uzloqshoh","Oqshoh","Arslonshoh"]},
+ navoiy:{hamdavr:["Husayn Boyqaro","Abdurahmon Jomiy"]},
+ furqat:{hamdavr:["Muqimiy"]},
+ muqimiy:{hamdavr:["Furqat"]},
+ hamza:{hamdavr:["Abdulla Qodiriy","Gʻafur Gʻulom"]},
+ oybek:{hamdavr:["Gʻafur Gʻulom","Abdulla Qahhor"]},
+ ghafurgulom:{hamdavr:["Oybek","Abdulla Qahhor"]},
+ qahhor:{hamdavr:["Oybek","Gʻafur Gʻulom"]},
+ vohidov:{hamdavr:["Abdulla Oripov"]},
+ oripov:{hamdavr:["Erkin Vohidov"]},
+ behbudiy:{hamdavr:["Abdurauf Fitrat"]},
+ fitrat:{hamdavr:["Mahmudxoʻja Behbudiy"]},
+ qodiriy:{hamdavr:["Abdulhamid Choʻlpon"]},
+ cholpon:{hamdavr:["Abdulla Qodiriy"]},
+ buxoriy:{shogird:["Imom at-Termiziy","Muslim ibn al-Hajjoj"]},
+ termiziy:{ustoz:["Imom al-Buxoriy"]},
+ naqshband:{shogird:["Xoja Yaqub Charkiy"]},
+ yassaviy:{shogird:["Sulaymon Boqirgʻoniy"]}
+};
+P.forEach(p => { const r = REL2[p.s]; if (r) p.rel = Object.assign({}, p.rel || {}, r); });
+
+const norm = s => String(s || "").toLowerCase()
+  .replace(/[ʻʼ‘’`´']/g, "")
+  .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+  .replace(/\s+/g, " ").trim();
+
+const IDX = P.map(p => norm([p.n,p.y,p.m,p.o,p.r,p.e,p.b,p.d,p.fam,p.hayot,
+  (p.hissa||[]).join(" "),(p.asar||[]).join(" "),p.meros,
+  (p.sanalar||[]).map(x=>x.join(" ")).join(" "),(p.safar||[]).join(" "),(p.yutuq||[]).join(" ")
+].join(" ")));
+
+const esc = s => String(s == null ? "" : s)
+  .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+
+const wiki = n => "https://uz.wikipedia.org/w/index.php?search=" + encodeURIComponent(n);
+
+const roman = n => ROMAN[Math.max(0, Math.min(ROMAN.length - 1, n - 1))] || n;
+
+
+/* ─────────────── XARITA CHEGARALARI ─────────────── */
+/* Davlat chegaralari: [id, nom, svg path, label x, label y] — 1-qism */
+const D1 = [
+[887,"Yaman","M425.9,546.7L420.5,548.7L417.8,550.7L416.8,552.1L416.1,554.5L416.6,557.8L410,561.4L403.7,563.5L398.5,564.7L394.6,566.7L391.8,567L385.9,569.1L382.6,571.1L382.2,572.2L378.5,575.6L374.4,576.2L371.3,575.6L367.5,577.7L365,579.9L360.4,581.2L358.4,582.1L355.3,582.6L352.1,582.5L346.3,583.5L343.5,586.4L341,587.2L339.6,589.2L336.6,589.8L335.1,589.2L332.3,590.8L327.8,591.4L324.6,590L323,590.5L322.9,589L320.3,584.2L320.8,580.1L320.3,577.7L318.8,576L318.8,573.9L318,570L316.9,566.6L316.3,563.6L314.1,562.5L315.6,561L314.8,557.8L316.1,553.6L315.6,549.8L319.6,546.3L319.8,544.9L319,543.4L319.8,538.8L322.3,537L324.2,537.5L325.4,538.7L327.6,539.2L330.2,538.3L336.5,537.9L340.8,538L343.6,539.2L353.3,540.2L357.3,539.8L358.3,540.4L360.4,543.3L362.2,543.4L365.4,541.5L366.9,537.7L373.2,529.8L382.5,525L384.2,524.5L414,520.3L422.1,539.4L422.8,539.8ZM313.4,561.7L313.4,561.7L313.4,561.7ZM315.2,579.4L315.2,579.4L315.2,579.4ZM315.5,576.5L315.5,576.5L315.5,576.5ZM433.2,591.2L437.7,590.9L441.2,592.1L437.1,594.2L432.7,594.7L431.4,594.4L428.3,592.3L429.6,590.9L431.8,590.4Z",367,555],
+[860,"Oʻzbekiston","M617.3,227.2L618.3,226.7L620.3,228.5L616.2,230.6L615.8,231.9L613.9,232.6L612.1,234.8L609.1,237L609.3,237.8L612.2,239.3L614.1,238.6L615.6,241.4L619.1,243L622.3,243.2L622.4,240.3L623.7,240.7L625,237.4L626.4,239.3L627.3,242.4L630.4,242.7L630.6,244.8L632.5,244.5L635.7,247L639.2,247.1L640.5,248.2L636.9,250.1L634.7,251.9L632.9,251.1L632.5,253.6L630,253.1L628.1,255.6L625.3,257.1L621.9,255.4L617.5,255.9L614.2,256.4L612.9,254.7L611.4,254.2L611.3,252.9L614.7,249.9L615.2,248.8L611.9,244.8L610.3,246.7L604.1,250L600.9,248L598.7,251.3L599.7,254.6L599.4,256.5L596,256.1L592.7,256.7L592.6,257.4L595.7,257.3L594.4,258.5L595.1,260.5L592.6,261.5L592,264.3L590.7,265.7L586.6,265.3L582.7,264.5L579.6,266.7L578.8,269.8L581.6,271L582.3,273L586.9,273.7L587.3,274.6L586.2,277.7L587.3,281.6L589.3,283.6L588.9,286.4L587.6,287.8L583.8,293.8L583.2,298L580.6,296.7L578.4,297.5L575.8,295.8L573.2,295.3L569.9,295.6L570,289.7L571,287.7L570.5,286.7L568.5,286.1L566.2,284.5L562.8,283.2L560.2,283.6L554.4,279.4L549.9,276.8L546.2,273.4L544.6,273.8L539.9,270.5L537.6,267.9L528.4,261.2L526.2,258.7L525.5,254.6L522.5,249.6L520.4,243.8L517.6,241.7L516.1,241.2L514.2,242.4L508.1,241.6L504.9,242L501,239.5L501.5,236.7L500.8,235.1L502,233.2L499.6,231.5L500.1,228.1L498.5,226.6L494.1,226.5L492.2,225.7L490.6,223.2L488,222.7L484.9,219.5L483.7,221.2L481.4,220.8L480.2,221.7L483.8,226.2L482.8,226.6L482.1,225.1L478.9,223.8L476.6,228.1L471.9,228.6L470.3,229.6L467.5,232.9L468.1,238.7L469.1,240.1L468.1,241.4L465.4,241L456.9,240.5L456.9,186.6L473,181.3L483.4,178.2L485.7,178.7L510.8,195.6L512.4,199L521.3,209L522.2,209.1L534.4,207L547.6,208.2L552.6,205.7L556.5,210.1L558.9,211.7L562.2,218.1L565.4,216.4L564.5,226.3L564.4,230.8L569.6,230.9L570.1,234.6L571.5,241.3L573,243.1L585,242.3L587,244.7L586.2,247.8L588.9,250L591.1,250.7L592.2,250L592,246.9L593.6,244.5L596.3,242.2L597.2,239.9L600.4,238.1L603.6,235.5L608.2,233.4L611.6,229.7L613.7,230L614.8,228.4ZM614.2,246L614.2,246L614.2,246ZM620.1,260.7L618,260.7L618.4,259.3L617.6,257.4L620.3,258.6ZM626.2,259.9L626.2,259.9L626.2,259.9Z",533,233],
+[784,"BAA","M460.3,443.1L461,444.1L461.3,451.1L457.8,453.9L456.8,452.5L457.1,451.4L454.9,452.4L454.5,459.8L456.4,460.1L457,461.9L452.3,462.7L451.4,463.3L451.8,465.9L448.6,473.9L448.4,477.8L447.7,478.7L420.2,475.1L411.4,463.8L409.7,461.1L409.6,459.3L411.8,459.6L412,461.7L413.3,462.8L416.9,462.7L421.2,460.8L425.3,460.9L428.5,461.5L434.6,461.7L440,459.4L441.4,456.4L443.7,453.1L447.4,450.4L452,445L456.5,441.4L458,438.2L458.9,438.4L458.7,442.7ZM460.1,448.1L460.1,448.1L460.1,448.1ZM428.5,459.6L427,459.2L429.7,458.3ZM420.9,459.2L420.9,459.2L420.9,459.2ZM434.9,460.5L433.6,461L431.8,460.6L433.9,459.6ZM440.7,457.4L440.7,457.4L440.7,457.4Z",439,464],
+[804,"Ukraina","M266.5,154.2L259.3,154.5L257.1,156.9L255.8,156.9L252.7,158.4L251.3,160.1L250.2,159.3L247.4,159.8L245.8,161L243,160.9L240.9,161.5L236.4,165.3L234.8,168L232.2,169.6L235,166.9L234.5,164.4L232.7,167.1L230.4,168.2L230.5,171.4L232.1,175.3L229.9,174.4L228.7,171.5L226.2,171.7L225.1,170.2L221.6,169.5L219.3,168L217.7,167.8L217,169.7L215.2,170.3L212.8,168.5L210,169.3L205,169.9L200.3,167.1L197.5,166.2L199.8,165.6L200,164.5L196.8,163.9L195.1,162.6L203.8,163.8L206.1,161.6L203.7,162.4L201.3,161.9L199.6,160.2L199.3,155.9L197.3,152.3L199,156.8L198.5,161.1L194.9,160.9L195.2,159.1L193.5,161.4L190.7,161.5L187,162.6L186.2,165.5L184,169.6L180.8,173.2L176.5,175.3L175.1,175L174.2,176.1L175.5,181.3L175.3,182.5L173.8,180.8L172.1,180.1L170.1,180.4L165.2,182.9L160.4,181.2L159.3,179.6L162.4,178.6L162.3,176.3L164.9,173.5L164.9,172.2L167.2,170.4L167.8,168.5L167,164.6L169.3,163L169.9,165.3L171,164L174.3,165L175.3,164.2L176.7,165.8L179.9,164.6L177.7,162.8L177.9,160L177.2,158.3L173.9,156.2L173.2,153.6L173.7,151.7L169.4,148.4L169.1,147.2L170,144L169.8,141.6L168.7,140.2L167.5,140.8L165.3,137.8L162.7,137.3L162,138.3L160.1,135.9L158,135.6L155.1,133.1L152.2,132.1L148.8,133.8L144.7,133.5L142.2,135.6L138.9,136.5L137.3,139.9L129.9,141.2L126.7,142.6L125.7,143.8L123.7,144.3L120.4,140.9L116,141.3L110.2,139.8L107.8,139.9L104.9,138.3L102.1,140.6L101,138L98.9,137.6L96.5,135.6L95.4,133.2L94.1,133.2L94.2,130.6L95.9,128.7L98.5,122.4L101.4,123.3L101.8,122.3L100.3,120.8L100.6,118.8L99.7,114.7L103.8,108.8L111.1,100.8L113.9,100.2L115.2,96.7L113.9,93.9L115.3,92.9L112.7,88.1L110.6,84.9L109.9,81.4L111,79.2L113.7,80.2L115.5,78.8L118,75.3L127.7,74.1L134.8,74.5L143.9,77L147.8,77.3L149.2,79.7L152.7,79.9L154.2,82L155.5,80.1L157.1,80.6L159,79.8L163.5,80.9L164.9,82.8L166.1,81L169.2,79.6L171.5,83.7L173.7,82.8L180.2,82L182,84.7L184.3,85.7L185.2,84.2L184.2,80L185.6,76.3L189,72.2L191.5,72.1L192.9,71.2L197.4,71.2L199.6,72.2L202.9,71L203.8,68.3L205.3,67.6L209.5,68.5L212.2,67L218.5,67L220.5,68.6L222.5,73.4L225.6,76.8L225.4,77.9L222.6,78.6L224.4,84.9L223.8,86.1L226.6,86.2L229,87.3L232.7,86.7L233.8,89.2L235.4,89.5L236.8,94.8L236.5,98L239.3,101.3L241.6,99.8L244,100.2L246,102.4L248.1,102.4L249.4,103.6L250.9,102.2L258,100.2L259.7,102.2L261,105.3L264.7,108.4L267,106.2L269,107.7L271.2,107.9L274,110L276.8,109.5L278.2,111.4L279.9,111.6L283.3,114.2L286,113.8L286.8,119.5L284.5,122.5L282.3,123.5L283,125L285.5,126L283.4,126.7L281.8,130.2L283.9,131L285.2,135.4L282.8,142.2L279.1,142.4L273.9,142.1L271.9,144.3L267.3,146.8L266.4,151L267.2,151.3ZM200,168L201.5,168.8L196.7,167.9L196,167Z",192,120],
+[795,"Turkmaniston","M426.1,275.8L426.1,275.8L426.1,275.8ZM456.9,240.5L465.4,241L468.1,241.4L469.1,240.1L468.1,238.7L467.5,232.9L470.3,229.6L471.9,228.6L476.6,228.1L478.9,223.8L482.1,225.1L482.8,226.6L483.8,226.2L480.2,221.7L481.4,220.8L483.7,221.2L484.9,219.5L488,222.7L490.6,223.2L492.2,225.7L494.1,226.5L498.5,226.6L500.1,228.1L499.6,231.5L502,233.2L500.8,235.1L501.5,236.7L501,239.5L504.9,242L508.1,241.6L514.2,242.4L516.1,241.2L517.6,241.7L520.4,243.8L522.5,249.6L525.5,254.6L526.2,258.7L528.4,261.2L537.6,267.9L539.9,270.5L544.6,273.8L546.2,273.4L549.9,276.8L554.4,279.4L560.2,283.6L562.8,283.2L566.2,284.5L568.5,286.1L570.5,286.7L571,287.7L570,289.7L569.9,295.6L565.5,294.7L561.8,292.7L560.5,294L559.5,296.9L554.6,297.1L551.6,298.6L548.3,309.1L546.7,310.7L543.9,312.2L543,313.5L541.4,313.5L533.3,316.1L534,317.9L532.8,321L528.8,323.5L526.4,323.5L524.7,324.6L522.4,321.8L520.8,320.9L518.4,321.3L516.6,320.8L514.4,318.6L513.5,318.7L513.4,315.4L512.3,314L513,312.3L512.5,306L512,305.1L503.7,305.2L500.7,300.8L499.5,299.8L495.3,297.9L493.2,295.8L492.5,293.5L487.3,291.1L483.2,291.7L481.4,291.4L479.7,289.8L475.5,288.1L471.4,287L471.4,285.6L469.9,283.9L466.9,283.9L465.4,283.4L461.8,283.4L459.6,285.8L452.6,285.5L450.5,286.1L447.2,288.1L444.8,290.6L443.7,293.6L437.8,295.9L434.8,295.7L433.8,287.8L434.1,282.9L434,279.8L434.5,275L432.7,271.7L432.5,270.2L428.6,268.4L426.7,269.5L426.3,267.1L427.5,264.7L429.2,265.7L431.4,265.6L430,263.9L430.2,260.5L429.3,259.8L424.8,259.4L423.9,260.4L422.3,256.1L422.1,253.6L423.4,249.6L424.4,244.6L426.5,247.6L428.5,248.2L431.6,247.7L433.2,249.9L434.3,250.1L437.8,249.1L439.7,249.5L439.1,247.5L441.5,247.5L443.3,246.7L443.2,244.1L442,242.4L438.7,239.9L436.7,237.7L434.1,229.5L431.7,228.8L428,229.7L426.7,229.5L424.6,231.2L423,235L423.7,235.8L423.1,240.3L423.5,242.2L420.8,237.6L419.6,234L423.6,230L427.7,227.8L432.3,226.5L437,226L443,229.7L445.4,232L445.9,233.6L449.1,238.6L451.1,240.9L452.3,241.4Z",493,271],
+[792,"Turkiya","M135.3,257.3L132.8,257.8L132.8,256.5L134.7,255.9ZM301.8,237.8L305.2,239L306.3,238.1L309.4,238.2L312.1,238.9L313.2,237.2L315.5,237.1L319.6,241L320,242.3L321.7,242.4L322.5,243.6L324.6,246.1L325.6,249.1L323.9,252.5L325.4,256.9L324.9,257.5L328.6,259L331.6,258.7L334.5,260.8L336.7,263.4L337.3,264.1L334.8,262.5L333.4,263.9L332.7,267.3L328.8,267.9L329.4,270.1L330.4,271.1L330.1,273.2L331.4,275.4L331.3,277.2L331.9,281.7L333.1,281.9L332.3,284.8L330.8,288.1L334.5,290.3L334.7,294.5L337,296.4L336.7,298.4L335,298L331.5,300.6L330.7,299.6L330.2,296.5L328.6,296.1L326.8,297.3L323.3,297L318.8,295.4L317.1,296L315.4,295.3L312,298.6L310.9,298.9L310,296.6L307.7,297.6L301.9,299.1L299.2,299.4L295.9,298.9L293.2,299L285.8,302.7L278.8,304.6L272.4,304.4L269,302.2L266.3,301.7L258.2,305.1L254.2,305L252.9,303.6L249.8,303L248.5,307.6L249.6,310.6L246.8,311.4L246.5,313.6L244.9,314.5L244.4,315.9L241.6,314.8L242.3,313.7L240.7,309.6L241.5,308.3L244.8,304.9L244.7,302.9L243.3,301.5L239.1,304L237.8,305.7L236.3,306L234,305.2L230,303L227.8,303.2L224.5,305.6L221.6,309.1L218.1,311.2L211.7,312.3L208.4,313.2L205.6,312.3L203.9,311.2L200.1,306.6L197.5,305.5L192.9,303L185.4,302.1L184.7,303L184.5,306.7L183.6,309.5L182.6,310.4L180.9,309.6L175.1,311.6L171.5,310.2L169.3,308.4L168.2,304.4L164.7,304.3L162.2,303L160.3,302.8L159.1,304.5L157.3,305.2L157.9,303.7L154.9,303.9L153.4,304.7L151.2,304.2L153.1,303.2L156.3,302.9L159.6,299.9L153.5,300.2L150,300.1L149,299.3L152,298.1L151.9,297L148.6,295.1L147.1,291.1L148.7,290.5L148.8,287.1L145.7,286L142.9,284.1L141.8,284.8L138.7,283L140.2,280.8L139.7,278.3L141.1,278.2L142,281.1L144.8,281.7L147.4,281.2L144.6,279.2L143.8,277.1L146.4,274.7L144.9,274.2L144.8,271.5L142.9,269.1L145.4,266L144.4,265.3L136.8,266.7L137.5,259.4L139,258.9L140.7,256.5L143.5,253.6L146.4,253.7L149.3,252.8L151.4,254.8L154.1,254.6L155.4,253.9L154.6,252.1L156.9,252.4L156.2,253.9L160.1,253.6L163.8,253.9L167.8,253.8L168.3,253.3L165.5,251.7L167.3,250.4L176.8,248.9L171.6,247.8L168.2,245L168.7,242.6L171.2,241.9L177.6,243L182.2,242.3L187.2,243.9L191.9,243.6L194.1,240.6L200.8,236.7L203.2,234.7L205.7,233.6L210,232.4L214.7,230.6L223.4,231.4L229.4,231.5L232.1,229.9L233.7,230.4L233.4,232.4L235.2,234.7L238,236.1L241.9,235L243.3,235.4L244.7,239.1L245.8,240.3L248.2,241.4L251.1,240L253.4,241.2L254.2,242.5L261.7,244L263.2,245.1L268.3,246.2L273.4,244.9L279.5,243.6L283.6,245.4L287,246L288.5,245.7L295.9,242.1L300.8,239.1ZM157.2,231.3L156.9,232.9L159.1,237.2L160.7,238.5L167.2,241.6L168.4,241.9L167.3,245L165.4,245.5L158.9,244L156.2,245.3L154.3,244.9L151.7,245.5L150.9,247.4L149.1,249.6L143.9,252.2L139.1,257.5L137.8,258.2L138.3,254.8L140.4,253L143.3,251.6L144.1,250.4L136.7,250.6L136,249L139.2,245.8L139.2,241.7L142.3,239.4L141.8,236.6L139,234.9L139.5,233.7L141.1,233.3L141.8,231.6L145.1,231L146.4,230L149.5,229.7L152,232L155.7,231Z",234,272],
+[762,"Tojikiston","M583.2,298L583.8,293.8L587.6,287.8L588.9,286.4L589.3,283.6L587.3,281.6L586.2,277.7L587.3,274.6L586.9,273.7L582.3,273L581.6,271L578.8,269.8L579.6,266.7L582.7,264.5L586.6,265.3L590.7,265.7L592,264.3L592.6,261.5L595.1,260.5L594.4,258.5L595.7,257.3L592.6,257.4L592.7,256.7L596,256.1L599.4,256.5L599.7,254.6L598.7,251.3L600.9,248L604.1,250L610.3,246.7L611.9,244.8L615.2,248.8L614.7,249.9L611.3,252.9L611.4,254.2L612.9,254.7L614.2,256.4L617.5,255.9L617.3,256.6L614.1,258.1L612.7,259.9L612,258.6L606.8,256.4L602.1,257.9L601.1,260.5L599.7,259.7L598.9,262.6L599.7,265.9L602.9,265.2L609.8,265.6L611.4,265.1L613.7,265.3L615,267.4L618,267.4L618.6,266.3L622.9,264.8L623.7,266.9L625.7,267.3L626.5,269.3L629.1,268.3L631.1,270.2L632.5,268.5L635.5,267.8L638,268.1L641.8,267.9L644.4,266.8L646.1,266.9L645.9,270L647.9,273.1L646.8,275.1L647.9,278.5L650.3,279.4L651.4,277.8L653,277.8L658,279.9L659,281.3L658.3,283.1L660.1,289.9L659.6,292.2L662.1,295.1L659.6,297.2L657.1,295L652.8,294.7L651.8,295.9L647.4,297.2L646,296.8L647,294.7L644.5,294L641.6,294L638.2,296.7L635.7,299.9L632.5,300.6L630.3,301.7L626.5,304.4L624.3,303.9L622.5,298.6L623.3,292.2L624.1,288.7L623.8,287.7L621.3,288.2L620.9,286.7L621.5,284.5L620.7,282.6L618.5,281.1L616.6,280.6L613.8,282.3L611.7,285.8L609.5,287.9L609.9,291.4L607.7,293L606.5,292.2L603.2,292.3L601.7,292.9L600.7,295L600.9,297.5L599.3,298.9L596,296L592.9,296.9L588.9,299.1L586.5,301L585.3,300.7ZM614.2,246L614.2,246L614.2,246ZM614.7,261.7L613.2,262.1L612.4,260.9Z",618,279],
+[760,"Suriya","M241.6,314.8L244.4,315.9L244.9,314.5L246.5,313.6L246.8,311.4L249.6,310.6L248.5,307.6L249.8,303L252.9,303.6L254.2,305L258.2,305.1L266.3,301.7L269,302.2L272.4,304.4L278.8,304.6L285.8,302.7L293.2,299L295.9,298.9L299.2,299.4L301.9,299.1L307.7,297.6L310,296.6L310.9,298.9L310.8,299.5L304.8,305.7L300.8,306.8L299.5,308.6L299,312.7L300.1,316.2L300.2,318.4L298.7,323L298.4,329.8L296.2,334.3L293,335.5L272.5,347.9L264.8,352.7L251.6,361.4L246.8,360.5L245.1,359.1L243.4,358.6L241.6,356.3L240.5,356.1L241.8,353.3L241.8,350.9L241,349.1L241.4,347.1L243,345.5L242.1,344.1L243.8,342L246.5,342.1L246,340.4L247.7,339.1L249,337L248.2,334.2L246.3,333.2L247.4,331.9L242.5,331.7L241.7,328.8L241.6,326L242.2,323.9L241.7,321.3L240.2,319.3Z",270,326],
+[682,"Saudiya Arabistoni","M252.4,446.3L250.5,444.5L252.7,445.8ZM307,546L307.7,545L308.9,546.1L308.8,547.6L307.8,546.5L306.7,546.7L305,545.3L305.6,542.8L306.5,543.5ZM414,520.3L384.2,524.5L382.5,525L373.2,529.8L366.9,537.7L365.4,541.5L362.2,543.4L360.4,543.3L358.3,540.4L357.3,539.8L353.3,540.2L343.6,539.2L340.8,538L336.5,537.9L330.2,538.3L327.6,539.2L325.4,538.7L324.2,537.5L322.3,537L319.8,538.8L319,543.4L319.8,544.9L319.6,546.3L315.6,549.8L314.6,545.7L313,544.3L312.9,543.2L311.2,541.4L310.2,537.9L307.7,535.3L304.4,532.8L301.8,528.7L301,526.4L298.8,523.9L297.6,519.3L293.8,511.7L292.3,510.9L290.8,508.9L286.5,505.8L284.4,505.5L281.5,503L280.2,500.5L277.9,497.7L275.9,493.9L276.5,491.5L274.8,487.3L275.3,483.6L275.9,481.4L275,477L272.7,473.8L271.8,470.8L269.2,466L267.3,463.7L263.4,460.5L261.1,459.4L259.3,459.2L255.4,453L256.3,451.3L255.1,447.4L252.6,443.2L250.9,441.9L250,438.5L248.3,437.7L245.5,431.9L241.2,426.2L240.2,423.9L238.3,421.8L236.6,418.1L234,414.5L232.9,413.9L227.9,413.1L229.7,408.7L229.9,406.1L231.5,398.4L242.9,400.4L247.9,396.6L250.9,392.1L258.5,390.5L260.3,386.5L264,384.2L258.6,377.9L253.1,371.8L274.9,365.3L276.5,363.8L289.6,366.2L290.8,366.7L307.9,377L316.3,384.3L335.9,400.2L353.8,401.9L355.7,401.5L365.3,402.8L366.9,407.3L367.8,408.4L376.1,408.3L378.1,413.3L379.7,415.4L379.9,418.3L381.1,419.4L384.6,421.1L384,421.7L386.4,424.8L387.9,425.2L389.8,427.5L392.7,429.1L394.4,431.1L393.1,430.6L393.1,432.7L394.8,434.1L395.1,435.3L394.5,437.8L393.2,437.7L394.2,440.8L395.8,444.1L397.7,445.8L398.8,449.8L401.5,453.3L403.2,455.9L406.4,455.5L407.9,455.9L406.9,458.6L409.6,459.3L409.7,461.1L411.4,463.8L420.2,475.1L447.7,478.7L448.4,477.8L453.3,485.9L446.2,508.9ZM249.2,442.4L249.2,442.4L249.2,442.4Z",334,459],
+[643,"Rossiya","M1030,118.9L1027.7,118.1L1021,118.3L1018.8,117.1L1014.8,113.8L1013.8,112.2L1013.9,108.3L1010.5,107.4L1006.2,107.3L1004.2,105.6L1003.1,103.8L1000.6,101.9L995.4,102L991.7,100.3L986.4,99.1L983.3,100.6L976.6,101.9L973.5,104.2L969.5,104.1L967.6,104.8L964.1,103.7L962.6,102.2L957.5,100.6L955.2,98.3L953.3,97.3L953.5,95L952.4,93.1L951.4,84.2L945.5,82.2L943.5,82.5L941.8,81.4L933.7,77.8L927.9,77.2L925.7,75.2L922.3,74.4L916.9,71L915.4,74.7L914.1,76.5L911,77.9L909.7,81.6L907.7,82.5L906.7,84.3L905.4,90.5L906.8,92.7L907.6,96.2L910.3,98.1L910,102L908.4,105.8L905.7,108L902.9,108.6L900.4,111.4L898.8,111.6L896.4,109L891.2,108.4L889.2,108.7L886.5,107.1L884.3,106.9L881.2,108L876.3,108.2L874.4,106.3L871,106.7L868.2,103.4L867.1,97.7L856.6,96.7L854.8,97L853.1,94L851.3,94L849.7,95.5L846.8,92.5L845,95.3L840.9,95.4L835.9,99.2L832.5,100.1L828.5,103.3L827.1,103.5L821.6,105.9L821.3,107.4L817.7,108.7L817.8,111.8L815,113.5L813.4,113.3L812.7,114.8L810.9,115.8L809.8,114.7L809,116.2L806.9,115.6L802.2,116.2L801.3,119.4L799.4,120.9L798.1,120.9L792.9,122.2L791.9,120L788.9,118.3L787.4,115.6L785.3,113.5L786.5,111.2L785.2,110.9L780.6,115.4L770.2,112.7L767.7,107.9L767.8,106L763.7,103.7L760.7,103.1L760,102.3L759.1,98.4L756.6,94L754.2,92.2L750.3,90.3L748.2,90.4L746.7,92L743.9,92L741.1,94.8L736.8,95.1L735.1,94.2L730.1,94.6L729.2,91L725.8,90.8L726.5,87L724.7,87L723.8,85.4L721.3,85.5L719.2,87.1L718.9,91.1L716.7,91.7L714.2,94L708.7,81.8L698,61.8L691.4,50.6L689.8,48.6L677.6,38.4L676,34.6L678.5,34.7L680.5,29.3L676.8,31.2L674.3,31.7L667.8,35.4L665.5,35.8L664.8,37.9L661.3,40.5L659,40.6L654.9,43.8L653.8,46.7L652.3,45.1L648.6,44.3L646.2,45.1L643.3,47.3L642.4,44.7L643.6,40.8L646.6,38.7L647,36.6L646,36.2L643.4,38.1L640.6,37.7L638.4,35.4L635.3,34.9L634.9,37.5L633,38L632.8,35.1L631.5,32.4L629.8,31.7L628.7,33.6L621.5,34.5L618.9,33.5L619.9,26.4L617,16.5L615.1,13.2L612.4,13.6L609.1,15.9L607,15.2L604.4,13.1L601.7,12.2L596.2,11.6L593.4,13.1L591.4,15.1L587.9,15.9L588.4,17.9L586.5,19.7L583.9,20L582.5,21.3L566.7,25.1L563.4,24.6L561.2,26L558.7,25.9L556.1,27.9L555.3,30.7L552.8,30.1L549.9,30.9L547.8,30.3L545,31L542.9,32.5L534.2,34.3L533,35.5L528.2,36.1L526.8,37.1L521.9,37.3L520.7,38.3L514.3,36.5L512.3,38L511.9,41.8L510.5,44.2L513.4,45.5L515.1,44.9L516.4,46L513.2,47.4L512.8,50.3L517.8,51.3L521.6,53.5L522.3,55.3L521.1,56.4L515,55.5L511.2,55.9L508.6,59.9L508.8,63L510.5,66.1L510,68.1L507.2,70.4L504.6,70.8L500.7,73.4L500.7,74.9L504.2,76.9L505,79L510.4,81L510.9,81.8L514.6,82.7L516.7,84.7L517,86.3L514.9,92.6L513.2,94L510.1,95.4L506.8,95.9L503.1,95.3L501.2,93L500,93L498,97.3L494.9,98.8L494.1,96.7L488,95.4L484.5,90.7L482.4,89.1L476.8,88.7L474.8,91.5L472.6,92.1L469.7,89.6L468,89.1L463.8,90.6L462.4,89.9L458.7,92.9L457.7,95.1L455,97L452.2,97L448.5,94.6L446.6,92.5L442.6,90L442.2,92.3L442.7,96L442.1,97.8L440.7,97.3L440.2,94L436.1,88.3L432.4,85.9L430.7,83.4L428.6,82L423.9,82.2L420.4,82L417.8,78.5L414.3,78.7L410.1,81.9L407.2,82.1L405.3,79.1L401.3,77.7L400.9,78.7L395.5,85.3L392.1,86.9L390.9,88L387.4,88.8L385.6,92.7L380,97L378.1,96.8L378.9,101.2L380.4,106.9L379.5,108.3L376,109.9L373.8,108.2L369.8,102.4L368.2,100.8L366.1,100.3L364.2,102.5L363.8,106.1L360.6,109.5L359.5,112.1L358.5,117.6L360.9,120.3L360.8,122L357.5,126.8L356.5,130.5L357,133.1L360.7,135.2L361.9,137.7L361.7,140.6L363.8,143.9L365.8,142.9L372.6,143.8L377.3,150.6L381.7,159.2L379.7,160.2L377.4,159.4L376.8,160.3L377.9,162.4L384.6,166L383,168.3L378.7,169.9L379.4,172.4L376.6,172.2L374.1,174.6L369.6,176.4L368.2,176L367.5,177.6L366.3,177.3L365.9,179.6L361.6,189.2L358,191.7L358,195.2L360.9,196.4L363.1,198.6L364.5,201.6L365.6,208.1L366.7,204L367.6,203.2L366.1,208.8L366.1,213.1L365.6,215.8L368.3,219.1L368.5,221L369.5,221.9L373.8,228.2L375.5,231.5L377.5,233.1L375.6,236.5L372,238.6L369.9,242.1L366.3,241.9L363.4,240.6L362.9,238.6L358,233.5L356.1,233.7L354.6,232.4L352.2,231L349.4,230.3L346.1,227.9L347,223.9L345.3,223.1L342.9,223.2L341.5,221.4L337.9,219.8L336.8,221.9L335.4,220.2L333.9,220L328.1,222.6L325.7,221.9L326.2,220L323.8,218.6L318.8,216.4L317.7,214.9L315.2,213.8L313.1,214L311.6,213L307.6,213.5L302.6,213.1L300.2,211.4L297.2,210.8L292.6,208.4L291.2,208.8L287.2,207.9L285.4,210.1L280.5,205.6L278.4,203L271.9,197.2L266.1,195.2L262.6,191L259.6,191.5L257.9,190.5L255.7,186.9L252.9,185.4L249.7,184.6L249.4,183.7L252.9,182.1L250.5,180.8L252.1,180L254.6,181.9L260.4,180.7L260,178.9L260.7,176.5L262.5,174.3L263.5,171.2L264.4,170.5L265.1,172.2L266.2,169.7L269.5,169.8L265.1,165.1L263.3,164.9L261.7,161.3L263.9,161.6L266.7,160.3L269.6,160.9L268.9,158.5L272.8,157.1L278.1,154L277,151.4L275.2,151.3L274.2,152.8L270.1,153.3L272.4,151.5L266.5,154.2L267.2,151.3L266.4,151L267.3,146.8L271.9,144.3L273.9,142.1L279.1,142.4L282.8,142.2L285.2,135.4L283.9,131L281.8,130.2L283.4,126.7L285.5,126L283,125L282.3,123.5L284.5,122.5L286.8,119.5L286,113.8L283.3,114.2L279.9,111.6L278.2,111.4L276.8,109.5L274,110L271.2,107.9L269,107.7L267,106.2L264.7,108.4L261,105.3L259.7,102.2L258,100.2L250.9,102.2L249.4,103.6L248.1,102.4L246,102.4L244,100.2L241.6,99.8L239.3,101.3L236.5,98L236.8,94.8L235.4,89.5L233.8,89.2L232.7,86.7L229,87.3L226.6,86.2L223.8,86.1L224.4,84.9L222.6,78.6L225.4,77.9L225.6,76.8L222.5,73.4L220.5,68.6L218.5,67L212.2,67L209.5,68.5L205.3,67.6L203.8,68.3L202.9,71L199.6,72.2L197.4,71.2L195.4,67.6L195.5,63.7L194.9,59L191.9,55.1L193.7,51.9L197.2,52.1L198.3,53.5L201.4,53.8L204.5,51.6L204.9,50.6L207.5,49.4L207.3,47.4L204.9,45.6L204.7,43L202,41.3L197.3,40.8L198.2,37.4L197.7,36.4L193.5,33.8L191.2,29.1L190,28.4L190.9,26.2L187,23L187.3,20.5L188.9,18L187.2,13.7L188.1,11.4L188.2,8.2L185.2,6.4L183.3,4.1L181,3L177.8,2.9L172.9,6L171.5,4.1L171.8,1.2L168.7,-0.4L165,0.9L163.1,-1.8L160.1,-1.1L158.6,-2.7L159.2,-5L158.1,-10.5L157.1,-11.6L154.9,-16.8L153.2,-16.4L155.3,-24.3L154.9,-25.7L152.1,-27.9L151.8,-29.5L150.1,-29.9L150.1,-30L1030,-30ZM371.2,179.1L371.2,179.1L371.2,179.1ZM81.5,13.7L77.7,19.3L80.8,20.6L84,20.1L84.5,14L86.2,13.8L88,15.3L93.5,17.7L98.8,17.8L101.6,21.9L100,28.3L100.9,30.9L94.5,30.8L73.5,29.7L67,29L68.7,27.4L70.7,23.6L71,20.4L72.4,19.7L75.5,19.8L76.9,19L80.9,13.5ZM217,169.7L217.7,167.8L219.3,168L221.6,169.5L225.1,170.2L226.2,171.7L228.7,171.5L229.9,174.4L232.1,175.3L236,181.1L238,181.8L241,180.4L242.9,180.8L245.9,179.5L248.9,180.5L247.6,183L247,185.5L245.2,186.1L241.4,186.4L238.2,184.7L235.9,186.8L233.7,188L233,189.5L229,189.4L226.4,190.7L224.4,193.5L222.2,195.2L220.4,195.7L217.6,195L215.4,193.2L217.2,187.9L216.6,185L214.8,183.6L212.6,183.5L209.7,181.2L206.4,181.5L205.3,180.3L212.2,175L213.6,174.8L217.8,172Z",520,30],
+[642,"Ruminiya","M159.3,179.6L160.4,181.2L165.2,182.9L170.1,180.4L172.1,180.1L173.8,180.8L175.3,182.5L174.5,186.8L173.7,188.9L168.2,190.1L168.2,187.6L167.6,186.6L166.6,187.7L166.9,189.4L165.7,193L166.2,193.9L163.9,197.1L164.1,201.8L163.3,205.3L161,205.3L157.6,204.2L155.8,201.7L150.9,201.2L147.3,199L140.9,200.2L137.9,201.4L134.9,203.4L133.6,205L130.2,206.4L126.6,206.2L118.8,204.6L116.6,205L109.2,203.7L105.9,203.4L102.6,204L102,202.3L103.7,200.8L102.8,199.6L100.3,198L98,195L98.6,193.4L100.5,192.4L98.1,190.9L96.5,191.4L93.7,193.4L91.7,191.5L88.8,190.9L85.8,188.6L87.7,187.7L85.8,186.6L87.3,184.6L86.6,183.6L82.2,181.6L79.6,179.1L79.6,175L75.1,171.6L73.9,169.5L76.7,168.6L77.8,169.1L80.3,167.2L82.4,167.4L84.8,164.8L85.4,161.8L87.3,160.3L87.3,158.9L90.4,153.4L91.3,150.8L92.7,149.4L92.7,147.7L95.8,144.1L100,143L102.1,140.6L104.9,138.3L107.8,139.9L110.2,139.8L116,141.3L120.4,140.9L123.7,144.3L125.7,143.8L126.7,142.6L129.9,141.2L137.3,139.9L138.9,136.5L142.2,135.6L144,135.6L146.1,137.3L148,140.4L149.9,145.5L155.5,153.8L157.8,156L159.6,161.3L159.6,164.2L158.3,169.1L158.1,171.6L158.8,176.6L157.8,177.4Z",125,173],
+[634,"Qatar","M406.4,455.5L403.2,455.9L401.5,453.3L401.9,452.2L401.1,448.7L401,445.6L402.1,443.6L403.6,439.2L406.4,437.1L409.4,440.1L409.7,441.6L408.7,444.6L410,449.1L409.8,451.3L408.1,454.8Z",406,447],
+[586,"Pokiston","M679.7,318.1L682.7,325.4L682.2,326.9L679.9,328.1L677.9,330.3L676.4,330L673.3,331.2L671.9,331.1L668.4,333.3L665.6,332.9L662.8,331.5L660.2,331.4L653.3,329.9L649.6,331.4L648,334.4L648,335.6L649.8,337.4L649.5,339.6L652.7,340L652.4,341.3L650.1,342.6L650.1,344.6L651.7,346.2L651.3,347.8L650,349.6L651.4,351.7L653.3,352.8L653.8,355.6L657.2,355.8L657.1,358.8L658.5,359.6L660.6,359.5L663.3,360.7L664.3,361.9L663.5,363.6L658,366L656,367.7L655.5,369L656.4,372.1L655.6,375.6L656.8,377.5L653.7,379.3L650.1,384L649,385L649.3,387.6L648,389.3L643.4,391.2L642.1,395.2L640.7,398.3L638.3,402.4L632.3,405.8L630.5,409.8L628.1,412.8L627.2,415.4L623.7,416.5L619.9,416.9L616.6,418.4L614.6,417.7L613.9,415.7L611.5,414.6L608.7,416.7L606.1,421.3L602.6,424.9L601.5,429.3L604.3,431.5L607.8,432.1L608.8,433.3L608.6,436.4L608,438.1L608.3,440L610,442.5L614.1,442.9L614.2,445.8L616.6,450.1L618.4,454.5L617.6,456.9L618.4,457.9L614.9,459.8L613.4,459.4L613.1,457.7L608.2,459.3L607.4,460.4L604.1,460.6L602.4,459.4L597.7,459.5L594.3,459L593.5,459.5L593.5,463L591,463L587.5,464.3L587,465.5L586.1,464.4L584.2,463.8L582.2,464.8L581.1,464L578.3,460.6L578.1,458.3L576.9,453.7L571.8,452.5L571.8,448.2L568.9,444L566.6,443.9L565.7,445L568.1,444.8L569.3,445.6L566.8,445.3L563,445.9L560.9,446.6L558,446.4L554.3,447.2L551.2,447.2L549.9,448.7L544.5,446.9L543.5,446.1L542.2,446.8L539.9,446.3L538.1,446.7L537.4,448.4L534,447.8L532.3,448.2L527.6,447.8L524.8,449.3L523.6,448.2L522.4,449L518.7,449.2L517,448.5L517.9,441.7L518.8,440.8L519.4,437L520,436.1L524,434.7L524.8,433.1L526.2,432.3L529.9,431.3L533.1,431.4L534,431L534.8,428.5L534.8,426.1L535.4,425.5L534,424L531.3,424.4L529.5,423.8L530.1,421L529.4,414.9L529.5,411.8L527.5,412.1L525.2,409.9L520.3,408.3L517.4,405.3L514.4,399.5L514.1,398.2L509,392.2L525.4,397.5L526.5,397.7L538.2,396.6L543.9,397.9L545.7,396.5L548.5,395.8L552.7,395.9L555.5,395.6L566.2,392.4L567.7,390.8L566.9,389.9L567.6,386.4L567.4,382.9L568.6,379.1L571,377.4L572.2,375.5L574.2,374.1L578.1,375.2L579.9,375L582.9,373.7L581.2,371.6L585.9,369.5L587.5,367.9L590.5,368.5L592.1,367.9L594.1,369.9L595.1,370L597.3,368.7L599.5,366.2L599,359.9L600.8,356.7L601.8,352.4L602.6,351.9L606.3,351.2L610,349L610.2,348L608.6,344.7L605.8,341.2L607.1,339.2L611.6,340.5L616.3,340.1L618.5,339.2L618.9,335L617.5,333L621,328.5L622.8,327.3L624.6,324.4L623.7,323L624.3,321.5L624,319.6L621.6,314.5L619.9,313.1L620.4,312L624.6,307.9L626.2,307.9L630.3,304.3L635.3,302.6L640.6,302.1L647.6,301.8L650.1,302.7L655.8,300L657.5,299.8L659.6,301L661.4,300.5L664.5,301.5L665.3,303.8L667.9,303.8L669.8,305L671.2,308.6L671.2,311.4L670.5,312.5L672.2,313.9L673.1,315.9L674.2,316.2L677.4,315.2L677.5,316.7Z",601,389],
+[512,"Ummon","M486.3,506.4L485.5,505L487,503.2L488,501.1L488.8,503L487.5,504ZM425.9,546.7L422.8,539.8L422.1,539.4L414,520.3L446.2,508.9L453.3,485.9L448.4,477.8L448.6,473.9L451.8,465.9L451.4,463.3L452.3,462.7L457,461.9L456.4,460.1L454.5,459.8L454.9,452.4L457.1,451.4L456.8,452.5L457.8,453.9L461.3,451.1L462.4,454.2L464,457.1L466.9,460.9L470.2,463.5L474.4,464.9L479.9,466L482.1,467L484.8,466.8L486.8,468.3L489.6,472.8L492.6,476.7L495,479.2L498.1,480L497.8,483.4L496.3,486.5L494.8,488.4L493.2,491.7L490,494.1L488.2,496.1L486,499.7L483.6,504.2L480.8,504L481.2,502L479.7,502.4L477.1,506.1L475.5,513.4L476.5,520.1L475.1,520.7L469.7,521.4L466,523L464.2,524.9L463,529.7L461.2,531.7L460,532.1L453,532.8L451.5,533.3L449.1,536.2L449.6,538.5L447.1,542.3L444,543.2L441.8,542.4L436.4,542.7L435.2,543.7L431.5,545.5L428.2,545.9ZM460.3,443.1L458.7,442.7L458.9,438.4L458,438.2L458.9,436.5L461.7,435.1L461.1,441.3ZM460.1,448.1L460.1,448.1L460.1,448.1Z",458,502],
+[524,"Nepal","M801.3,416.5L801.7,418L800.3,422.1L799.9,425.4L801.3,427.9L801.8,430.3L800.7,433.8L796.2,434.2L793.8,433.9L792.5,434.7L790.4,433.8L789.5,432.3L786.2,433.8L782.6,432.1L778.7,431.2L777.1,431.8L775.8,431.3L775.5,429.6L774,428.9L771.1,430.1L764.6,426.5L763.8,423.4L758.2,421.1L755.4,422.5L751.3,421.4L749.6,422.5L743.7,420.7L743,418.9L740.6,418.9L735.7,416L734.2,416.5L728.4,412.8L726.9,410.8L719.9,406.8L718.9,407.5L715.1,404.8L715.8,401.5L716.8,400.3L717.1,397.5L718.7,393.7L720.2,391.6L724.1,388.3L725.2,388.4L726.3,389.9L727.8,389.3L729.5,386.2L732,385.6L736.3,386.4L737.5,389L741,391.1L744.9,394.3L748.2,395.2L750.3,397.3L752.8,400.5L756.6,399.3L758.3,400L759.7,403.8L764.9,407.7L766.4,408.2L769.7,407.7L768.9,410.4L769.2,411.1L772.3,411.6L775.2,411.6L777,413.3L778.2,415.8L779.4,415.7L779.5,413.9L783.1,415.8L784.2,415.3L784.6,413.9L789.6,415.8L790.9,416.9L796.7,417.1L798.6,416.3Z",756,412],
+[496,"Moʻgʻuliston","M1030,224.2L1029.9,224.2L1021.8,224.8L1016.3,224.3L1001.3,226.7L991.6,230.9L984.4,234.6L982.1,236.6L980.8,235.9L976.9,235.7L976.9,232.6L968.5,234.4L961.7,230.7L951.8,228.5L949.9,227.7L947.1,224.1L944.7,223L940.4,222.8L928.5,221L923,222.6L898.8,219.4L890,220.4L889.1,217.3L884.9,213.3L884.1,210.7L880.8,202.2L878.9,201.4L878.9,197.4L875.7,197.6L872,196.3L868.3,193.7L866.6,191.8L864,191.4L860.7,188L856.8,186.7L851.4,185.9L847.5,186.4L843.3,185.4L838.5,185.3L835.6,184.7L832.8,183.2L830.9,183.5L828.6,178.5L829.1,175.3L832.3,170.6L831.3,167L832.6,163L832.1,159.6L830.9,156.3L829.2,155.5L826.9,151.1L826.1,147.7L824.9,144.9L822.6,143.8L821.8,141.7L819.2,142.5L816.8,139.7L814.4,139.3L811.3,139.7L806.3,136.2L805.6,133.6L803.4,132.2L799.9,130.8L800.4,127.9L798.3,127L797.3,125.5L798.6,124.1L798.1,120.9L798.1,120.9L799.4,120.9L801.3,119.4L802.2,116.2L806.9,115.6L809,116.2L809.8,114.7L810.9,115.8L812.7,114.8L813.4,113.3L815,113.5L817.8,111.8L817.7,108.7L821.3,107.4L821.6,105.9L827.1,103.5L828.5,103.3L832.5,100.1L835.9,99.2L840.9,95.4L845,95.3L846.8,92.5L849.7,95.5L851.3,94L853.1,94L854.8,97L856.6,96.7L867.1,97.7L868.2,103.4L871,106.7L874.4,106.3L876.3,108.2L881.2,108L884.3,106.9L886.5,107.1L889.2,108.7L891.2,108.4L896.4,109L898.8,111.6L900.4,111.4L902.9,108.6L905.7,108L908.4,105.8L910,102L910.3,98.1L907.6,96.2L906.8,92.7L905.4,90.5L906.7,84.3L907.7,82.5L909.7,81.6L911,77.9L914.1,76.5L915.4,74.7L916.9,71L922.3,74.4L925.7,75.2L927.9,77.2L933.7,77.8L941.8,81.4L943.5,82.5L945.5,82.2L951.4,84.2L952.4,93.1L953.5,95L953.3,97.3L955.2,98.3L957.5,100.6L962.6,102.2L964.1,103.7L967.6,104.8L969.5,104.1L973.5,104.2L976.6,101.9L983.3,100.6L986.4,99.1L991.7,100.3L995.4,102L1000.6,101.9L1003.1,103.8L1004.2,105.6L1006.2,107.3L1010.5,107.4L1013.9,108.3L1013.8,112.2L1014.8,113.8L1018.8,117.1L1021,118.3L1027.7,118.1L1030,118.9L1030,224.2Z",931,157],
+[498,"Moldova","M142.2,135.6L144.7,133.5L148.8,133.8L152.2,132.1L155.1,133.1L158,135.6L160.1,135.9L162,138.3L162.7,137.3L165.3,137.8L167.5,140.8L168.7,140.2L169.8,141.6L170,144L169.1,147.2L169.4,148.4L173.7,151.7L173.2,153.6L173.9,156.2L177.2,158.3L177.9,160L177.7,162.8L179.9,164.6L176.7,165.8L175.3,164.2L174.3,165L171,164L169.9,165.3L169.3,163L167,164.6L167.8,168.5L167.2,170.4L164.9,172.2L164.9,173.5L162.3,176.3L162.4,178.6L159.3,179.6L157.8,177.4L158.8,176.6L158.1,171.6L158.3,169.1L159.6,164.2L159.6,161.3L157.8,156L155.5,153.8L149.9,145.5L148,140.4L146.1,137.3L144,135.6Z",162,152],
+[422,"Livan","M242.5,331.7L247.4,331.9L246.3,333.2L248.2,334.2L249,337L247.7,339.1L246,340.4L246.5,342.1L243.8,342L242.1,344.1L243,345.5L241.4,347.1L237.8,349.5L236.5,351.7L233.2,351.6L234.7,347.7L235.7,346.2L237.5,341.4L238.6,339.4L239,336.6L240.7,334.2L242.5,332.7Z",241,341],
+[417,"Qirgʻiziston","M617.5,255.9L621.9,255.4L625.3,257.1L628.1,255.6L630,253.1L632.5,253.6L632.9,251.1L634.7,251.9L636.9,250.1L640.5,248.2L639.2,247.1L635.7,247L632.5,244.5L630.6,244.8L630.4,242.7L627.3,242.4L626.4,239.3L625,237.4L623.7,240.7L622.4,240.3L622.3,243.2L619.1,243L615.6,241.4L614.1,238.6L612.2,239.3L609.3,237.8L609.1,237L612.1,234.8L613.9,232.6L615.8,231.9L616.2,230.6L620.3,228.5L618.3,226.7L617.3,227.2L616.8,225.9L618.1,223.1L620.7,220.2L626.6,218.9L631.6,219.8L636.7,221.6L637.8,222.7L642.4,223.5L644.6,224.9L643.8,222.2L645.3,216.2L648.8,214.3L649.5,213.4L652.3,212.7L658.8,216.6L664.7,218.7L667.6,219L669.2,217.3L676.9,217.5L681.6,216.7L684.7,217.6L690.8,217.8L693.2,218.4L698.6,218.3L703.1,219.7L705,219.6L705.8,221.2L708.9,224.2L713.5,224.9L716.6,228.1L716.7,230.4L712.6,230.9L711.9,232.3L706.8,234L700.9,237.1L696.8,239.8L696.6,241.1L694.2,244.1L691,244.4L688.4,245.2L682,244.6L680.3,245.4L678.3,248.8L676.6,252.9L674.9,254.3L674.2,253.2L670.1,255L668,254.9L667,250.7L666.3,250.4L663.4,252.5L660.8,252.9L659.3,252.3L659.1,254.4L657.3,254.9L654.5,257.3L650,258.6L648.3,262.6L649.1,264.7L648.2,266.3L646.1,266.9L644.4,266.8L641.8,267.9L638,268.1L635.5,267.8L632.5,268.5L631.1,270.2L629.1,268.3L626.5,269.3L625.7,267.3L623.7,266.9L622.9,264.8L618.6,266.3L618,267.4L615,267.4L613.7,265.3L611.4,265.1L609.8,265.6L602.9,265.2L599.7,265.9L598.9,262.6L599.7,259.7L601.1,260.5L602.1,257.9L606.8,256.4L612,258.6L612.7,259.9L614.1,258.1L617.3,256.6ZM620.1,260.7L620.3,258.6L617.6,257.4L618.4,259.3L618,260.7ZM626.2,259.9L626.2,259.9L626.2,259.9ZM614.7,261.7L612.4,260.9L613.2,262.1Z",656,238],
+[414,"Quvayt","M374.3,395.1L373.3,395.2L372.2,392.9L373.4,390.7L375.1,393.1ZM376.1,408.3L367.8,408.4L366.9,407.3L365.3,402.8L355.7,401.5L359.7,396.1L362.3,390.4L364.2,389.4L367.9,389.2L371.2,390.6L371.4,392.4L372.9,395.7L371,395.1L368.4,397.6L371.9,398.4L373.4,403L375,405.6Z",367,399],
+[398,"Qozogʻiston","M394.8,188.7L393.9,189L393.2,187.3ZM396.2,186.9L396.2,186.9L396.2,186.9ZM421.6,180.2L420.2,179.3L421.3,178.6ZM617.3,227.2L614.8,228.4L613.7,230L611.6,229.7L608.2,233.4L603.6,235.5L600.4,238.1L597.2,239.9L596.3,242.2L593.6,244.5L592,246.9L592.2,250L591.1,250.7L588.9,250L586.2,247.8L587,244.7L585,242.3L573,243.1L571.5,241.3L570.1,234.6L569.6,230.9L564.4,230.8L564.5,226.3L565.4,216.4L562.2,218.1L558.9,211.7L556.5,210.1L552.6,205.7L547.6,208.2L534.4,207L522.2,209.1L521.3,209L512.4,199L510.8,195.6L485.7,178.7L483.4,178.2L473,181.3L456.9,186.6L456.9,240.5L452.3,241.4L451.1,240.9L449.1,238.6L445.9,233.6L445.4,232L443,229.7L437,226L432.3,226.5L427.7,227.8L423.6,230L419.6,234L419.2,229.4L420.9,224.6L420.7,219.8L418.9,218.9L417.2,219.2L416.2,218.2L413.8,218.5L412.6,217.6L410.1,214L406.7,213.7L406.8,209.2L405,206.7L402.9,202.1L401.7,198.6L400.2,197.6L396.4,196.6L395.5,195.4L396,192.8L397.2,192.2L402,192.1L405.4,194L409.4,193.6L406.9,192.2L404.2,189.3L404,186.8L406.2,184.6L408,181.1L411.4,180.4L419.9,180.4L424,181.6L427.1,181.5L423.2,178.9L422.6,177.8L423.8,174.6L425.4,171.7L426.4,168.2L425.8,162.7L426.8,160.8L425.7,157.9L424.1,156.3L419.4,155.8L417.9,157.3L415.2,158.1L414.4,157.2L411.5,156.7L410.5,155.3L405.4,153.9L402.7,155L399.1,157.5L397.3,157.5L392.8,161.3L390.3,162.3L385.8,163.2L384.6,166L377.9,162.4L376.8,160.3L377.4,159.4L379.7,160.2L381.7,159.2L377.3,150.6L372.6,143.8L365.8,142.9L363.8,143.9L361.7,140.6L361.9,137.7L360.7,135.2L357,133.1L356.5,130.5L357.5,126.8L360.8,122L360.9,120.3L358.5,117.6L359.5,112.1L360.6,109.5L363.8,106.1L364.2,102.5L366.1,100.3L368.2,100.8L369.8,102.4L373.8,108.2L376,109.9L379.5,108.3L380.4,106.9L378.9,101.2L378.1,96.8L380,97L385.6,92.7L387.4,88.8L390.9,88L392.1,86.9L395.5,85.3L400.9,78.7L401.3,77.7L405.3,79.1L407.2,82.1L410.1,81.9L414.3,78.7L417.8,78.5L420.4,82L423.9,82.2L428.6,82L430.7,83.4L432.4,85.9L436.1,88.3L440.2,94L440.7,97.3L442.1,97.8L442.7,96L442.2,92.3L442.6,90L446.6,92.5L448.5,94.6L452.2,97L455,97L457.7,95.1L458.7,92.9L462.4,89.9L463.8,90.6L468,89.1L469.7,89.6L472.6,92.1L474.8,91.5L476.8,88.7L482.4,89.1L484.5,90.7L488,95.4L494.1,96.7L494.9,98.8L498,97.3L500,93L501.2,93L503.1,95.3L506.8,95.9L510.1,95.4L513.2,94L514.9,92.6L517,86.3L516.7,84.7L514.6,82.7L510.9,81.8L510.4,81L505,79L504.2,76.9L500.7,74.9L500.7,73.4L504.6,70.8L507.2,70.4L510,68.1L510.5,66.1L508.8,63L508.6,59.9L511.2,55.9L515,55.5L521.1,56.4L522.3,55.3L521.6,53.5L517.8,51.3L512.8,50.3L513.2,47.4L516.4,46L515.1,44.9L513.4,45.5L510.5,44.2L511.9,41.8L512.3,38L514.3,36.5L520.7,38.3L521.9,37.3L526.8,37.1L528.2,36.1L533,35.5L534.2,34.3L542.9,32.5L545,31L547.8,30.3L549.9,30.9L552.8,30.1L555.3,30.7L556.1,27.9L558.7,25.9L561.2,26L563.4,24.6L566.7,25.1L582.5,21.3L583.9,20L586.5,19.7L588.4,17.9L587.9,15.9L591.4,15.1L593.4,13.1L596.2,11.6L601.7,12.2L604.4,13.1L607,15.2L609.1,15.9L612.4,13.6L615.1,13.2L617,16.5L619.9,26.4L618.9,33.5L621.5,34.5L628.7,33.6L629.8,31.7L631.5,32.4L632.8,35.1L633,38L634.9,37.5L635.3,34.9L638.4,35.4L640.6,37.7L643.4,38.1L646,36.2L647,36.6L646.6,38.7L643.6,40.8L642.4,44.7L643.3,47.3L646.2,45.1L648.6,44.3L652.3,45.1L653.8,46.7L654.9,43.8L659,40.6L661.3,40.5L664.8,37.9L665.5,35.8L667.8,35.4L674.3,31.7L676.8,31.2L680.5,29.3L678.5,34.7L676,34.6L677.6,38.4L689.8,48.6L691.4,50.6L698,61.8L708.7,81.8L714.2,94L716.7,91.7L718.9,91.1L719.2,87.1L721.3,85.5L723.8,85.4L724.7,87L726.5,87L725.8,90.8L729.2,91L730.1,94.6L735.1,94.2L736.8,95.1L741.1,94.8L743.9,92L746.7,92L748.2,90.4L750.3,90.3L754.2,92.2L756.6,94L759.1,98.4L760,102.3L760.7,103.1L763.7,103.7L767.8,106L767.7,107.9L770.2,112.7L780.6,115.4L785.2,110.9L786.5,111.2L785.3,113.5L787.4,115.6L788.9,118.3L791.9,120L792.9,122.2L788.2,122.1L786.7,123.5L786.4,128.5L784.6,131.2L781.5,132.4L776,133.6L774.9,135.7L773.6,141.1L774.2,147.8L775,151.6L773.1,154.6L770.4,155.1L768.1,157L765.7,158.3L764.4,156.1L760.9,155.7L757.4,156.1L754.2,155.3L748.6,152.7L746.8,152.7L746.6,155.1L743.2,165.2L741.7,168.7L741.3,171.1L739.2,177.4L739.3,178.6L742,179.8L742.2,183.2L740.9,184.6L738.6,183.2L735.7,184L733.6,183.1L732.5,181.2L731.5,181.8L723.5,184.5L721.2,184.6L715,186.4L713,188.3L714.3,189.6L717.1,189.4L719.2,190.3L718,194.9L718.2,200.1L719.7,203.1L721.9,210L721.5,211.7L722.8,213.9L718.5,215.7L718.5,216.7L720.1,218.1L717,219.3L716.1,221.2L717.1,227.4L716.6,228.1L713.5,224.9L708.9,224.2L705.8,221.2L705,219.6L703.1,219.7L698.6,218.3L693.2,218.4L690.8,217.8L684.7,217.6L681.6,216.7L676.9,217.5L669.2,217.3L667.6,219L664.7,218.7L658.8,216.6L652.3,212.7L649.5,213.4L648.8,214.3L645.3,216.2L643.8,222.2L644.6,224.9L642.4,223.5L637.8,222.7L636.7,221.6L631.6,219.8L626.6,218.9L620.7,220.2L618.1,223.1L616.8,225.9Z",575,140]
+];
+
+
+/* Davlat chegaralari: [id, nom, svg path, label x, label y] — 2-qism */
+const D2 = [
+[400,"Iordaniya","M240.5,356.1L241.6,356.3L243.4,358.6L245.1,359.1L246.8,360.5L251.6,361.4L264.8,352.7L272.5,347.9L275.6,359.1L274.7,359.4L275.4,361.5L277.6,360.9L278.1,362.3L276.5,363.8L274.9,365.3L253.1,371.8L258.6,377.9L264,384.2L260.3,386.5L258.5,390.5L250.9,392.1L247.9,396.6L242.9,400.4L231.5,398.4L231.8,395.9L232.8,390.7L233.6,388.7L233.6,385.2L236.8,376.3L236.4,375.1L236.9,372L238,368.3L237.7,365.6L238.2,362.4L238,360.4L238.2,357.3Z",251,375],
+[376,"Isroil","M241.4,347.1L241,349.1L241.8,350.9L241.8,353.3L240.5,356.1L238.2,357.3L238,360.4L236.2,359.1L234.1,358.6L232.8,359.6L231.6,363.4L232,366.5L234.2,368.5L231.5,370.4L230.7,373L233.1,373.4L236.9,372L236.4,375.1L236.8,376.3L233.6,385.2L233.6,388.7L232.8,390.7L231.8,395.9L231,396.8L228.4,388L224,375.4L227,371.4L226.4,370.6L228.6,366.7L229.9,362.9L231.2,357.6L233.2,351.6L236.5,351.7L237.8,349.5Z",232,372],
+[275,"Falastin","M226.4,370.6L227,371.4L224,375.4L223.5,373.9ZM238,360.4L238.2,362.4L237.7,365.6L238,368.3L236.9,372L233.1,373.4L230.7,373L231.5,370.4L234.2,368.5L232,366.5L231.6,363.4L232.8,359.6L234.1,358.6L236.2,359.1Z",234,366],
+[368,"Iroq","M310.9,298.9L312,298.6L315.4,295.3L317.1,296L318.8,295.4L323.3,297L326.8,297.3L328.6,296.1L330.2,296.5L330.7,299.6L331.5,300.6L335,298L336.7,298.4L337.9,303L339.6,304.9L339.6,306.7L341.8,308.9L343.1,313.5L346.2,314.6L347,315.8L351.8,316L352.8,317L350.4,318L349.7,320.6L351.1,322.6L351.4,325.2L349.1,326.5L346.5,329.5L346,332.4L344.6,332.3L343.9,334.5L344.9,336.1L344.9,337.9L343.5,340.2L344.3,340.8L347.1,345L348.7,344.9L348.6,346.4L349.8,346.7L351.5,349.7L350.8,351.6L351.1,353.2L354,353.6L356,354.8L362,359.5L364.6,360L366.1,363.5L369.5,368L368,373L368,377.9L371.5,378.1L371.6,384.6L375.5,387.6L376,389.9L377.2,390.9L375.2,390.9L372.9,389.9L371.2,390.6L367.9,389.2L364.2,389.4L362.3,390.4L359.7,396.1L355.7,401.5L353.8,401.9L335.9,400.2L316.3,384.3L307.9,377L290.8,366.7L289.6,366.2L276.5,363.8L278.1,362.3L277.6,360.9L275.4,361.5L274.7,359.4L275.6,359.1L272.5,347.9L293,335.5L296.2,334.3L298.4,329.8L298.7,323L300.2,318.4L300.1,316.2L299,312.7L299.5,308.6L300.8,306.8L304.8,305.7L310.8,299.5Z",326,351],
+[364,"Eron","M459.1,428L456.6,430.6L455.5,430.2L451,432L450.1,431.2L454.6,429.3L454.5,427.6L456.1,428.1L459.4,427ZM434.8,295.7L437.8,295.9L443.7,293.6L444.8,290.6L447.2,288.1L450.5,286.1L452.6,285.5L459.6,285.8L461.8,283.4L465.4,283.4L466.9,283.9L469.9,283.9L471.4,285.6L471.4,287L475.5,288.1L479.7,289.8L481.4,291.4L483.2,291.7L487.3,291.1L492.5,293.5L493.2,295.8L495.3,297.9L499.5,299.8L500.7,300.8L503.7,305.2L512,305.1L512.5,306L513,312.3L512.3,314L513.4,315.4L513.5,318.7L513.7,320.1L512.7,322.7L511.8,323.3L512.3,325.6L511.6,328.7L510.2,331.4L507.9,333.5L509.5,335.7L506.9,335.8L505.2,338.6L505.6,341.9L505.5,344.5L507,345.5L509.8,346.2L506,350.9L506.2,352.7L508.9,362.2L508.5,365.6L508.5,369.7L509.1,371.9L517.8,373.2L518.8,374.4L519.4,377L519.1,380.1L509,392.2L514.1,398.2L514.4,399.5L517.4,405.3L520.3,408.3L525.2,409.9L527.5,412.1L529.5,411.8L529.4,414.9L530.1,421L529.5,423.8L531.3,424.4L534,424L535.4,425.5L534.8,426.1L534.8,428.5L534,431L533.1,431.4L529.9,431.3L526.2,432.3L524.8,433.1L524,434.7L520,436.1L519.4,437L518.8,440.8L517.9,441.7L517,448.5L515.1,449.6L507.1,447.5L505.5,445.7L504.3,447.2L500.3,446.3L495.9,446.1L494.2,445.1L489.8,445.9L487.1,444.3L484.3,443.8L480.7,443.8L477.9,442.6L476.4,443.1L475.7,442.3L471.4,441.5L470.1,438.5L470,437.1L469,434.5L468.6,430.8L467.7,428.1L465.9,425.9L461,424.6L458.4,425.3L456.5,426.6L453.4,427.3L451,429.8L449.6,429.6L445.3,432.3L442.6,432.9L438.3,430.6L436.5,430.2L432.6,430.3L430.4,428.8L429.9,427.7L424.8,425.3L421.7,423.1L419.4,419.6L416.3,418.3L414.6,417.1L410.7,416.8L409.1,416L406.5,413.3L406.5,412.2L404.5,408.7L404.2,406.1L402.1,404.3L402.2,401.9L400.1,400.9L399.8,397.6L394.6,391.4L393.6,387.9L392.7,387.8L388.1,390.1L386.7,388.8L382.7,386.6L382.1,385.8L384.1,385.7L384.5,384.5L382.1,384.1L381.2,385.5L381.2,388.9L380.3,390L377.2,390.9L376,389.9L375.5,387.6L371.6,384.6L371.5,378.1L368,377.9L368,373L369.5,368L366.1,363.5L364.6,360L362,359.5L356,354.8L354,353.6L351.1,353.2L350.8,351.6L351.5,349.7L349.8,346.7L348.6,346.4L348.7,344.9L347.1,345L344.3,340.8L343.5,340.2L344.9,337.9L344.9,336.1L343.9,334.5L344.6,332.3L346,332.4L346.5,329.5L349.1,326.5L351.4,325.2L351.1,322.6L349.7,320.6L350.4,318L352.8,317L351.8,316L347,315.8L346.2,314.6L343.1,313.5L341.8,308.9L339.6,306.7L339.6,304.9L337.9,303L336.7,298.4L337,296.4L334.7,294.5L334.5,290.3L330.8,288.1L332.3,284.8L333.1,281.9L331.9,281.7L331.3,277.2L331.4,275.4L330.1,273.2L330.4,271.1L329.4,270.1L328.8,267.9L332.7,267.3L333.4,263.9L334.8,262.5L337.3,264.1L341.3,270.2L345.4,273.5L351.2,274.8L355.2,274.4L355.9,274.4L359.1,271.1L360.6,270.6L362.7,268.4L369,264.1L371.4,263.6L374.8,267.6L372.8,268.8L372.7,270.8L374.3,271.8L374,273.4L371.9,274L371.6,275.6L374.2,278L375.9,278.8L377.7,281.2L380.7,280.9L381.7,288.3L383,291.3L383.9,292.2L387.1,293.6L389.9,293.9L394.2,294.9L396.4,298.3L398.5,300.1L402.8,302.9L404.8,303.8L411.7,305.5L416.3,305.4L429,302.1L434.8,301.3L432.2,302.3L435.4,302.8L435.9,301Z",438,356],
+[356,"Hindiston","M587.5,464.3L591,463L593.5,463L593.5,459.5L594.3,459L597.7,459.5L602.4,459.4L604.1,460.6L607.4,460.4L608.2,459.3L613.1,457.7L613.4,459.4L614.9,459.8L618.4,457.9L617.6,456.9L618.4,454.5L616.6,450.1L614.2,445.8L614.1,442.9L610,442.5L608.3,440L608,438.1L608.6,436.4L608.8,433.3L607.8,432.1L604.3,431.5L601.5,429.3L602.6,424.9L606.1,421.3L608.7,416.7L611.5,414.6L613.9,415.7L614.6,417.7L616.6,418.4L619.9,416.9L623.7,416.5L627.2,415.4L628.1,412.8L630.5,409.8L632.3,405.8L638.3,402.4L640.7,398.3L642.1,395.2L643.4,391.2L648,389.3L649.3,387.6L649,385L650.1,384L653.7,379.3L656.8,377.5L655.6,375.6L656.4,372.1L655.5,369L656,367.7L658,366L663.5,363.6L664.3,361.9L663.3,360.7L660.6,359.5L658.5,359.6L657.1,358.8L657.2,355.8L653.8,355.6L653.3,352.8L651.4,351.7L650,349.6L651.3,347.8L651.7,346.2L650.1,344.6L650.1,342.6L652.4,341.3L652.7,340L649.5,339.6L649.8,337.4L648,335.6L648,334.4L649.6,331.4L653.3,329.9L660.2,331.4L662.8,331.5L665.6,332.9L668.4,333.3L671.9,331.1L673.3,331.2L676.4,330L677.9,330.3L679.9,328.1L682.2,326.9L682.7,325.4L690.8,320.3L693.4,320.9L693,323.5L695.9,331.3L696.4,332L700.1,333.1L703,335.3L703.3,336.9L701,338.7L701.5,346.3L704.8,349.8L704.8,352.4L705.8,353.4L706,359.1L704.3,360.5L702.8,360.9L701.2,359.5L700.4,357.8L697.1,358.8L698.2,362.7L700.8,365.9L700.4,368.7L701.5,370.2L700.7,372L700.9,373.9L703.3,373.8L704.8,372.9L707.3,376.6L709.7,378.6L712.1,378.4L715.2,380.7L716.4,381L716.4,383.4L721.7,385.3L724.9,387.5L725.2,388.4L724.1,388.3L720.2,391.6L718.7,393.7L717.1,397.5L716.8,400.3L715.8,401.5L715.1,404.8L718.9,407.5L719.9,406.8L726.9,410.8L728.4,412.8L734.2,416.5L735.7,416L740.6,418.9L743,418.9L743.7,420.7L749.6,422.5L751.3,421.4L755.4,422.5L758.2,421.1L763.8,423.4L764.6,426.5L771.1,430.1L774,428.9L775.5,429.6L775.8,431.3L777.1,431.8L778.7,431.2L782.6,432.1L786.2,433.8L789.5,432.3L790.4,433.8L792.5,434.7L793.8,433.9L796.2,434.2L800.7,433.8L801.8,430.3L801.3,427.9L799.9,425.4L800.3,422.1L801.7,418L801.3,416.5L801.3,415.7L806.7,413.8L808.7,414.8L809.2,416.5L808.1,420.7L809.6,423.2L808,424.9L809.3,427.5L812.4,429.2L814.4,428.8L819,430.6L822.8,430L825.2,428.3L827.5,429.5L829.5,429.7L835.3,429.5L836.8,428.6L839.5,429.4L843.5,428.5L842.9,426L843.9,423.5L842.9,421.6L840.2,421.7L838.6,420.3L839,417.8L842.7,418.2L845.6,416.8L847.4,417L850.1,415.5L850.5,413.1L852.4,412.1L855,410L855.9,407.7L857.6,407L860.8,406.5L863.4,405.1L867.6,400.9L871.1,398.9L872.7,400.6L875.1,400.9L878.1,402.1L879.6,402.1L880.6,400.2L886.2,397.2L888.4,399.7L889.5,400.1L887.2,401.7L887.6,403.8L890.5,402.1L892.1,405.6L890.1,407.5L888.9,409.9L889.8,410.5L892.3,409.3L894.1,410.5L897.4,410.4L900,412.3L900.2,415.7L896.1,418.6L895.2,419.9L895.5,421.7L897.7,425L897,425.8L895.3,424.9L894.4,423.4L893,422.9L888.8,423.6L886.5,424.4L884.8,426.4L880.1,429.9L876.5,431.8L875.8,433.3L875.9,436.7L876.5,438.5L875.3,440L875,441.7L872.8,444.7L871.1,446L870.3,448L872,450.3L870.7,453.6L867.6,458.8L865.8,464.1L861,462.6L859,462.9L857.5,461.8L857,462.4L858.1,466.4L857.6,472.8L857,474L855.4,473.9L855.4,475.4L854.5,477.6L855.4,481.7L853.3,485.9L852.1,485.8L850.3,484.4L849.1,486.2L848.2,478L846.8,475.1L846.6,470.5L845.6,466.3L844.6,465.9L842.2,466.3L842.3,468.4L840.4,471L840.5,473.1L838.9,474.5L837.7,473.9L836.9,472L835.6,473.1L835,470L834,467.5L834.7,463.6L836.2,461.5L837.9,461.6L839.4,460.4L841.7,460.3L842.4,458.4L843.7,458.2L845.7,452.1L847.7,452.6L848.2,452L847,450.7L843.5,448.8L837.4,449.2L835.4,448.7L826.2,449L819.8,447.4L819.6,439.7L818.4,436.9L817.4,436.4L816.7,438.9L813.9,438.5L812,436.6L811,434.1L810,434.5L810.5,436L807.4,435.5L805.7,432.8L804,432.2L804.8,434.6L801.7,437.9L801,440.3L802.8,441.5L804.9,444L806.5,445L808.3,445L808.9,446.5L810.2,447.4L809.6,448.5L805,448.6L803.5,452.3L801.7,451.9L800.3,455.2L801.7,456.9L803.2,457L804.4,458L807.9,459.4L807.6,462.6L806.2,466.4L808,469.2L807.9,471.4L810.1,472.1L809.2,473.8L810,478.6L811.3,482.7L811.4,484.8L811,487.8L811.4,489.9L809.8,489.9L809.3,488.9L808.1,490.7L807.5,489L808,485.8L807,484.5L806.2,487.9L806.4,489.9L804.9,490.4L803.2,488.7L802.8,490.3L800.7,489.5L802,485.5L801.8,484.5L799.5,487.9L796.6,489.9L790.5,491.7L787.9,494.7L787.7,496.2L789.1,500.9L786.8,504.1L786.7,505.3L784,506.9L781.7,509.8L774.1,512.4L773.9,510.4L772.9,510.1L770.6,511.6L769.7,513.2L771.9,512.5L772.7,513.1L770.4,514.5L765.5,518.8L765.3,519.7L762.2,523.8L758.4,528.2L753.5,530.8L748.6,536L746.2,537.6L742.2,539.7L739.6,541.7L738.8,543.5L739.6,545.2L738.6,547.7L733.2,550.3L729.4,549.9L728.2,550.2L726.5,554.4L724.8,556.7L723.2,556.6L722.7,555.4L721.3,555.1L718.5,556.3L717.5,557.2L715.5,561.5L714.9,564.3L716.1,569.8L716.2,572.3L715.6,573.8L716.8,577.7L717.7,581.8L716,579.3L715,580.5L718,583.2L716.8,590.6L715.9,593.2L714.1,595.6L712.8,598.3L711.7,602.8L712.1,604.2L711.1,605.7L712.2,605.4L712.7,607L712.6,616.5L707.8,616.7L706.4,618.1L706.4,619.6L703.6,623.5L702.8,625.9L703.8,627.2L706.6,627.8L703.4,627.9L697.4,629.7L695,632.1L694.3,636.2L693.6,637.5L690.5,639.7L687.8,640.9L685.4,640.1L681.8,637.3L677.4,631.9L676.5,629.1L675,626L674.1,620.8L675.2,621.9L675.5,625L676.4,625L675.2,620.9L673.6,619.1L673.6,617.8L670.7,611.4L668.5,605.2L666.4,601.4L662.9,597.5L660.2,592L658.3,586.3L656.6,577.8L655.4,575.6L654.1,570.7L649.5,564.3L648.8,561.7L647.9,560.7L649.3,560.7L647.2,557.8L644.4,553.4L643,548.8L641.9,540.6L640.9,536.9L641,535.8L639.3,530.4L638.4,525.1L637.9,523.8L639.4,520L639,518.5L637.6,520.5L637.2,514.3L636.4,513.7L635.8,510.8L636.2,508L638.1,502.4L638,499.4L637.3,496.1L636,495.4L635.2,492.1L637.3,490.3L639.6,489.4L634.4,489.4L635,487.3L636.1,486.2L634.2,486.2L634.5,484.1L637.3,483.2L634.9,482.7L633.5,483.1L630.6,482.8L631.9,483.7L631.2,485.6L629,488L630.5,488.5L631.4,489.8L631.3,491.3L628.8,495.6L624,497.8L622.2,498.9L618.1,500.4L614.9,500.4L612.4,499.3L607.5,495.4L604.5,491.6L598.5,486L596.5,483.6L596.3,481.5L597.9,481.1L599.4,482.6L602.4,481.2L605.2,480.7L607.2,479.6L609.1,479.3L611.9,474.7L611.8,473.4L610.8,475L609.9,474.6L605.6,476L603.6,477.1L599,476.1L594.5,473.7L592.6,472.1L590.2,467.6L594.1,464.4L591.1,465.6L589.4,467.1L588.2,467.4ZM861.5,648.7L861.5,648.7L861.5,648.7ZM855.2,639L855.2,639L855.2,639ZM858.5,643L857,642.1L857.7,641.5ZM859.5,641.1L858.8,641.4L859,639.3ZM851.4,629.4L851.4,629.4L851.4,629.4ZM848.3,613.9L846.9,614L846.8,611.8L848.5,610.2L849.1,612.3ZM850.4,604.9L849.3,604.9L849.8,603.5ZM850.7,603.2L850.1,603.2L848.7,599.6L849.5,598.7L850.4,595.8L851.4,595.7L850.7,594.2L850.9,589.6L851.6,588.5L852.2,583.2L852.9,581.8L854.4,581.2L854.5,584.4L852.5,587.8L853.3,588.8L853.6,592.3L852.2,593.4L852.3,596.2L851,598.2L851.5,599.1ZM853.9,597.8L853.9,597.8L853.9,597.8ZM850.7,588.7L850.7,588.7L850.7,588.7ZM637,606.9L637,606.9L637,606.9ZM640.1,638.8L640.1,638.8L640.1,638.8Z",693,486],
+[268,"Gruziya","M322.5,243.6L321.7,242.4L320,242.3L319.6,241L315.5,237.1L313.2,237.2L312.1,238.9L309.4,238.2L306.3,238.1L305.2,239L301.8,237.8L303.9,235.1L304.5,231.3L303.5,228.7L301.6,221.3L300.9,220.1L297.7,218.8L297,217.3L294.6,215.4L291.3,214.5L285.4,210.1L287.2,207.9L291.2,208.8L292.6,208.4L297.2,210.8L300.2,211.4L302.6,213.1L307.6,213.5L311.6,213L313.1,214L315.2,213.8L317.7,214.9L318.8,216.4L323.8,218.6L326.2,220L325.7,221.9L328.1,222.6L333.9,220L335.4,220.2L336.8,221.9L337.9,219.8L341.5,221.4L342.9,223.2L345.3,223.1L347,223.9L346.1,227.9L349.4,230.3L352.2,231L354.6,232.4L353.2,234.3L352.1,234.6L352,236.2L353.2,237.9L357.2,241.1L356.7,242.9L354.8,244.1L351.8,242.3L350.3,242.8L347.7,242L346.9,240.3L342.2,238.7L339.3,241L337.5,242.1L333.6,242.4L331,242.1L326.3,243.3Z",323,228],
+[818,"Misr","M252.1,485.9L193.8,486L194.4,484.2L193,483.7L192,485.9L182,486L124.6,486L124.6,400.5L122.8,391.8L121.7,387.9L123.6,384.7L124.6,380.8L123.6,377.2L123.3,373.8L126.5,369.7L127.3,371.3L129,371.5L134.4,370.2L149,373.2L152.1,375.3L155.2,375.5L156.7,376.7L162.5,377.3L167.4,379.8L169.4,380L172.3,378.9L177.7,375.1L180.9,374.7L182.7,372.2L188.4,370.9L184.5,372.7L186,372.9L189.2,372.2L189.7,370.5L191.2,370.6L194.8,372.2L198.7,371.2L201.4,373.7L198.7,371.9L197.5,374.3L200,375.2L201,376.8L203.4,374.8L206.4,377.1L212,375.9L212.7,376.9L214.7,376.3L217.8,376.3L220.3,375.7L223.5,373.9L224,375.4L228.4,388L231,396.8L229.2,399.4L227.9,405.7L226.1,410.6L225.6,414.7L223.7,417.8L221.8,417L218.8,414.3L217,411.8L213.3,408L212.8,405.4L211.4,401.8L209.2,399.2L207.6,396.3L205.9,390.7L203.7,395L205.9,398L206.8,400.5L206.7,402.8L209.5,408L212.8,412.4L216.5,416.1L216.5,419.7L218.1,422.9L219.2,423.8L220.2,426.4L220.9,431.2L221.9,432.4L224.9,438.7L227.4,442.6L234.2,457L237.2,460.8L240.4,463.4L237.9,463.6L237.5,465.2L237.7,469.2L239.5,475L241.8,477.4L245.2,478.6L247.2,481.4L251.7,484.8Z",177,432],
+[196,"Kipr","M207.5,324.6L209.2,325.7L212.7,324.6L214.7,324.7L216.2,326.3L217.9,326.6L219.9,325.6L221.4,326L221.9,327L218.1,327.2L216.1,329.4L213.8,330.5L211.8,330.8L210,332.4L209.2,331.2L207.3,331.4L204.7,330.4L203.3,327.4L203.1,325.7L204.1,326.2L205.9,324.8Z",211,328],
+[156,"Xitoy","M1030,491.7L1028.9,492.2L1026.1,492.4L1026.6,491.2L1025.5,490.2L1022.7,490.2L1021,488.6L1020.8,487.1L1019.6,487L1020.1,489.7L1019.2,490.5L1017.9,489.5L1017.1,491L1014.2,491.6L1014.2,491.6L1012.3,490L1007.5,490.4L1005.7,489.2L1003.8,487.1L1000.8,485.9L1000.1,486.2L1000,483.1L998.8,481.3L999.2,479.3L1000.6,478.5L1001.4,476.9L998.8,475.4L995.7,475.8L995,474.8L993,474.6L991.3,475.2L988.2,473.5L987.6,472.2L985.2,470.3L980.8,472.7L980.1,475.4L979,476.4L977.2,476.6L975.6,477.8L973.9,476.5L972.2,477.2L970.7,479.7L967.5,476.8L965.9,479L964.1,477.1L960.9,480.7L959,479.1L955.7,477.3L954.7,477.4L952.7,480.5L951.5,481.5L950.4,480.8L948.5,481.4L947.6,480.2L946.6,480.6L945,483L945.9,486L947.3,487.9L947.2,493.8L948,494.7L947.2,495.6L945.2,494.8L942.5,495.3L941.8,494.9L940.9,490.9L940.3,488.7L937.7,489.9L936,491.6L934.4,492.2L932.5,491.7L931,492.1L929.7,491L929.8,489.8L928.5,489.4L927.8,485.6L924.4,484.9L920.1,484.5L919.8,483.7L921.6,480.2L922.1,476.3L923.4,474.8L921.7,473.2L916.5,472.1L916.8,469.9L915.8,468.2L916.2,467L914.6,464.5L914.8,463L916.2,461.6L913.6,461.8L912.6,461.3L909.5,461.3L907.5,461.9L903.3,464L902.7,462.8L904,461.1L903.7,458.2L902.2,456.8L902.8,453.5L904.5,452.4L904.2,450.4L905.3,447.9L906.4,448L908.3,445.9L909.1,443.8L910.9,443.9L912.3,441.5L914,441L914.3,440L913.3,438.1L914.4,437.3L915.2,429.6L914.5,424.7L914.2,420.1L912.7,419.2L910.5,420.4L908.7,415.3L908.3,413.2L905.8,410.5L904.8,410.6L903.6,408.8L902.3,408.7L900,412.3L897.4,410.4L894.1,410.5L892.3,409.3L889.8,410.5L888.9,409.9L890.1,407.5L892.1,405.6L890.5,402.1L887.6,403.8L887.2,401.7L889.5,400.1L888.4,399.7L886.2,397.2L880.6,400.2L879.6,402.1L878.1,402.1L875.1,400.9L872.7,400.6L871.1,398.9L867.6,400.9L863.4,405.1L860.8,406.5L857.6,407L855.9,407.7L855,410L852.4,412.1L850.5,413.1L850.1,415.5L847.4,417L845.6,416.8L842.7,418.2L839,417.8L838.7,415.5L834.7,414L833.1,415.2L829.2,414L825.3,413.9L825.3,412L821.3,411.1L816.6,413.6L812.5,418.4L811.9,419.8L810.3,421.4L809.6,423.2L808.1,420.7L809.2,416.5L808.7,414.8L806.7,413.8L801.3,415.7L801.3,416.5L798.6,416.3L796.7,417.1L790.9,416.9L789.6,415.8L784.6,413.9L784.2,415.3L783.1,415.8L779.5,413.9L779.4,415.7L778.2,415.8L777,413.3L775.2,411.6L772.3,411.6L769.2,411.1L768.9,410.4L769.7,407.7L766.4,408.2L764.9,407.7L759.7,403.8L758.3,400L756.6,399.3L752.8,400.5L750.3,397.3L748.2,395.2L744.9,394.3L741,391.1L737.5,389L736.3,386.4L732,385.6L729.5,386.2L727.8,389.3L726.3,389.9L725.2,388.4L724.9,387.5L721.7,385.3L716.4,383.4L716.4,381L715.2,380.7L712.1,378.4L709.7,378.6L707.3,376.6L704.8,372.9L703.3,373.8L700.9,373.9L700.7,372L701.5,370.2L700.4,368.7L700.8,365.9L698.2,362.7L697.1,358.8L700.4,357.8L701.2,359.5L702.8,360.9L704.3,360.5L706,359.1L705.8,353.4L704.8,352.4L704.8,349.8L701.5,346.3L701,338.7L703.3,336.9L703,335.3L700.1,333.1L696.4,332L695.9,331.3L693,323.5L693.4,320.9L690.8,320.3L687,320.6L683.2,319.6L679.7,318.1L677.5,316.7L677.4,315.2L674.2,316.2L673.1,315.9L672.2,313.9L670.5,312.5L671.2,311.4L671.2,308.6L669.8,305L667.9,303.8L665.3,303.8L664.5,301.5L661.4,300.5L659.6,301L657.5,299.8L655.8,300L654,298.2L657.9,296.4L659.6,297.2L662.1,295.1L659.6,292.2L660.1,289.9L658.3,283.1L659,281.3L658,279.9L653,277.8L651.4,277.8L650.3,279.4L647.9,278.5L646.8,275.1L647.9,273.1L645.9,270L646.1,266.9L648.2,266.3L649.1,264.7L648.3,262.6L650,258.6L654.5,257.3L657.3,254.9L659.1,254.4L659.3,252.3L660.8,252.9L663.4,252.5L666.3,250.4L667,250.7L668,254.9L670.1,255L674.2,253.2L674.9,254.3L676.6,252.9L678.3,248.8L680.3,245.4L682,244.6L688.4,245.2L691,244.4L694.2,244.1L696.6,241.1L696.8,239.8L700.9,237.1L706.8,234L711.9,232.3L712.6,230.9L716.7,230.4L716.6,228.1L717.1,227.4L716.1,221.2L717,219.3L720.1,218.1L718.5,216.7L718.5,215.7L722.8,213.9L721.5,211.7L721.9,210L719.7,203.1L718.2,200.1L718,194.9L719.2,190.3L717.1,189.4L714.3,189.6L713,188.3L715,186.4L721.2,184.6L723.5,184.5L731.5,181.8L732.5,181.2L733.6,183.1L735.7,184L738.6,183.2L740.9,184.6L742.2,183.2L742,179.8L739.3,178.6L739.2,177.4L741.3,171.1L741.7,168.7L743.2,165.2L746.6,155.1L746.8,152.7L748.6,152.7L754.2,155.3L757.4,156.1L760.9,155.7L764.4,156.1L765.7,158.3L768.1,157L770.4,155.1L773.1,154.6L775,151.6L774.2,147.8L773.6,141.1L774.9,135.7L776,133.6L781.5,132.4L784.6,131.2L786.4,128.5L786.7,123.5L788.2,122.1L792.9,122.2L798.1,120.9L798.6,124.1L797.3,125.5L798.3,127L800.4,127.9L799.9,130.8L803.4,132.2L805.6,133.6L806.3,136.2L811.3,139.7L814.4,139.3L816.8,139.7L819.2,142.5L821.8,141.7L822.6,143.8L824.9,144.9L826.1,147.7L826.9,151.1L829.2,155.5L830.9,156.3L832.1,159.6L832.6,163L831.3,167L832.3,170.6L829.1,175.3L828.6,178.5L830.9,183.5L832.8,183.2L835.6,184.7L838.5,185.3L843.3,185.4L847.5,186.4L851.4,185.9L856.8,186.7L860.7,188L864,191.4L866.6,191.8L868.3,193.7L872,196.3L875.7,197.6L878.9,197.4L878.9,201.4L880.8,202.2L884.1,210.7L884.9,213.3L889.1,217.3L890,220.4L898.8,219.4L923,222.6L928.5,221L940.4,222.8L944.7,223L947.1,224.1L949.9,227.7L951.8,228.5L961.7,230.7L968.5,234.4L976.9,232.6L976.9,235.7L980.8,235.9L982.1,236.6L984.4,234.6L991.6,230.9L1001.3,226.7L1016.3,224.3L1021.8,224.8L1029.9,224.2L1030,224.2L1030,491.7ZM1030,528.7L1028.8,528.2L1025.5,527.4L1022,525.5L1021.3,521.8L1021.4,517.2L1021.9,516.4L1028.1,511.6L1027.1,511.5L1028.5,510L1030,510L1030,528.7Z",800,273],
+[116,"Kambodja","M961.4,606L961.4,606L961.4,606ZM964.3,612.2L964.3,612.2L964.3,612.2ZM1009.3,568.4L1008.5,571.2L1007.7,572.1L1007.3,574.8L1010.2,582.4L1008.8,586.8L1009.7,592.2L1009.2,594.2L1008,595.3L1007.3,594.7L1005.5,595.1L1003,597.3L1000.5,598.4L997.5,598.7L997.4,601.5L996.7,601.6L993.1,600.8L991.4,602.2L991.5,605.9L994.8,609L994.8,611.3L992.3,610.4L991.5,610.6L990.4,609.2L986.4,609.7L985.7,610.8L982.5,610.3L983,612L980.7,614.2L977.6,614.4L976.2,615.5L974.4,614.1L970.9,613.6L968,614.5L966.6,613.4L968.1,611.7L968.6,610.3L967.9,608.5L966.6,607.5L964.7,610L962.5,610L961.9,606.8L962.2,604.1L960.2,601.4L958,597.2L957.7,595.4L958.2,593.5L955.5,590.8L955.1,587L953.7,584L953.6,581.2L956,580.7L956,579.9L958,577.9L959.9,574.6L963,572.5L967.3,571.5L969.7,572.2L974,571.8L976,572.1L979.9,571.4L982,572.1L983.1,573.7L984.3,572.3L986.1,575L988,574.4L990.2,575.2L992,577L993.7,577L994.3,575.6L992.8,572.4L994.8,572L995.4,570.9L996.8,571.1L998.4,569.8L1001.8,572.7L1004.9,571.6L1006.9,569.6L1008.2,569.9Z",981,590],
+[104,"Myanma","M930,505.3L927.6,504L924.9,505.2L922.9,504.7L923.4,506.7L921.6,508L920.1,507.6L918.2,508.4L917.1,511.5L912.6,512.3L909.8,512.4L907.5,511.7L907.2,512.8L905.3,515L905.2,518.8L904.1,521L904.6,524.5L901.7,526L900.6,525.7L901.4,527.5L903.3,528.3L904.5,532.3L904.1,533.4L905.1,535.1L910,541.1L912,543.1L912.4,545.8L914.7,550.6L916.3,549.3L916.8,550L916.1,552L913.6,553.4L913.3,556.5L913.3,560.6L909.3,562.8L909.9,567.2L913.4,572.2L917.3,575.6L919.5,579.3L919.9,584.6L919.1,586L920.3,590L922.3,592.1L923,596.1L924.6,600.6L923.1,602.4L920,607.9L915.4,612.8L915.5,615.3L914.8,617.9L913.3,619.6L912.6,618L912.9,616.2L912.3,612.6L914.5,609.3L915.2,606.5L915.2,602.6L916.7,601.2L915.9,600.6L914.1,601L914.7,598.6L914.7,595.7L913.7,595.5L914.6,594.3L914,593.3L914.4,590.9L913.4,585.4L911.8,581.9L909.9,579.1L909.4,576.4L908.9,580.1L908.1,576.3L908.3,574.4L907.3,572.5L906.3,568.9L907.5,568.9L905.3,566.7L905.1,563L904.5,561.7L904.9,560.3L904.2,555.3L902.8,553.8L903.4,551.1L903.4,548.9L904.3,547.6L900.6,548.1L899.4,545.7L898.5,542.1L896.2,539.2L895,540.5L895.6,542.4L894.5,545.3L892.5,547.7L889.7,548.2L887.9,545.4L888.4,547.6L889.3,549L886,551.1L883.3,552.1L882.4,554.2L879.3,557L878.4,556.7L878.7,553.6L877,555.9L874.5,556L873.5,553.6L871.5,555L871.4,553.2L872.1,549.5L869.1,552.9L866.8,553.8L867.3,548.2L868.2,546.8L869.5,541.3L870.5,539.3L870.7,536.4L869.7,533.5L869,529.3L866.2,523.3L865.4,522L864.9,517L863.8,518.6L863.7,521.4L861.3,519.9L859,516.1L859.9,515.7L862.5,517.5L864,516.5L864.4,515.3L862.7,514.2L861.6,512.3L860.2,511.4L861.3,509.9L859.9,509.9L857.6,508.2L855.4,508.4L855.8,510L855.1,510.5L853.7,508L854.4,504.6L852.4,507.1L851.5,506.5L852.5,505L850.6,502.4L850.7,505.5L849.5,503.5L846.5,499.8L844.9,494.1L846.5,492.4L849.7,493.9L849.2,490.4L849.1,486.2L850.3,484.4L852.1,485.8L853.3,485.9L855.4,481.7L854.5,477.6L855.4,475.4L855.4,473.9L857,474L857.6,472.8L858.1,466.4L857,462.4L857.5,461.8L859,462.9L861,462.6L865.8,464.1L867.6,458.8L870.7,453.6L872,450.3L870.3,448L871.1,446L872.8,444.7L875,441.7L875.3,440L876.5,438.5L875.9,436.7L875.8,433.3L876.5,431.8L880.1,429.9L884.8,426.4L886.5,424.4L888.8,423.6L893,422.9L894.4,423.4L895.3,424.9L897,425.8L897.7,425L895.5,421.7L895.2,419.9L896.1,418.6L900.2,415.7L900,412.3L902.3,408.7L903.6,408.8L904.8,410.6L905.8,410.5L908.3,413.2L908.7,415.3L910.5,420.4L912.7,419.2L914.2,420.1L914.5,424.7L915.2,429.6L914.4,437.3L913.3,438.1L914.3,440L914,441L912.3,441.5L910.9,443.9L909.1,443.8L908.3,445.9L906.4,448L905.3,447.9L904.2,450.4L904.5,452.4L902.8,453.5L902.2,456.8L903.7,458.2L904,461.1L902.7,462.8L903.3,464L907.5,461.9L909.5,461.3L912.6,461.3L913.6,461.8L916.2,461.6L914.8,463L914.6,464.5L916.2,467L915.8,468.2L916.8,469.9L916.5,472.1L921.7,473.2L923.4,474.8L922.1,476.3L921.6,480.2L919.8,483.7L920.1,484.5L924.4,484.9L927.8,485.6L928.5,489.4L929.8,489.8L929.7,491L931,492.1L932.5,491.7L934.4,492.2L936,491.6L937.7,489.9L940.3,488.7L940.9,490.9L938.7,493.2L936.8,493.9L934.3,498.3L934.8,499.4L933.1,499.5L931.4,500.5ZM909.5,609.6L910.4,611.5L909,610.2ZM909.2,620.7L909.2,620.7L909.2,620.7ZM909.7,603.9L909.4,602.9L910.6,601.2ZM912.8,599.2L912.3,597.2L913.8,598.6ZM913.2,601L912.9,603.2L911.9,602.9L911.3,600.4ZM911.7,591.6L912.2,593L910.7,594.5L910.6,590.7ZM908.7,596.5L908.7,596.5L908.7,596.5ZM869.5,554.6L868.8,555.7L868.6,554L870.8,551.7L870.5,553.8ZM902.7,551.1L901.7,550.6L901.6,548.8L903,549.2ZM861.1,523.8L858.9,521.8L861.7,521.8ZM859,510.1L859,510.1L859,510.1ZM861.3,513.9L863.8,515.4L863.4,516.5L861.8,516.6L860.6,514.6ZM913.1,609.5L913.1,609.5L913.1,609.5ZM908.1,601.5L908.1,601.5L908.1,601.5ZM908,593.9L907.3,595.1L906.6,594.4ZM910.7,586.1L910.6,587.9L910,585.1ZM873,556L873,556L873,556ZM853.8,509.7L853.8,509.7L853.8,509.7Z",891,494],
+[100,"Bolgariya","M157.2,231.3L155.7,231L152,232L149.5,229.7L146.4,230L145.1,231L141.8,231.6L141.1,233.3L139.5,233.7L139,234.9L137.7,234.5L136.3,235.5L137.1,237.7L137,239.7L134.8,240.7L133.3,240.4L127.6,241.7L126.3,240.6L123.2,239.5L122.4,240.1L120.2,238.5L119.7,237.3L114.8,237.6L114.5,238.5L110.3,239.6L106,239.7L105.1,240.5L102.5,240.3L103.5,234.9L101.7,230.9L98.1,228.4L96.4,226.3L98.3,224.4L97.4,221.7L97.7,218.6L100.3,218L102.8,214.9L103.2,213.5L101,211.1L98.7,209.6L96.9,205.9L96.6,203.6L97.2,201.4L99.1,200.4L100.3,198L102.8,199.6L103.7,200.8L102,202.3L102.6,204L105.9,203.4L109.2,203.7L116.6,205L118.8,204.6L126.6,206.2L130.2,206.4L133.6,205L134.9,203.4L137.9,201.4L140.9,200.2L147.3,199L150.9,201.2L155.8,201.7L157.6,204.2L161,205.3L163.3,205.3L163,208.9L162,210.6L160.5,210L158.4,210.5L156.2,213.6L155.8,219.9L154.4,220.6L151.5,224L153.9,225.8L156.8,230.2Z",127,219],
+[64,"Butan","M839,417.8L838.6,420.3L840.2,421.7L842.9,421.6L843.9,423.5L842.9,426L843.5,428.5L839.5,429.4L836.8,428.6L835.3,429.5L829.5,429.7L827.5,429.5L825.2,428.3L822.8,430L819,430.6L814.4,428.8L812.4,429.2L809.3,427.5L808,424.9L809.6,423.2L810.3,421.4L811.9,419.8L812.5,418.4L816.6,413.6L821.3,411.1L825.3,412L825.3,413.9L829.2,414L833.1,415.2L834.7,414L838.7,415.5Z",826,422],
+[112,"Belarus","M197.4,71.2L192.9,71.2L191.5,72.1L189,72.2L185.6,76.3L184.2,80L185.2,84.2L184.3,85.7L182,84.7L180.2,82L173.7,82.8L171.5,83.7L169.2,79.6L166.1,81L164.9,82.8L163.5,80.9L159,79.8L157.1,80.6L155.5,80.1L154.2,82L152.7,79.9L149.2,79.7L147.8,77.3L143.9,77L134.8,74.5L127.7,74.1L118,75.3L115.5,78.8L113.7,80.2L111,79.2L109.9,81.4L109.2,79.6L110.1,76.3L110.4,72.3L108.4,70.1L105.5,68.5L105.6,67.1L107.8,64L112.5,61.4L113.3,59.5L113,54.9L111.9,50.5L109.9,44.6L108.6,38.5L111.3,39L116.2,38.3L117.5,39.3L120.8,37.7L122.4,37.8L123,35.2L125.4,35L126.8,33.5L129.8,32L131,34.8L132.9,34.5L132.4,32L130.7,31.3L132.6,27L132.6,24.2L134.1,20.4L137.5,18.9L138.7,16.3L142,16.5L143.7,13.4L140.5,12.5L142,6.3L144.4,5.6L146.9,3.2L152.5,3.8L153.2,1.7L155.9,-1.5L158.6,-2.7L160.1,-1.1L163.1,-1.8L165,0.9L168.7,-0.4L171.8,1.2L171.5,4.1L172.9,6L177.8,2.9L181,3L183.3,4.1L185.2,6.4L188.2,8.2L188.1,11.4L187.2,13.7L188.9,18L187.3,20.5L187,23L190.9,26.2L190,28.4L191.2,29.1L193.5,33.8L197.7,36.4L198.2,37.4L197.3,40.8L202,41.3L204.7,43L204.9,45.6L207.3,47.4L207.5,49.4L204.9,50.6L204.5,51.6L201.4,53.8L198.3,53.5L197.2,52.1L193.7,51.9L191.9,55.1L194.9,59L195.5,63.7L195.4,67.6Z",157,45],
+[50,"Bangladesh","M811.4,484.8L811.3,482.7L810,478.6L809.2,473.8L810.1,472.1L807.9,471.4L808,469.2L806.2,466.4L807.6,462.6L807.9,459.4L804.4,458L803.2,457L801.7,456.9L800.3,455.2L801.7,451.9L803.5,452.3L805,448.6L809.6,448.5L810.2,447.4L808.9,446.5L808.3,445L806.5,445L804.9,444L802.8,441.5L801,440.3L801.7,437.9L804.8,434.6L804,432.2L805.7,432.8L807.4,435.5L810.5,436L810,434.5L811,434.1L812,436.6L813.9,438.5L816.7,438.9L817.4,436.4L818.4,436.9L819.6,439.7L819.8,447.4L826.2,449L835.4,448.7L837.4,449.2L843.5,448.8L847,450.7L848.2,452L847.7,452.6L845.7,452.1L843.7,458.2L842.4,458.4L841.7,460.3L839.4,460.4L837.9,461.6L836.2,461.5L834.7,463.6L834,467.5L835,470L835.6,473.1L836.9,472L837.7,473.9L838.9,474.5L840.5,473.1L840.4,471L842.3,468.4L842.2,466.3L844.6,465.9L845.6,466.3L846.6,470.5L846.8,475.1L848.2,478L849.1,486.2L849.2,490.4L849.7,493.9L846.5,492.4L844.9,494.1L846.5,499.8L843.6,495.4L843.1,489.6L842.1,487.3L841.1,483.3L839.7,480.1L837.9,477.7L837.4,475.7L834.6,478.5L831.7,479L830.4,477.6L828.3,473.2L828.5,471.1L828,467.4L827.5,469.4L824.4,469L827.1,470.3L827.9,472.7L826.5,473.7L827.5,475.4L826.5,475.7L826.2,477.2L827.9,480.9L827.9,482.9L825.3,485.4L824,487.9L822.3,487.2L822.5,485.7L823.8,484.1L821.1,485.6L820.3,481.4L819.5,486.1L816.9,488.6L816,482.7L816.2,486.9L814.6,489.1L813.3,489.1L811.8,487.4ZM833.9,483.9L832.7,484.7L833.1,479.9L834.2,482.7ZM838.2,481.5L836.7,480.4L837.2,478.8ZM829.9,484.9L827,485.2L828.8,482.1L828.5,479.7L827.6,478.8L826.9,476.2L828.7,476.5L829.4,478.5L830.8,480.3L830.4,484.1ZM841.6,487.9L841.6,487.9L841.6,487.9ZM842.4,491.6L841.8,491.7L841.4,489.3L842.2,489.1ZM828.4,474.7L828.4,474.7L828.4,474.7Z",824,464],
+[48,"Bahrayn","M399.3,440.4L399,441.3L397.8,439.4L397.9,436.3L399.1,436.1Z",399,438],
+[31,"Ozarbayjon","M337.3,264.1L336.7,263.4L339.6,262.5L340.8,264L344.1,266.3L347.3,265.3L347.4,267.9L349.7,269.7L349.4,270.7L351.2,274.8L345.4,273.5L341.3,270.2ZM380.7,280.9L377.7,281.2L375.9,278.8L374.2,278L371.6,275.6L371.9,274L374,273.4L374.3,271.8L372.7,270.8L372.8,268.8L374.8,267.6L371.4,263.6L369,264.1L362.7,268.4L360.6,270.6L359.1,271.1L355.9,274.4L355.2,274.4L355.2,272.2L354.5,270.3L356.2,270L354,267.8L355.1,265.4L353.4,264.6L352.1,264.9L347.7,260.9L345.4,259.5L348.4,259.1L349.6,255.9L345.4,253.4L343.3,250.3L345.5,247.3L343.2,245.1L340,243.7L341.3,243.3L339.3,241L342.2,238.7L346.9,240.3L347.7,242L350.3,242.8L351.8,242.3L354.8,244.1L356.7,242.9L357.2,241.1L353.2,237.9L352,236.2L352.1,234.6L353.2,234.3L354.6,232.4L356.1,233.7L358,233.5L362.9,238.6L363.4,240.6L366.3,241.9L369.9,242.1L372,238.6L375.6,236.5L377.5,233.1L380.2,236.1L383.2,240.8L384.5,244.8L388.1,249.1L390.4,251L392.7,251.1L396.1,253.4L396.7,255.3L394.4,254.7L392,254.8L388,256.5L387.2,258L385.6,264.7L386,268.3L385,269.2L384.2,272.1L382.2,271.3L380.5,275.7ZM345.2,250.6L345.2,250.6L345.2,250.6ZM339.5,244.7L339.5,244.7L339.5,244.7Z",367,255],
+[51,"Armaniston","M336.7,263.4L334.5,260.8L331.6,258.7L328.6,259L324.9,257.5L325.4,256.9L323.9,252.5L325.6,249.1L324.6,246.1L322.5,243.6L326.3,243.3L331,242.1L333.6,242.4L337.5,242.1L339.3,241L341.3,243.3L340,243.7L343.2,245.1L345.5,247.3L343.3,250.3L345.4,253.4L349.6,255.9L348.4,259.1L345.4,259.5L347.7,260.9L352.1,264.9L353.4,264.6L355.1,265.4L354,267.8L356.2,270L354.5,270.3L355.2,272.2L355.2,274.4L351.2,274.8L349.4,270.7L349.7,269.7L347.4,267.9L347.3,265.3L344.1,266.3L340.8,264L339.6,262.5ZM339.5,244.7L339.5,244.7L339.5,244.7ZM345.2,250.6L345.2,250.6L345.2,250.6Z",338,255],
+[4,"Afgʻoniston","M569.9,295.6L573.2,295.3L575.8,295.8L578.4,297.5L580.6,296.7L583.2,298L585.3,300.7L586.5,301L588.9,299.1L592.9,296.9L596,296L599.3,298.9L600.9,297.5L600.7,295L601.7,292.9L603.2,292.3L606.5,292.2L607.7,293L609.9,291.4L609.5,287.9L611.7,285.8L613.8,282.3L616.6,280.6L618.5,281.1L620.7,282.6L621.5,284.5L620.9,286.7L621.3,288.2L623.8,287.7L624.1,288.7L623.3,292.2L622.5,298.6L624.3,303.9L626.5,304.4L630.3,301.7L632.5,300.6L635.7,299.9L638.2,296.7L641.6,294.8L644.5,294L647,294.7L646,296.8L647.4,297.2L651.8,295.9L652.8,294.7L657.1,295L659.6,297.2L657.9,296.4L654,298.2L655.8,300L650.1,302.7L647.6,301.8L640.6,302.1L635.3,302.6L630.3,304.3L626.2,307.9L624.6,307.9L620.4,312L619.9,313.1L621.6,314.5L624,319.6L624.3,321.5L623.7,323L624.6,324.4L622.8,327.3L621,328.5L617.5,333L618.9,335L618.5,339.2L616.3,340.1L611.6,340.5L607.1,339.2L605.8,341.2L608.6,344.7L610.2,348L610,349L606.3,351.2L602.6,351.9L601.8,352.4L600.8,356.7L599,359.9L599.5,366.2L597.3,368.7L595.1,370L594.1,369.9L592.1,367.9L590.5,368.5L587.5,367.9L585.9,369.5L581.2,371.6L582.9,373.7L579.9,375L578.1,375.2L574.2,374.1L572.2,375.5L571,377.4L568.6,379.1L567.4,382.9L567.6,386.4L566.9,389.9L567.7,390.8L566.2,392.4L555.5,395.6L552.7,395.9L548.5,395.8L545.7,396.5L543.9,397.9L538.2,396.6L526.5,397.7L525.4,397.5L509,392.2L519.1,380.1L519.4,377L518.8,374.4L517.8,373.2L509.1,371.9L508.5,369.7L508.5,365.6L508.9,362.2L506.2,352.7L506,350.9L509.8,346.2L507,345.5L505.5,344.5L505.6,341.9L505.2,338.6L506.9,335.8L509.5,335.7L507.9,333.5L510.2,331.4L511.6,328.7L512.3,325.6L511.8,323.3L512.7,322.7L513.7,320.1L513.5,318.7L514.4,318.6L516.6,320.8L518.4,321.3L520.8,320.9L522.4,321.8L524.7,324.6L526.4,323.5L528.8,323.5L532.8,321L534,317.9L533.3,316.1L541.4,313.5L543,313.5L543.9,312.2L546.7,310.7L548.3,309.1L551.6,298.6L554.6,297.1L559.5,296.9L560.5,294L561.8,292.7L565.5,294.7Z",565,341]
+];
+
+
+
+
+
+const D = [...D1, ...D2];
+
+
+/* ─────────────── XARITA REJIMLARI ─────────────── */
+/* ═══════ XARITA MAʼLUMOTLARI ═══════ */
+const I = {
+ 860:{c:"Toshkent",t:"Hudud 12 viloyat, Qoraqalpogʻiston Respublikasi va Toshkent shahridan iborat. Samarqand, Buxoro, Xiva kabi Buyuk Ipak yoʻli shaharlari shu yerda joylashgan. Mustaqillik 1991-yil 31-avgustda eʼlon qilingan.",ch:"5 ta davlat bilan chegaradosh: Qozogʻiston, Qirgʻiziston, Tojikiston, Afgʻoniston va Turkmaniston. Oʻzbekiston dunyodagi ikki marta quruqlikda oʻralgan ikki davlatdan biri (ikkinchisi — Lixtenshteyn).",tm:"1370-yilda Temur Samarqandni poytaxt qilib, markazlashgan davlatga asos solgan.",s:["temur","ulugbek","navoiy","buxoriy"],tu:1},
+ 398:{c:"Astana",t:"Qozogʻiston va Oʻzbekiston umumiy turkiy tarix, til va madaniyatga ega. Forob (Forobiy vatani) va Turkiston (Yassaviy maqbarasi) hozirgi Qozogʻiston hududida.",ch:"Eng uzun chegara: taxminan 2 300 km.",tm:"1391-yilgi Toʻxtamishga qarshi yurish shu dashtlar orqali oʻtgan; Temur 1405-yilda Oʻtrarda vafot etgan.",s:["forobiy","yassaviy","temur"],tu:1},
+ 417:{c:"Bishkek",t:"Fargʻona vodiysi Oʻzbekiston, Qirgʻiziston va Tojikiston oʻrtasida boʻlingan. Qirgʻiz xalqi turkiy xalqlardan biri.",ch:"Chegara uzunligi taxminan 1 300 km.",tm:"Temur Moʻgʻulistonga qarshi bir necha yurish qilgan.",s:["bobur"],tu:1},
+ 762:{c:"Dushanbe",t:"Samarqand va Buxoro qadimdan fors-tojik va turkiy madaniyatlar kesishgan joy boʻlgan. Somoniylar davlati (IX–X asr) Buxoroda markazlashgan, uning hududi hozirgi Tojikistonni ham qamragan.",ch:"Chegara uzunligi taxminan 1 300 km.",tm:"Movarounnahr tarkibida Temur davlatiga kirgan.",s:["ibnsino","buxoriy"]},
+ 4:{c:"Kobul",t:"Bobur 1504-yilda Kobulni egallab, shu yerdan Hindistonga yurgan va Kobulda dafn etilgan. Hirot — Alisher Navoiy shahri, Gʻazna — Beruniy vafot etgan joy.",ch:"Termiz yaqinida Amudaryo boʻyida, taxminan 140 km.",tm:"Temur 1380-yillarda Hirot va Xurosonni egallagan.",s:["bobur","navoiy","beruniy","temur"]},
+ 795:{c:"Ashxobod",t:"Xorazmshohlar poytaxti Gurganj (Kunya-Urganch) hozirgi Turkmaniston hududida. Turkmanlar turkiy xalq.",ch:"Chegara uzunligi taxminan 1 600 km.",tm:"Temur Xuroson va Xorazm yurishlarida shu hududlardan oʻtgan.",s:["manguberdi","beruniy"],tu:1},
+ 643:{c:"Moskva",t:"Rossiya Oʻzbekistonning muhim savdo va siyosiy hamkori; bevosita chegarasi yoʻq.",tm:"1391-yil Qunduzcha va 1395-yil Terek janglarida Temur Oltin Oʻrda xoni Toʻxtamishni magʻlub etgan.",s:["temur"]},
+ 156:{c:"Pekin",t:"Xitoy Oʻzbekistonning muhim iqtisodiy hamkori; bevosita chegarasi yoʻq. Buyuk Ipak yoʻli qadimdan ikki hududni bogʻlagan.",tm:"1404–1405: Xitoyga yurish tayyorlangan, lekin Temur Oʻtrarda vafot etgan.",s:["temur"]},
+ 792:{c:"Anqara",t:"Turkiya turkiy davlatlar tashkiloti aʼzosi. Navoiyning turkiy adabiy tili turkiy xalqlar uchun umumiy meros hisoblanadi.",tm:"1402-yil Anqara jangida Temur Usmonli sultoni Bayazidni magʻlub etib, asir olgan.",s:["temur","navoiy"],tu:1},
+ 31:{c:"Boku",t:"Ozarbayjon turkiy davlatlar tashkiloti aʼzosi.",tm:"1386-yilgi yurishlarda Temur Ozarbayjon hududlarini egallagan.",s:["temur"],tu:1},
+ 364:{c:"Tehron",t:"Fors va turkiy madaniyatlar asrlar davomida Markaziy Osiyo bilan chambarchas bogʻliq boʻlgan. Ibn Sino Hamadonda (Eron) vafot etgan.",tm:"1380–1387-yillarda Xuroson, Fors va Mozandaron Temur davlatiga qoʻshilgan.",s:["ibnsino","temur"]},
+ 368:{c:"Bagʻdod",t:"Bagʻdod IX asrda «Bayt al-hikma» ilmiy markazi bilan mashhur boʻlgan. Xorazmiy va Fargʻoniy shu yerda ishlagan.",tm:"Temur Bagʻdodni 1393 va 1401-yillarda egallagan.",s:["xorazmiy","fargoniy","temur"]},
+ 760:{c:"Damashq",t:"Forobiy umrining oxirida Damashqda yashab, shu yerda vafot etgan.",tm:"1400–1401-yillarda Temur Halab va Damashqni egallagan.",s:["forobiy","temur"]},
+ 268:{c:"Tbilisi",t:"Kavkaz hududi Temur yurishlari yoʻlida joylashgan.",tm:"Temur 1386–1403-yillarda Gruziyaga bir necha marta yurish qilgan.",s:["temur"]},
+ 51:{c:"Yerevan",t:"Kavkaz hududi Temur yurishlari yoʻlida joylashgan.",tm:"Temur 1386–1387-yillarda Armanistonga yurish qilgan.",s:["temur"]},
+ 356:{c:"Nyu-Dehli",t:"Bobur 1526-yil Panipat jangida Boburiylar sulolasiga asos solgan va Agrada vafot etgan. Beruniy «Hindiston» asarini yozgan.",tm:"Temur 1398-yilda Dehlini egallagan.",s:["temur","bobur","beruniy"]},
+ 586:{c:"Islomobod",t:"Hozirgi Pokiston hududi Hindiston yurishlari yoʻlida joylashgan.",tm:"1398-yilgi Hindiston yurishida Panjob hududlariga yurish qilingan.",s:["temur"]},
+ 818:{c:"Qohira",t:"Fargʻoniy Misrda yashab, Nil daryosi suv sathini oʻlchovchi inshoot qurilishida qatnashgan.",s:["fargoniy"]},
+ 682:{c:"Ar-Riyod",t:"Makka va Madina — Imom al-Buxoriy hadis izlab borgan muqaddas shaharlar.",s:["buxoriy"]},
+ 496:{c:"Ulan-Bator",t:"XIII asrda moʻgʻul qoʻshinlari Markaziy Osiyoga yurish qilgan; Jaloliddin Manguberdi ularga qarshi kurashgan.",s:["manguberdi"]}
+};
+
+const SIY = {temur:"Amir Temur",ulugbek:"Mirzo Ulugʻbek",navoiy:"Alisher Navoiy",buxoriy:"Imom al-Buxoriy",forobiy:"Abu Nasr Forobiy",yassaviy:"Ahmad Yassaviy",bobur:"Zahiriddin Bobur",beruniy:"Abu Rayhon Beruniy",manguberdi:"Jaloliddin Manguberdi",ibnsino:"Ibn Sino",xorazmiy:"Muhammad al-Xorazmiy",fargoniy:"Ahmad al-Fargʻoniy"};
+
+/* muhim qoʻshni va hamkorlar */
+const NB = [398,417,762,4,795,643,156];
+
+const TEMUR = {364:"1381–1387",368:"1393, 1401",760:"1400–1401",792:"1402",268:"1386–1403",51:"1386–1387",31:"1386",356:"1398",586:"1398",4:"1380-yillar",643:"1391, 1395",398:"1391, 1405",795:"1380-yillar",762:"1370-yillar",417:"1370-yillar"};
+
+const TURK = [792,31,398,417,860,795];
+
+const MODES = {
+ now:{vb:[330,70,400,248],lab:[860,398,417,762,4,795,643,156],
+  cls:i=>i===860?"hl":NB.includes(i)?"nb":"dim",
+  h:"Oʻzbekiston, 2026",k:"Qoʻshni va muhim hamkorlar",p:"Davlatlar ustiga sichqonchani olib boring.",
+  leg:[["#e7c766","Oʻzbekiston"],["#1c7a6c","7 ta muhim qoʻshni va hamkor"]]},
+ temur:{vb:[0,0,1000,620],lab:[860,364,368,760,792,356,586,4,398,31,268,51,643,156],
+  cls:i=>i===860?"hl":TEMUR[i]?"cq":"dim",
+  h:"Amir Temur yurishlari",k:"1370–1405 (yillar taxminiy)",p:"Qizil — Temur yurish qilgan yoki bosib olgan hududlar. Davlat ustiga kelsangiz, yillari chiqadi. 1405-yilda Xitoyga yurish arafasida Oʻtrarda vafot etgan.",
+  leg:[["#e7c766","Markaz: Samarqand"],["#b8324a","Yurish qilingan hududlar"]],
+  ex:i=>i===156?"1404–1405: Xitoyga yurish tayyorlangan, lekin Temur Oʻtrarda vafot etgan.":TEMUR[i]?"Yurish yillari: "+TEMUR[i]+".":""},
+ turk:{vb:[100,90,640,397],lab:TURK,
+  cls:i=>TURK.includes(i)?"tk":"dim",
+  h:"Turkiy davlatlar",k:"Turkiy davlatlar tashkiloti va turkiy xalqlar",p:"Turkiya, Ozarbayjon, Qozogʻiston, Qirgʻiziston, Oʻzbekiston va Turkmaniston. Tashkilot tarkibi oʻzgarishi mumkin, rasmiy manbadan tekshiring.",
+  leg:[["#2b6fd0","Turkiy davlatlar"]]}
+};
+
+
+/* ─────────────── KOMPONENTLAR ─────────────── */
+
+
+
+
+
+/* ─────────────── BEZAKLI PORTRET (SVG) ─────────────── */
+const CAT = {
+  1:{bg:"#17306b",bg2:"#060c1d",c1:"#1d3a78",c2:"#2b4f96",hat:"turban"},
+  2:{bg:"#5c1322",bg2:"#21060c",c1:"#701d2b",c2:"#8e2636",hat:"crown"},
+  3:{bg:"#0f4a42",bg2:"#03201c",c1:"#136055",c2:"#1b7a6c",hat:"doppi"},
+  4:{bg:"#3a3742",bg2:"#131218",c1:"#42404c",c2:"#565360",hat:"karakul"},
+  5:{bg:"#0f4830",bg2:"#031c11",c1:"#146039",c2:"#1c7a4a",hat:"turban"},
+  6:{bg:"#16304d",bg2:"#050d1a",c1:"#1c3d5e",c2:"#26507a",hat:"modern"}
+};
+
+function pic(p, i, ctx) {
+  const t = CAT[p.c] || CAT[1], k = ctx + i;
+  const skin = ["#eed4b2","#e6c8a3","#f2ddc1"][i % 3];
+  const beard = (p.c === 5) || (p.c === 2) || (p.c === 1 && i % 2 === 0);
+  const gold = "url(#G" + k + ")";
+  const emblem = ({
+    1:'<path d="M-26-12-1-5 26-12 26 12-1 19-26 12Z" fill="none" stroke="'+gold+'" stroke-width="1.6"/><path d="M-1-5V19" stroke="'+gold+'" stroke-width="1"/>',
+    2:'<path d="M0-20 4 8 0 18-4 8Z" fill="'+gold+'"/><path d="M-11 3h22" stroke="'+gold+'" stroke-width="2.6"/><path d="M-4 18h8" stroke="'+gold+'" stroke-width="2.2"/>',
+    3:'<path d="M-14 16C-8-6 5-14 17-17 13-4 3 10-14 16Z" fill="none" stroke="'+gold+'" stroke-width="1.6"/><path d="M-14 16 9-1" stroke="'+gold+'" stroke-width="1"/>',
+    4:'<path d="M-18-10h30v18h-30z" fill="none" stroke="'+gold+'" stroke-width="1.5"/><path d="M-6-10v18" stroke="'+gold+'" stroke-width="1.5"/><path d="M12-10c4 4 4 12 8 18" fill="none" stroke="'+gold+'" stroke-width="1.5"/>',
+    5:'<path d="M-11-4h22l-4 15h-14z" fill="none" stroke="'+gold+'" stroke-width="1.6"/><path d="M0-9v5M-8 0h16" stroke="'+gold+'" stroke-width="1.2"/><path d="M-4-4c0 4 8 4 8 0" fill="none" stroke="'+gold+'" stroke-width="1"/>',
+    6:'<path d="M0-16 4-4 16 0 4 4 0 16-4 4-16 0-4-4z" fill="'+gold+'"/>'
+  })[p.c] || "";
+  let hat = "";
+  if (t.hat === "turban") {
+    hat = `<path d="M80 114c0-30 18-48 40-48s40 18 40 48c0 5-4 7-9 7H89c-5 0-9-2-9-7z" fill="#f2e6c6"/>
+      <path d="M88 92c10-7 20-10 32-10s22 3 32 10" stroke="#d9c69a" stroke-width="3" fill="none"/>
+      <path d="M85 102c11-6 23-9 35-9s24 3 35 9" stroke="#d9c69a" stroke-width="2.5" fill="none"/>
+      <circle cx="120" cy="80" r="4.5" fill="${gold}"/>`;
+  } else if (t.hat === "crown") {
+    hat = `<path d="M83 112 90 76l11 15 19-30 19 30 11-15 7 36z" fill="${gold}"/>
+      <rect x="83" y="104" width="74" height="9" rx="4" fill="${gold}"/>
+      <circle cx="120" cy="72" r="3.5" fill="#fff8d0"/>`;
+  } else if (t.hat === "doppi") {
+    hat = `<path d="M84 110c0-21 16-34 36-34s36 13 36 34z" fill="#12312c" stroke="${gold}" stroke-width="2"/>
+      <path d="M84 110h72" stroke="${gold}" stroke-width="3"/>
+      <circle cx="103" cy="96" r="2" fill="${gold}"/><circle cx="120" cy="92" r="2" fill="${gold}"/><circle cx="137" cy="96" r="2" fill="${gold}"/>`;
+  } else if (t.hat === "karakul") {
+    hat = `<path d="M82 110c0-17 17-28 38-28s38 11 38 28z" fill="#1b1a20"/>
+      <rect x="82" y="103" width="76" height="8" rx="4" fill="#2b2935"/>`;
+  } else {
+    hat = `<path d="M83 124c0-32 15-50 37-50s37 18 37 50c-4-20-16-28-37-28s-33 8-37 28z" fill="#2b2a30"/>`;
+  }
+  let fig = `
+    <path d="M44 300c4-60 32-94 76-94s72 34 76 94z" fill="${t.c1}"/>
+    <path d="M120 206c-15 0-26 5-34 14 10 18 21 27 34 27s24-9 34-27c-8-9-19-14-34-14z" fill="${t.c2}"/>
+    <path d="M101 172h38v34h-38z" fill="${skin}"/>
+    <ellipse cx="120" cy="${140 + (i % 3) - 1}" rx="${35 + (i % 4)}" ry="${41 + (i % 3)}" fill="${skin}"/>
+    <ellipse cx="84" cy="146" rx="6" ry="10" fill="${skin}"/>
+    <ellipse cx="156" cy="146" rx="6" ry="10" fill="${skin}"/>
+    ${hat}
+    <path d="M100 131c4-3 10-3 14 0" stroke="#3b2c1f" stroke-width="1.8" fill="none" stroke-linecap="round" opacity=".75"/>
+    <path d="M126 131c4-3 10-3 14 0" stroke="#3b2c1f" stroke-width="1.8" fill="none" stroke-linecap="round" opacity=".75"/>
+    <ellipse cx="106" cy="138" rx="4.4" ry="2.4" fill="#2a1d14"/>
+    <ellipse cx="134" cy="138" rx="4.4" ry="2.4" fill="#2a1d14"/>
+    <circle cx="107.4" cy="137.4" r="1" fill="#fff" opacity=".6"/>
+    <circle cx="135.4" cy="137.4" r="1" fill="#fff" opacity=".6"/>
+    <path d="M120 140v10c0 2 2 4 4 4" stroke="#c9a982" stroke-width="1.6" fill="none" stroke-linecap="round" opacity=".8"/>
+    ${beard ? '<path d="M93 148c2 30 14 50 27 50s25-20 27-50c-8 15-17 22-27 22s-19-7-27-22z" fill="#40342a" opacity=".92"/>' : ""}
+    <path d="M114 164c4 1.5 8 1.5 12 0" stroke="${beard ? "#f0dcc0" : "#8a4b3f"}" stroke-width="1.8" fill="none" stroke-linecap="round"/>`;
+  if (p.c === 6) fig += `<path d="M104 208l16 18 16-18 9 5-25 30-25-30z" fill="#eef2f8"/><path d="M116 224l4 22 4-22z" fill="#8e2636"/>`;
+  const arch = "M24 284V132c0-58 40-94 96-106 56 12 96 48 96 106v152z";
+  return `<svg viewBox="0 0 240 300" class="pic" role="img" aria-label="${p.n} — uslublashtirilgan portret">
+  <defs>
+    <linearGradient id="G${k}" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#fff8dc"/><stop offset=".35" stop-color="#e9c96b"/>
+      <stop offset=".62" stop-color="#a87c1f"/><stop offset="1" stop-color="#f3dd9a"/>
+    </linearGradient>
+    <linearGradient id="B${k}" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="${t.bg}"/><stop offset="1" stop-color="${t.bg2}"/>
+    </linearGradient>
+    <radialGradient id="R${k}" cx=".5" cy=".36" r=".62">
+      <stop offset="0" stop-color="#fff" stop-opacity=".22"/><stop offset="1" stop-color="#fff" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="N${k}" width="30" height="30" patternUnits="userSpaceOnUse">
+      <path d="M15 2 19 11 28 15 19 19 15 28 11 19 2 15 11 11z" fill="none" stroke="#f4dc94" stroke-opacity=".16" stroke-width=".8"/>
+    </pattern>
+    <clipPath id="A${k}"><path d="${arch}"/></clipPath>
+  </defs>
+  <rect width="240" height="300" fill="url(#G${k})"/>
+  <rect x="6" y="6" width="228" height="288" fill="#081020"/>
+  <g clip-path="url(#A${k})">
+    <rect x="20" y="18" width="200" height="270" fill="url(#B${k})"/>
+    <rect x="20" y="18" width="200" height="270" fill="url(#N${k})"/>
+    <circle cx="120" cy="132" r="88" fill="url(#R${k})"/>
+    ${fig}
+    <g transform="translate(120 254)" opacity=".95">${emblem}</g>
+  </g>
+  <path d="${arch}" fill="none" stroke="url(#G${k})" stroke-width="2.6"/>
+  <path d="M33 282V134c0-52 36-86 87-97 51 11 87 45 87 97v148" fill="none" stroke="#f4dc94" stroke-opacity=".45" stroke-width=".8"/>
+  <rect x="13" y="13" width="214" height="274" fill="none" stroke="#5b3f08" stroke-width="1" stroke-dasharray="4 3" opacity=".85"/>
+  <g fill="url(#G${k})">
+    <rect x="10" y="10" width="16" height="16"/><rect x="10" y="10" width="16" height="16" transform="rotate(45 18 18)"/>
+    <rect x="214" y="10" width="16" height="16"/><rect x="214" y="10" width="16" height="16" transform="rotate(45 222 18)"/>
+    <rect x="10" y="274" width="16" height="16"/><rect x="10" y="274" width="16" height="16" transform="rotate(45 18 282)"/>
+    <rect x="214" y="274" width="16" height="16"/><rect x="214" y="274" width="16" height="16" transform="rotate(45 222 282)"/>
+  </g>
+  <circle cx="18" cy="18" r="3" fill="#081020"/><circle cx="222" cy="18" r="3" fill="#081020"/>
+  <circle cx="18" cy="282" r="3" fill="#081020"/><circle cx="222" cy="282" r="3" fill="#081020"/>
+  <path d="M120 2 124 11 133 13 124 15 120 24 116 15 107 13 116 11z" fill="url(#G${k})"/>
+  </svg>`;
+}
+
+const Portrait = ({ p, i, ctx }) => (
+  <span style={{ display: "block" }} dangerouslySetInnerHTML={{ __html: pic(p, i, ctx) }} />
+);
+
+const ORN = (
+  <svg className="orn" viewBox="0 0 320 18" preserveAspectRatio="none" aria-hidden="true">
+    <g stroke="#c39a38" fill="none" strokeWidth="1">
+      <path d="M0 9h124M196 9h124" strokeOpacity=".6" />
+      <path d="M160 2l6 7-6 7-6-7z" />
+      <path d="M146 9l5-5 5 5-5 5z" strokeOpacity=".8" />
+      <path d="M164 9l5-5 5 5-5 5z" strokeOpacity=".8" />
+      <circle cx="134" cy="9" r="2" /><circle cx="186" cy="9" r="2" />
+    </g>
+  </svg>
+);
+
+const NAMEIDX = new Map(P.map((p, i) => [norm(p.n), i]));
+
+function RelChips({ items, onOpen }) {
+  return items.filter(Boolean).map((nm, j) => {
+    const idx = NAMEIDX.get(norm(nm));
+    return idx == null
+      ? <span className="tag tag-plain" key={j}>{nm}</span>
+      : <button type="button" className="tag tag-link" key={j} onClick={() => onOpen(idx)}>{nm} ›</button>;
+  });
+}
+
+/* ─────────────── ORQA FON (canvas) ─────────────── */
+function ParticleField() {
+  const cv = useRef(null);
+  useEffect(() => {
+    const canvas = cv.current;
+    if (!canvas) return;
+    const x = canvas.getContext("2d");
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let S = [], W = 0, H = 0, raf = null;
+    function rs() {
+      W = canvas.width = window.innerWidth;
+      H = canvas.height = window.innerHeight;
+      S = [];
+      const n = Math.min(64, Math.round(W / 18));
+      for (let i = 0; i < n; i++) S.push({ x: Math.random() * W, y: Math.random() * H, vx: (Math.random() - .5) * .16, vy: (Math.random() - .5) * .16, r: Math.random() * 1.3 + .4 });
+    }
+    function frame() {
+      x.clearRect(0, 0, W, H);
+      for (let i = 0; i < S.length; i++) {
+        const a = S[i];
+        a.x += a.vx; a.y += a.vy;
+        if (a.x < 0 || a.x > W) a.vx *= -1;
+        if (a.y < 0 || a.y > H) a.vy *= -1;
+        x.fillStyle = "rgba(244,220,148,.72)";
+        x.beginPath(); x.arc(a.x, a.y, a.r, 0, 6.2832); x.fill();
+        for (let j = i + 1; j < S.length; j++) {
+          const b = S[j], dx = a.x - b.x, dy = a.y - b.y, dd = dx * dx + dy * dy;
+          if (dd < 9000) {
+            x.strokeStyle = "rgba(244,220,148," + (.11 - dd / 90000) + ")";
+            x.beginPath(); x.moveTo(a.x, a.y); x.lineTo(b.x, b.y); x.stroke();
+          }
+        }
+      }
+      raf = reduce ? null : requestAnimationFrame(frame);
+    }
+    rs(); frame();
+    const onResize = () => { rs(); if (reduce) frame(); };
+    const onVis = () => {
+      if (document.hidden) { if (raf) { cancelAnimationFrame(raf); raf = null; } }
+      else if (!reduce && !raf) frame();
+    };
+    window.addEventListener("resize", onResize);
+    document.addEventListener("visibilitychange", onVis);
+    return () => {
+      if (raf) cancelAnimationFrame(raf);
+      window.removeEventListener("resize", onResize);
+      document.removeEventListener("visibilitychange", onVis);
+    };
+  }, []);
+  return <canvas id="bg" ref={cv} aria-hidden="true" />;
+}
+
+function StarSky() {
+  const stars = useMemo(() => {
+    const n = window.innerWidth < 620 ? 14 : 26;
+    return Array.from({ length: n }, () => ({
+      ch: Math.random() < .35 ? "✦" : "★",
+      left: (3 + Math.random() * 94).toFixed(2) + "%",
+      top: (4 + Math.random() * 88).toFixed(2) + "%",
+      size: (6 + Math.random() * 9).toFixed(0) + "px",
+      d: (3 + Math.random() * 4).toFixed(1) + "s",
+      dl: (Math.random() * 5).toFixed(1) + "s",
+    }));
+  }, []);
+  return (
+    <div className="ornsky" aria-hidden="true">
+      <i className="shoot s1" /><i className="shoot s2" />
+      {stars.map((s, i) => (
+        <span key={i} className="tw" style={{ left: s.left, top: s.top, fontSize: s.size, "--d": s.d, "--dl": s.dl }}>{s.ch}</span>
+      ))}
+    </div>
+  );
+}
+
+function ClickFX() {
+  const [sparks, setSparks] = useState([]);
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const onDown = (e) => {
+      if (e.button !== 0) return;
+      if (e.target && e.target.closest && e.target.closest("dialog")) return;
+      const batch = [];
+      const n = 5;
+      for (let i = 0; i < n; i++) {
+        const a = (Math.PI * 2 / n) * i + Math.random() * .6;
+        const dist = 16 + Math.random() * 20;
+        batch.push({
+          id: Math.random().toString(36).slice(2),
+          ch: i % 2 ? "✦" : "★",
+          left: e.clientX, top: e.clientY,
+          size: (9 + Math.random() * 4).toFixed(0) + "px",
+          delay: (i * 16) + "ms",
+          dx: (Math.cos(a) * dist).toFixed(1) + "px",
+          dy: (Math.sin(a) * dist).toFixed(1) + "px",
+          rot: (Math.random() * 160 - 80).toFixed(0) + "deg",
+        });
+      }
+      setSparks((prev) => [...prev, ...batch].slice(-40));
+      setTimeout(() => setSparks((prev) => prev.filter((s) => !batch.some((b) => b.id === s.id))), 1000);
+    };
+    document.addEventListener("pointerdown", onDown, { passive: true });
+    return () => document.removeEventListener("pointerdown", onDown);
+  }, []);
+  return (
+    <div className="clickfx" aria-hidden="true">
+      {sparks.map((s) => (
+        <span key={s.id} className="spark" style={{
+          left: s.left, top: s.top, fontSize: s.size, animationDelay: s.delay,
+          "--dx": s.dx, "--dy": s.dy, "--rot": s.rot,
+        }}>{s.ch}</span>
+      ))}
+    </div>
+  );
+}
+
+/* ─────────────── SHAXSNING TOʻLIQ KARTASI ─────────────── */
+function PersonBody({ i, onOpen }) {
+  const p = P[i];
+  const facts = [["Davr", p.e], ["Hudud", p.r], ["Tugʻilgan", p.b], ["Vafot etgan", p.d]].filter((x) => x[1] && x[1] !== "—");
+  const rel = p.rel || {};
+  const relRows = [
+    ["Otasi", rel.o && [rel.o]],
+    ["Onasi", rel.m && [rel.m]],
+    ["Turmush oʻrtogʻi", rel.j && [rel.j]],
+    ["Aka-ukalari", rel.uka],
+    ["Ajdodlari", rel.a],
+    ["Farzandlari", rel.k],
+    ["Nevaralari", rel.nv],
+    ["Avlodlari", rel.avlod],
+    ["Ustozlari", rel.ustoz],
+    ["Shogirdlari va izdoshlari", rel.shogird],
+    ["Hamdavr va hamkasblari", rel.hamdavr],
+  ].filter((r) => r[1] && r[1].length);
+
+  return (
+    <>
+      <div className="mhead">
+        <p className="mh-meta">{p.e} · {p.r}</p>
+        <h2 id="dtitle">{p.n}</h2>
+        <p className="mh-sub">{p.m} · {p.y}</p>
+        <p className="mstars" aria-hidden="true">✦ ★ ✦ ★ ✦</p>
+      </div>
+      <div className="mband" aria-hidden="true" />
+      <div className="mtop">
+        <div className="mpic"><Portrait p={p} i={i} ctx="m" /></div>
+        <div className="mfacts">
+          <dl>
+            {facts.map((f) => (
+              <React.Fragment key={f[0]}>
+                <dt>{f[0]}</dt><dd>{f[1]}</dd>
+              </React.Fragment>
+            ))}
+            <dt>Faoliyati</dt><dd>{p.o}</dd>
+          </dl>
+          <div className="chipsrow">
+            <span className="tag">{C[p.c]}</span>
+            <span className="tag">{p.e}</span>
+            <span className="tag">{p.r}</span>
+          </div>
+        </div>
+      </div>
+      <div className="body">
+        {ORN}
+        <div className="sec"><h3>Hayoti va faoliyati</h3><p>{p.hayot}</p></div>
+        {(p.sanalar || []).length > 0 && (
+          <div className="sec"><h3>Hayotining asosiy sanalari</h3>
+            <ul className="life">
+              {p.sanalar.map((x, j) => <li key={j}><b>{x[0]}</b><span>{x[1]}</span></li>)}
+            </ul>
+          </div>
+        )}
+        {(p.yutuq || []).length > 0 && (
+          <div className="sec"><h3>Gʻalabalari va yutuqlari</h3>
+            <ul className="deed">{p.yutuq.map((x, j) => <li key={j}>{x}</li>)}</ul>
+          </div>
+        )}
+        {(p.safar || []).length > 0 && (
+          <div className="sec"><h3>Yurgan yoʻllari va safarlari</h3>
+            <div className="trip">{p.safar.map((x, j) => <span key={j}>{x}</span>)}</div>
+          </div>
+        )}
+        <div className="sec"><h3>Ilmiy va ijodiy hissasi</h3>
+          <ul>{(p.hissa || []).map((h, j) => <li key={j}>{h}</li>)}</ul>
+        </div>
+        <div className="sec"><h3>Asarlari</h3>
+          <ul>{(p.asar || []).map((h, j) => <li key={j}>{h}</li>)}</ul>
+        </div>
+        <div className="sec"><h3>Oilasi</h3><p>{p.fam}</p></div>
+        {relRows.length > 0 && (
+          <div className="sec">
+            <h3>Shajara — ajdodlar, avlodlar va oila</h3>
+            {relRows.map((r) => (
+              <p className="relrow" key={r[0]}>
+                <b>{r[0]}</b><RelChips items={r[1]} onOpen={onOpen} />
+              </p>
+            ))}
+          </div>
+        )}
+        <div className="sec"><h3>Merosi</h3><p>{p.meros}</p></div>
+        {ORN}
+        <p className="mstars end" aria-hidden="true">★ ✦ ★</p>
+      </div>
+    </>
+  );
+}
+
+/* ─────────────── XARITA BOʻLIMI ─────────────── */
+function MapSection({ mode, setMode, onOpenPerson }) {
+  const vbRef = useRef(MODES.now.vb.slice());
+  const [vb, setVbState] = useState(vbRef.current);
+  const [hover, setHover] = useState(null);
+  const [detail, setDetail] = useState(-1);
+  const dlg = useRef(null);
+  const raf = useRef(0);
+
+  useEffect(() => {
+    const to = MODES[mode].vb;
+    const from = vbRef.current.slice();
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      vbRef.current = to.slice(); setVbState(to.slice()); return;
+    }
+    const t0 = performance.now();
+    const step = (n) => {
+      const k = Math.min(1, (n - t0) / 600);
+      const e = k < .5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+      const cur = from.map((v, j) => v + (to[j] - v) * e);
+      vbRef.current = cur; setVbState(cur);
+      if (k < 1) raf.current = requestAnimationFrame(step);
+    };
+    raf.current = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(raf.current);
+  }, [mode]);
+
+  useEffect(() => {
+    const el = dlg.current;
+    if (!el) return;
+    if (detail >= 0) { if (!el.open) el.showModal(); }
+    else if (el.open) el.close();
+  }, [detail]);
+
+  const byId = useMemo(() => { const m = {}; D.forEach((r) => { m[r[0]] = r; }); return m; }, []);
+  const m = MODES[mode];
+  const fs = (0.017 * vb[2]).toFixed(2);
+
+  const info = hover == null
+    ? { h: m.h, k: m.k, p: m.p }
+    : (() => {
+        const r = byId[hover], t = I[hover];
+        return {
+          h: r[1],
+          k: t ? "Poytaxti: " + t.c : "",
+          p: t ? (((m.ex && m.ex(hover)) || t.t.split(". ")[0].replace(/\.$/, "") + ".") + " Batafsil maʼlumot uchun bosing.") : "",
+        };
+      })();
+
+  const det = detail >= 0 ? { r: byId[detail], t: I[detail] } : null;
+
+  return (
+    <section id="xarita" className="z" aria-labelledby="xt">
+      <svg className="divider" viewBox="0 0 400 26" aria-hidden="true" preserveAspectRatio="none" style={{ margin: "0 auto 10px", display: "block", opacity: .9, width: "min(420px,80%)" }}>
+        <g stroke="#c39a38" fill="none" strokeWidth="1.1">
+          <path d="M0 13h150M250 13h150" strokeOpacity=".7" />
+          <path d="M200 3l7 10-7 10-7-10z" />
+          <path d="M186 13l6-7 6 7-6 7z" strokeOpacity=".8" />
+          <path d="M214 13l6-7 6 7-6 7z" strokeOpacity=".8" />
+          <circle cx="170" cy="13" r="3" /><circle cx="230" cy="13" r="3" />
+        </g>
+      </svg>
+      <h2 id="xt">Xarita</h2>
+      <p className="xs">Davlat ustiga sichqonchani olib boring: u tepaga koʻtariladi, chiqsangiz joyiga qaytadi. Bossangiz, batafsil maʼlumot ochiladi.</p>
+      <div className="xtabs" role="group" aria-label="Xarita rejimi">
+        <button type="button" className={mode === "now" ? "on" : ""} aria-pressed={mode === "now"} onClick={() => setMode("now")}>Oʻzbekiston 2026</button>
+        <button type="button" className={mode === "temur" ? "on" : ""} aria-pressed={mode === "temur"} onClick={() => setMode("temur")}>Amir Temur yurishlari</button>
+        <button type="button" className={mode === "turk" ? "on" : ""} aria-pressed={mode === "turk"} onClick={() => setMode("turk")}>Turkiy davlatlar</button>
+      </div>
+      <div className="xwrap">
+        <div className="xmapbox">
+          <svg id="xmap" viewBox={vb.join(" ")} role="img" aria-label="Oʻzbekiston va qoʻshni hududlar xaritasi">
+            {D.map((r) => (
+              <path
+                key={r[0]}
+                className={"xc " + m.cls(r[0])}
+                data-i={r[0]}
+                tabIndex={0}
+                aria-label={r[1]}
+                d={r[2]}
+                onMouseEnter={() => setHover(r[0])}
+                onMouseLeave={() => setHover(null)}
+                onFocus={() => setHover(r[0])}
+                onBlur={() => setHover(null)}
+                onClick={() => setDetail(r[0])}
+                onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setDetail(r[0]); } }}
+              />
+            ))}
+            <g>
+              {m.lab.filter((i) => byId[i]).map((i) => {
+                const r = byId[i];
+                return (
+                  <text key={i} x={r[3]} y={r[4]} fontSize={fs} strokeWidth={(fs * .28).toFixed(2)}
+                    style={i === 860 ? { fill: "#ffe9a8" } : undefined}>{r[1]}</text>
+                );
+              })}
+            </g>
+          </svg>
+        </div>
+        <aside className="xinfo" aria-live="polite">
+          <h3>{info.h}</h3><p className="k">{info.k}</p><p>{info.p}</p>
+          <ul className="xleg">
+            {m.leg.map((l, j) => <li key={j}><i style={{ background: l[0] }} />{l[1]}</li>)}
+          </ul>
+        </aside>
+      </div>
+
+      <dialog id="xdlg" ref={dlg} aria-labelledby="xdt" onClick={(e) => { if (e.target === dlg.current) setDetail(-1); }}>
+        <button className="xdx" type="button" aria-label="Yopish" onClick={() => setDetail(-1)}>×</button>
+        {det && (
+          <div className="xdc">
+            <div className="xdh">
+              <h2 id="xdt">{det.r[1]}</h2>
+              <p>Poytaxti: {det.t.c}</p>
+              {(() => {
+                const tags = [];
+                if (det.t.tu) tags.push("Turkiy davlat");
+                if (detail !== 860 && NB.includes(detail)) tags.push("Muhim qoʻshni va hamkor");
+                return tags.length ? <div className="xtg">{tags.map((x, j) => <span key={j}>{x}</span>)}</div> : null;
+              })()}
+            </div>
+            <div className="xdb">
+              <h3>{detail === 860 ? "Umumiy maʼlumot" : "Oʻzbekiston bilan bogʻliqligi"}</h3><p>{det.t.t}</p>
+              {det.t.ch && <><h3>{detail === 860 ? "Chegaralari" : "Chegarasi"}</h3><p>{det.t.ch}</p></>}
+              {det.t.tm && <><h3>Amir Temur davrida</h3><p>{det.t.tm}</p></>}
+              {(det.t.s || []).length > 0 && (
+                <>
+                  <h3>Bogʻliq siymolar</h3>
+                  <div className="xch">
+                    {det.t.s.map((slug, j) => {
+                      const nm = SIY[slug] || slug;
+                      const k = P.findIndex((p) => p.s === slug);
+                      return k >= 0
+                        ? <button type="button" className="xl" key={j} onClick={() => { setDetail(-1); onOpenPerson(k, true); }}>{nm} ›</button>
+                        : <span key={j}>{nm}</span>;
+                    })}
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        )}
+      </dialog>
+    </section>
+  );
+}
+
+/* ─────────────── ILDIZ KOMPONENT ─────────────── */
+export default function App() {
+  const [cat, setCat] = useState(0);
+  const [onlyFav, setOnlyFav] = useState(false);
+  const [q, setQ] = useState("");
+  const [reg, setReg] = useState("");
+  const [era, setEra] = useState("");
+  const [sort, setSort] = useState("years");
+  const [view, setView] = useState("grid");
+  const [fav, setFav] = useState({});
+  const [user, setUser] = useState(null);
+  const [visits, setVisits] = useState(0);
+  const [toastMsg, setToastMsg] = useState("");
+  const [person, setPerson] = useState(-1);
+  const [authOpen, setAuthOpen] = useState(false);
+  const [authTab, setAuthTab] = useState("login");
+  const [authErr, setAuthErr] = useState("");
+  const [mapMode, setMapMode] = useState("now");
+
+  const pDlg = useRef(null);
+  const aDlg = useRef(null);
+  const toastT = useRef(null);
+
+  const UKEY = "siymolar-users", SKEY = "siymolar-session", VKEY = "siymolar-visits";
+  const favKey = (u) => (u ? "siymolar-fav:" + u.email : "siymolar-fav");
+
+  const toast = (msg) => {
+    setToastMsg(msg);
+    clearTimeout(toastT.current);
+    toastT.current = setTimeout(() => setToastMsg(""), 2200);
+  };
+
+  /* boshlangʻich holat */
+  useEffect(() => {
+    let u = null;
+    try { u = JSON.parse(localStorage.getItem(SKEY) || "null"); } catch (e) { u = null; }
+    setUser(u);
+    try { setFav(JSON.parse(localStorage.getItem(favKey(u)) || "{}") || {}); } catch (e) { setFav({}); }
+    let v = 0;
+    try {
+      v = (parseInt(localStorage.getItem(VKEY), 10) || 0) + 1;
+      localStorage.setItem(VKEY, String(v));
+    } catch (e) { v = 1; }
+    setVisits(v);
+  }, []);
+
+  useEffect(() => {
+    if (!user) return;
+    try { localStorage.setItem(favKey(user), JSON.stringify(fav)); } catch (e) {}
+  }, [fav, user]);
+
+  useEffect(() => {
+    const anyOpen = person >= 0 || authOpen;
+    document.body.classList.toggle("modal-open", anyOpen);
+  }, [person, authOpen]);
+
+  /* modal ochilishi/yopilishi */
+  useEffect(() => {
+    const el = pDlg.current;
+    if (!el) return;
+    if (person >= 0) { if (!el.open) el.showModal(); }
+    else if (el.open) el.close();
+  }, [person]);
+
+  useEffect(() => {
+    const el = aDlg.current;
+    if (!el) return;
+    if (authOpen) { if (!el.open) el.showModal(); }
+    else if (el.open) el.close();
+  }, [authOpen]);
+
+  /* dialogni Esc yoki backdrop orqali yopganda holatni ham yangilash */
+  useEffect(() => {
+    const el = pDlg.current;
+    if (!el) return;
+    const onClose = () => {
+      setPerson(-1);
+      if (location.hash.indexOf("#/") === 0) history.replaceState(null, "", location.pathname + location.search);
+    };
+    el.addEventListener("close", onClose);
+    return () => el.removeEventListener("close", onClose);
+  }, []);
+
+  useEffect(() => {
+    const el = aDlg.current;
+    if (!el) return;
+    const onClose = () => setAuthOpen(false);
+    el.addEventListener("close", onClose);
+    return () => el.removeEventListener("close", onClose);
+  }, []);
+
+  const filtered = useMemo(() => {
+    const list = [];
+    P.forEach((p, i) => {
+      if (onlyFav && !fav[i]) return;
+      if (cat && p.c !== cat) return;
+      if (reg && p.r !== reg) return;
+      if (era) {
+        if (era === "modern") { if (p.f < 1900) return; }
+        else if (String(Math.floor(p.f / 100) + 1) !== era) return;
+      }
+      if (q && IDX[i].indexOf(norm(q)) < 0) return;
+      list.push(i);
+    });
+    const by = {
+      years: (a, b) => P[a].f - P[b].f,
+      name: (a, b) => P[a].n.localeCompare(P[b].n, "uz"),
+      cat: (a, b) => P[a].c - P[b].c || P[a].f - P[b].f,
+    };
+    return list.sort(by[sort] || by.years);
+  }, [cat, onlyFav, fav, q, reg, era, sort]);
+
+  const regions = useMemo(() => [...new Set(P.map((p) => p.r))].sort((a, b) => a.localeCompare(b, "uz")), []);
+  const centuries = useMemo(() => [...new Set(P.map((p) => Math.floor(p.f / 100) + 1))].sort((a, b) => a - b), []);
+
+  /* ── ochish / navigatsiya ── */
+  const openPerson = (i, push) => {
+    setPerson(i);
+    if (push) {
+      const url = "#/" + P[i].s;
+      if (location.hash !== url) history.pushState({ i }, "", url);
+    }
+  };
+
+  const closePerson = () => {
+    setPerson(-1);
+    if (location.hash.indexOf("#/") === 0) history.replaceState(null, "", location.pathname + location.search);
+  };
+
+  const step = (dir) => {
+    const list = filtered.length ? filtered : P.map((_, i) => i);
+    let pos = list.indexOf(person);
+    if (pos < 0) pos = 0;
+    openPerson(list[(pos + dir + list.length) % list.length], true);
+  };
+
+  /* ── deep link ── */
+  useEffect(() => {
+    const route = () => {
+      const m = location.hash.match(/^#\/(.+)$/);
+      if (m) {
+        const slug = decodeURIComponent(m[1]);
+        const i = P.findIndex((p) => p.s === slug);
+        if (i >= 0) { setPerson(i); return; }
+      }
+      setPerson(-1);
+    };
+    if (location.hash) route();
+    window.addEventListener("popstate", route);
+    window.addEventListener("hashchange", route);
+    return () => {
+      window.removeEventListener("popstate", route);
+      window.removeEventListener("hashchange", route);
+    };
+  }, []);
+
+  /* klaviatura */
+  useEffect(() => {
+    const onKey = (e) => {
+      const tag = (document.activeElement && document.activeElement.tagName) || "";
+      if (e.key === "/" && tag !== "INPUT" && person < 0 && !authOpen) {
+        e.preventDefault();
+        document.getElementById("q")?.focus();
+      }
+      if (person >= 0 && (e.key === "ArrowLeft" || e.key === "ArrowRight")) {
+        e.preventDefault();
+        step(e.key === "ArrowLeft" ? -1 : 1);
+      }
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [person, filtered]);
+
+  /* ── sevimlilar ── */
+  const toggleFav = (i) => {
+    setFav((prev) => {
+      const nf = { ...prev };
+      if (nf[i]) delete nf[i]; else nf[i] = 1;
+      return nf;
+    });
+  };
+  const favCount = Object.keys(fav).length;
+
+  /* ── hisob ── */
+  const readUsers = () => { try { return JSON.parse(localStorage.getItem(UKEY) || "{}") || {}; } catch (e) { return {}; } };
+  const writeUsers = (u) => { try { localStorage.setItem(UKEY, JSON.stringify(u)); } catch (e) {} };
+
+  async function digest(str) {
+    if (window.crypto && crypto.subtle && location.protocol !== "file:") {
+      const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
+      return [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, "0")).join("");
+    }
+    let h = 5381;
+    for (let i = 0; i < str.length; i++) h = ((h << 5) + h + str.charCodeAt(i)) | 0;
+    return "h" + (h >>> 0).toString(16);
+  }
+
+  const setUserAndFav = (u) => {
+    setUser(u);
+    try { localStorage.setItem(SKEY, JSON.stringify(u)); } catch (e) {}
+    let nf = {};
+    try { nf = JSON.parse(localStorage.getItem(favKey(u)) || "{}") || {}; } catch (e) { nf = {}; }
+    if (!Object.keys(nf).length) {
+      try {
+        const gst = JSON.parse(localStorage.getItem("siymolar-fav") || "{}") || {};
+        if (Object.keys(gst).length) { nf = gst; localStorage.setItem(favKey(u), JSON.stringify(nf)); }
+      } catch (e) {}
+    }
+    setFav(nf);
+  };
+
+  const authSubmit = async (e) => {
+    e.preventDefault();
+    const form = e.target;
+    const fd = new FormData(form);
+    const email = String(fd.get("email") || "").trim().toLowerCase();
+    const pass = String(fd.get("pass") || "");
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) { setAuthErr("Email formati notoʻgʻri."); return; }
+    if (pass.length < 6) { setAuthErr("Parol kamida 6 belgidan iborat boʻlsin."); return; }
+    const all = readUsers();
+    if (authTab === "register") {
+      const name = String(fd.get("name") || "").trim();
+      if (name.length < 2) { setAuthErr("Ismingizni kiriting."); return; }
+      if (all[email]) { setAuthErr("Bu email allaqachon roʻyxatdan oʻtgan. «Kirish» boʻlimiga oʻting."); return; }
+      all[email] = { name, pass: await digest(pass + "|" + email) };
+      writeUsers(all);
+      setUserAndFav({ email, name });
+      setAuthErr("");
+      setAuthOpen(false);
+      toast("Akkaunt yaratildi. Xush kelibsiz, " + name + "!");
+    } else {
+      const u = all[email];
+      if (!u || u.pass !== await digest(pass + "|" + email)) { setAuthErr("Email yoki parol xato."); return; }
+      setUserAndFav({ email, name: u.name });
+      setAuthErr("");
+      setAuthOpen(false);
+      toast("Xush kelibsiz, " + u.name + "!");
+    }
+  };
+
+  const logout = () => {
+    setUser(null);
+    try { localStorage.removeItem(SKEY); } catch (e) {}
+    let nf = {};
+    try { nf = JSON.parse(localStorage.getItem(favKey(null)) || "{}") || {}; } catch (e) { nf = {}; }
+    setFav(nf);
+    setAuthOpen(false);
+    toast("Hisobdan chiqdingiz");
+  };
+
+  const share = () => {
+    if (person < 0) return;
+    const base = location.protocol === "file:" ? location.href.split("#")[0] : location.origin + location.pathname;
+    const url = base + "#/" + P[person].s;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(url).then(() => toast("Havola nusxalandi"), () => toast(url));
+    } else toast(url);
+  };
+
+  const showFav = () => {
+    setOnlyFav(true); setCat(0);
+    setAuthOpen(false);
+  };
+
+  /* ── xronologiya ── */
+  const timeline = useMemo(() => {
+    const groups = {};
+    filtered.forEach((i) => {
+      const cent = Math.floor(P[i].f / 100) + 1;
+      (groups[cent] = groups[cent] || []).push(i);
+    });
+    return Object.keys(groups).map(Number).sort((a, b) => a - b).map((k) => ({
+      cent: k,
+      items: groups[k].sort((a, b) => P[a].f - P[b].f),
+    }));
+  }, [filtered]);
+
+  const catCounts = useMemo(() => C.map((t, i) => (i === 0 ? P.length : P.filter((p) => p.c === i).length)), []);
+
+  return (
+    <>
+      <style dangerouslySetInnerHTML={{ __html: CSS }} />
+      <a className="skip" href="#g">Asosiy mazmunga oʻtish</a>
+      <ParticleField />
+      <StarSky />
+      <div className="z">
+        <div className="topbar">
+          <div className="visit" role="status" title="Bu saytga tashriflaringiz soni" aria-label={"Bu saytga " + visits + " marta kirdingiz"}>
+            <span id="visitCount">{visits}</span><span className="star" aria-hidden="true">★</span>
+          </div>
+          <div className="topbar-right">
+            <button className={"btn xbtn-top" + (view === "map" ? " on" : "")} type="button" aria-label="Xarita boʻlimiga oʻtish" onClick={() => setView("map")}>🗺 Xarita</button>
+            <button className="btn" id="acctBtn" type="button" aria-label={user ? "Hisob: " + (user.name || user.email) : "Hisobga kirish"}
+              onClick={() => { setAuthErr(""); setAuthOpen(true); if (!user) setAuthTab("login"); }}>
+              {user ? "👤 " + (user.name || user.email).split(" ")[0] : "👤 Kirish"}
+            </button>
+          </div>
+        </div>
+
+        <header className="hero">
+          <svg className="crest" viewBox="0 0 100 100" aria-hidden="true">
+            <defs><linearGradient id="crestGold" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#fff8dc" /><stop offset="50%" stopColor="#e7c766" /><stop offset="100%" stopColor="#a87c1f" /></linearGradient></defs>
+            <circle cx="50" cy="50" r="46" fill="none" stroke="url(#crestGold)" strokeWidth="1.2" opacity=".6" />
+            <circle cx="50" cy="50" r="40" fill="none" stroke="url(#crestGold)" strokeWidth=".6" opacity=".45" strokeDasharray="2 4" />
+            <path fill="url(#crestGold)" d="M62 22c-16 4-27 18-27 34 0 20 15 34 33 34 7 0 13-2 19-5-11 7-25 9-38 2C30 76 20 58 24 40c4-16 18-26 34-24 2 0 3 0 4 2z" />
+            <path fill="#f6e6ab" d="M72 30l2.4 7.2h7.6l-6.1 4.5 2.3 7.2-6.2-4.5-6.1 4.5 2.3-7.2-6.2-4.5h7.7z" />
+          </svg>
+          <p className="eyebrow">Maʼnaviy meros · Ensiklopediya</p>
+          <h1>Oʻzbekistonning <em>buyuk</em> siymolari</h1>
+          <svg className="divider" viewBox="0 0 400 26" aria-hidden="true" preserveAspectRatio="none">
+            <g stroke="#c39a38" fill="none" strokeWidth="1.1">
+              <path d="M0 13h150M250 13h150" strokeOpacity=".7" />
+              <path d="M200 3l7 10-7 10-7-10z" /><path d="M186 13l6-7 6 7-6 7z" strokeOpacity=".8" />
+              <path d="M214 13l6-7 6 7-6 7z" strokeOpacity=".8" />
+              <circle cx="170" cy="13" r="3" /><circle cx="230" cy="13" r="3" />
+            </g>
+          </svg>
+          <p className="lede">Ilm, adolat, jasorat va yaratuvchanlik bilan dunyoga nur sochgan ajdodlarimiz hamda zamondoshlarimizning hayoti, hissasi va merosi.</p>
+          <ul className="stats">
+            <li><b>{P.length}</b>siymo</li>
+            <li><b>{C.length - 1}</b>boʻlim</li>
+            <li><b>{favCount}</b>sevimli</li>
+          </ul>
+        </header>
+
+        <div className="bar">
+          <div className="row chips" role="tablist" aria-label="Boʻlimlar">
+            {C.map((t, i) => (
+              <button key={t} type="button" role="tab" aria-selected={!onlyFav && cat === i}
+                className={"btn" + (!onlyFav && cat === i ? " on" : "")}
+                aria-label={t + " — " + catCounts[i] + " ta"}
+                onClick={() => { setCat(i); setOnlyFav(false); }}>
+                <span className="n" aria-hidden="true">{i === 0 ? "✦" : i}</span>
+                <span>{t}</span><span className="cnt">{catCounts[i]}</span>
+              </button>
+            ))}
+            <button id="favBtn" type="button" role="tab" aria-selected={onlyFav}
+              className={"btn" + (onlyFav ? " on" : "")} onClick={showFav}>
+              ★ Sevimlilar{favCount ? " (" + favCount + ")" : ""}
+            </button>
+          </div>
+          <div className="row">
+            <label className="sw">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="M20 20l-3-3" /></svg>
+              <input id="q" type="search" placeholder="Ism, shahar, asar yoki yil..." aria-label="Qidirish"
+                value={q} onChange={(e) => setQ(e.target.value)}
+                onKeyDown={(e) => { if (e.key === "Escape") setQ(""); }} />
+              <button className="clear" type="button" aria-label="Qidiruvni tozalash" hidden={!q} onClick={() => setQ("")}>×</button>
+            </label>
+            <select id="reg" aria-label="Hudud boʻyicha filtr" value={reg} onChange={(e) => setReg(e.target.value)}>
+              <option value="">Barcha hududlar</option>
+              {regions.map((r) => <option key={r} value={r}>{r}</option>)}
+            </select>
+            <select id="era" aria-label="Davr boʻyicha filtr" value={era} onChange={(e) => setEra(e.target.value)}>
+              <option value="">Barcha davrlar</option>
+              <option value="modern">1900-yildan keyin</option>
+              {centuries.map((c) => <option key={c} value={String(c)}>{roman(c)} asr</option>)}
+            </select>
+            <select id="sort" aria-label="Tartiblash" value={sort} onChange={(e) => setSort(e.target.value)}>
+              <option value="years">Yillar boʻyicha</option>
+              <option value="name">Alifbo boʻyicha</option>
+              <option value="cat">Boʻlim boʻyicha</option>
+            </select>
+            <button className={"btn" + (view === "grid" ? " on" : "")} aria-pressed={view === "grid"} onClick={() => setView("grid")}>▦ Toʻr</button>
+            <button className={"btn" + (view === "tl" ? " on" : "")} aria-pressed={view === "tl"} onClick={() => setView("tl")}>☰ Xronologiya</button>
+            <button className={"btn" + (view === "map" ? " on" : "")} aria-pressed={view === "map"} onClick={() => setView("map")}>🗺 Xarita</button>
+            <button className="btn" onClick={() => {
+              const pool = filtered.length ? filtered : P.map((_, i) => i);
+              openPerson(pool[Math.floor(Math.random() * pool.length)], true);
+            }}>✦ Tasodifiy</button>
+            <span id="count" aria-live="polite">{filtered.length} / {P.length}</span>
+          </div>
+        </div>
+
+        {view === "map" && <MapSection mode={mapMode} setMode={setMapMode} onOpenPerson={openPerson} />}
+
+        <main id="g" hidden={view !== "grid"}>
+          {filtered.map((i, k) => {
+            const p = P[i];
+            return (
+              <article className="item in" key={p.s} style={{ transitionDelay: Math.min(k, 9) * 70 + "ms" }}>
+                <button className="fav" type="button" aria-pressed={!!fav[i]}
+                  aria-label={p.n + (fav[i] ? "ni sevimlilardan olib tashlash" : "ni sevimlilarga qoʻshish")}
+                  onClick={() => toggleFav(i)}>★</button>
+                <button className="frame" type="button" aria-label={p.n + " — batafsil maʼlumot"} onClick={() => openPerson(i, true)}>
+                  <Portrait p={p} i={i} ctx="c" />
+                </button>
+                <div className="plate"><b>{p.n}</b><span>{p.y}</span><em>{p.m}</em></div>
+              </article>
+            );
+          })}
+          {!filtered.length && (
+            <div className="empty"><b>Hech narsa topilmadi</b>Qidiruv soʻzini oʻzgartiring yoki filtrlarni tozalang.</div>
+          )}
+        </main>
+
+        <ol id="tl" hidden={view !== "tl"} aria-label="Xronologiya">
+          {timeline.map((g) => (
+            <li key={g.cent}>
+              <h3>{roman(g.cent)} asr</h3>
+              <ul>
+                {g.items.map((i) => (
+                  <li key={P[i].s}>
+                    <button type="button" onClick={() => openPerson(i, true)}><b>{P[i].n}</b><span>{P[i].y}</span></button>
+                  </li>
+                ))}
+              </ul>
+            </li>
+          ))}
+        </ol>
+
+        <section className="wrap">
+          <h2>Texnologiyalar</h2>
+          <div className="tech">
+            {["HTML5","CSS Grid","JavaScript","SVG naqsh","Canvas","Dialog","localStorage","Deep link"].map((t) => <span key={t}>{t}</span>)}
+          </div>
+        </section>
+        <footer>
+          <p className="author">Qodirov Ulugʻbek Quonchbekvich</p>
+          <p className="by">Sayt kodi va dizayni — <b>Buffy</b> · Codebuff</p>
+          <p><b>Manba:</b> maʼlumotlar ochiq manbalar — ensiklopediyalar, ilmiy adabiyot va rasmiy saytlar asosida jamlangan. Har bir siymo kartasida Vikipediyaga havola bor.</p>
+          <p>Portretlar — uslublashtirilgan SVG gravyuralar; tarixiy shaxslarning aksariyatida ishonchli tasvir saqlanmagan. Yoga suratlar emas, balki davr va faoliyat ruhini aks ettiruvchi bezakli ramkalardir.</p>
+        </footer>
+      </div>
+
+      {/* ── SHAXS MODALI ── */}
+      <dialog id="d" ref={pDlg} aria-labelledby="dtitle" onClick={(e) => { if (e.target === pDlg.current) closePerson(); }}>
+        <button className="x" aria-label="Yopish" onClick={closePerson}>×</button>
+        <div className="dc">
+          {person >= 0 && <PersonBody i={person} onOpen={(i) => openPerson(i, true)} />}
+          {person >= 0 && (
+            <div className="mfoot">
+              <a href={wiki(P[person].n)} target="_blank" rel="noopener">Manba: Vikipediya ↗</a>
+              <div className="mnav">
+                <button className="mbtn" type="button" onClick={share}>Havolani nusxalash</button>
+                <button className="mbtn" type="button" aria-label="Oldingi siymo" onClick={() => step(-1)}>‹ Oldingi</button>
+                <button className="mbtn" type="button" aria-label="Keyingi siymo" onClick={() => step(1)}>Keyingi ›</button>
+              </div>
+            </div>
+          )}
+        </div>
+      </dialog>
+
+      {/* ── HISOB MODALI ── */}
+      <dialog id="auth" ref={aDlg} aria-label="Hisob" onClick={(e) => { if (e.target === aDlg.current) setAuthOpen(false); }}>
+        <button className="x" aria-label="Yopish" onClick={() => setAuthOpen(false)}>×</button>
+        <div className="ac">
+          {user ? (
+            <>
+              <h2>Salom, {user.name || user.email}</h2>
+              <p className="sub">{user.email}</p>
+              <p className="sub">Sevimli siymolaringiz: <b>{favCount}</b> ta</p>
+              <button className="authbtn" type="button" onClick={showFav}>Sevimlilarimni koʻrish</button>
+              <button className="authbtn ghost" type="button" onClick={logout}>Hisobdan chiqish</button>
+              <p className="note">Bu demo hisob: maʼlumotlar faqat shu brauzerda saqlanadi. Haqiqiy akkaunt uchun serverli autentifikatsiya kerak.</p>
+            </>
+          ) : (
+            <>
+              <h2>{authTab !== "register" ? "Hisobga kirish" : "Roʻyxatdan oʻtish"}</h2>
+              <p className="sub">Sevimlilaringiz hisobingizga bogʻlanadi va shu qurilmada saqlanadi.</p>
+              <div className="tabs">
+                <button type="button" className={authTab !== "register" ? "on" : ""} onClick={() => { setAuthTab("login"); setAuthErr(""); }}>Kirish</button>
+                <button type="button" className={authTab === "register" ? "on" : ""} onClick={() => { setAuthTab("register"); setAuthErr(""); }}>Roʻyxatdan oʻtish</button>
+              </div>
+              <form id="authForm" noValidate onSubmit={authSubmit} key={authTab}>
+                {authTab === "register" && (
+                  <div className="field"><label htmlFor="an">Ismingiz</label><input id="an" name="name" autoComplete="name" /></div>
+                )}
+                <div className="field"><label htmlFor="ae">Email</label><input id="ae" name="email" type="email" autoComplete="email" /></div>
+                <div className="field"><label htmlFor="ap">Parol</label><input id="ap" name="pass" type="password" autoComplete={authTab !== "register" ? "current-password" : "new-password"} /></div>
+                <p className="err" role="alert">{authErr}</p>
+                <button className="authbtn" type="submit">{authTab !== "register" ? "Kirish" : "Akkaunt yaratish"}</button>
+              </form>
+              <p className="note">Demo rejim: parol shu qurilmada xeshlanib saqlanadi va hech qayerga yuborilmaydi. Haqiqiy akkaunt uchun Supabase yoki Firebase kabi serverli xizmat ulanishi kerak.</p>
+            </>
+          )}
+        </div>
+      </dialog>
+
+      <div id="toast" role="status" aria-live="polite" className={toastMsg ? "on" : ""}>{toastMsg}</div>
+      <ClickFX />
+    </>
+  );
+}
+
